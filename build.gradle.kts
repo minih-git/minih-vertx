@@ -17,6 +17,10 @@ repositories {
 dependencies {
     implementation("io.vertx:vertx-core:4.4.4")
     implementation("io.vertx:vertx-web:4.4.4")
+    implementation("io.vertx:vertx-mongo-client:4.4.4")
+    implementation("io.vertx:vertx-lang-kotlin:4.4.4")
+//    implementation("io.vertx:vertx-auth-common:4.4.4")
+    implementation("io.vertx:vertx-lang-kotlin-coroutines:4.4.4")
 }
 
 kotlin {
