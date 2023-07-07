@@ -6,5 +6,5 @@ import io.vertx.kotlin.coroutines.await
 
 suspend fun main() {
     val vertx = Vertx.vertx()
-    vertx.deployVerticle(SystemVerticle()).await()
+    vertx.deployVerticle(SystemVerticle(8080)).await()
 }
