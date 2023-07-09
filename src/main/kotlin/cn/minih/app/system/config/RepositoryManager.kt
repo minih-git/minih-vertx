@@ -11,22 +11,31 @@ import io.vertx.kotlin.coroutines.await
  * @date 2023/7/7
  * @desc
  */
-abstract class RepositoryManager(vertx: Vertx, val tableName: String) {
+abstract class RepositoryManager(private val tableName: String) {
 
-    var client: MongoClient = MongoClient.createShared(
-        vertx,
-        JsonObject()
-            .put("host", System.getenv("mongodb.host"))
-            .put("port", 3717)
-            .put("username", System.getenv("mongodb.username"))
-            .put("password", System.getenv("mongodb.password"))
-            .put("authSource", System.getenv("mongodb.source"))
-            .put("db_name", "minih")
-    )
+
+    private val client by lazy {
+        val config = Vertx.currentContext().config()
+        val mongoOptions = jsonObjectOf(
+            "host" to config.getString("mongodb.host"),
+            "port" to 3717,
+            "username" to config.getString("mongodb.username"),
+            "password" to config.getString("mongodb.password"),
+            "authSource" to (config.getString("mongodb.source") ?: "admin"),
+            "socketTimeoutMS" to 50000,
+            "serverSelectionTimeoutMS" to 50000,
+            "maxIdleTimeMS" to 300000,
+            "maxLifeTimeMS" to 3600000,
+            "db_name" to "minih",
+        )
+        MongoClient.createShared(Vertx.currentContext().owner(), mongoOptions)
+    }
+
 
     suspend fun findOne(vararg fields: Pair<String, Any?>): JsonObject? {
         val document = jsonObjectOf(*fields)
         return client.findOne(tableName, document, jsonObjectOf()).await()
+
     }
 
 
