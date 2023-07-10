@@ -1,3 +1,2 @@
 
-rootProject.name = "mini-vertx"
-
+rootProject.name = "minih-vertx"

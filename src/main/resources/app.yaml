@@ -1,0 +1,2 @@
+auth:
+  tokenStyle: "random-64"

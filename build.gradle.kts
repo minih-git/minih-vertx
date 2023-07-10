@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.8.0"
+    kotlin("jvm") version "1.9.0"
     application
 }
 
@@ -26,7 +26,9 @@ dependencies {
     implementation("io.vertx:vertx-redis-client:$vertxVersion")
     implementation("io.vertx:vertx-auth-common:$vertxVersion")
     implementation("io.vertx:vertx-config:$vertxVersion")
+    implementation("io.vertx:vertx-config-yaml:$vertxVersion")
     implementation("io.vertx:vertx-service-proxy:$vertxVersion")
+    testImplementation("io.vertx:vertx-junit5:$vertxVersion")
 
     //log
     implementation("io.github.oshai:kotlin-logging-jvm:4.0.0")
@@ -36,9 +38,8 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("cn.hutool:hutool-core:5.8.20")
 
+    //测试
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.0")
-
-    testImplementation("io.vertx:vertx-junit5:$vertxVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
 
 

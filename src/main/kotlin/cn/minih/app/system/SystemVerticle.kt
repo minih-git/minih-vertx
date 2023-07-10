@@ -1,11 +1,9 @@
 package cn.minih.app.system
 
-import cn.minih.app.system.auth.AuthLogic
-import cn.minih.app.system.auth.AuthServiceHandler
 import cn.minih.app.system.config.MinihVerticle
-import cn.minih.app.system.user.UserRepository
+import cn.minih.app.system.user.UserServiceHandler
 import cn.minih.app.system.utils.coroutineJsonHandler
-import cn.minih.app.system.utils.coroutineVoidHandler
+import io.netty.handler.codec.http.HttpHeaderValues
 
 
 /**
@@ -15,8 +13,9 @@ import cn.minih.app.system.utils.coroutineVoidHandler
  */
 class SystemVerticle(port: Int) : MinihVerticle(port) {
     override suspend fun initRouter() {
-        val authHandle = AuthServiceHandler(UserRepository())
-        router.post("/auth/login").coroutineJsonHandler { ctx -> authHandle.login(ctx) }
-        router.post("/test").coroutineVoidHandler { ctx -> AuthLogic().createTokenValue() }
+        router.post("/test")
+            .produces(HttpHeaderValues.APPLICATION_JSON.toString())
+            .consumes(HttpHeaderValues.APPLICATION_JSON.toString())
+            .coroutineJsonHandler(UserServiceHandler::getData)
     }
 }

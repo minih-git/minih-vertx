@@ -1,4 +1,4 @@
-package cn.minih.app.system.config
+package cn.minih.app.system.constants
 
 /**
  * @author hubin

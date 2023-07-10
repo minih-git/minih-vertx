@@ -1,7 +1,9 @@
 package cn.minih.app.system.config
 
-import io.github.oshai.kotlinlogging.KLogger
-import io.github.oshai.kotlinlogging.KotlinLogging
+import cn.minih.app.system.auth.AuthServiceHandler
+import cn.minih.app.system.constants.SYSTEM_CONFIGURATION_FRESH
+import cn.minih.app.system.constants.SYSTEM_CONFIGURATION_SUBSCRIBE
+import cn.minih.app.system.utils.log
 import io.netty.handler.codec.http.HttpHeaderValues
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.json.JsonObject
@@ -9,8 +11,8 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.ResponseContentTypeHandler
 import io.vertx.kotlin.coroutines.CoroutineVerticle
+import io.vertx.kotlin.coroutines.await
 
-val log: KLogger = KotlinLogging.logger {}
 
 /**
  * @author hubin
@@ -29,41 +31,24 @@ abstract class MinihVerticle(private val port: Int = 8080) : CoroutineVerticle()
         this.routerInstance = Router.router(vertx)
         val sharedData = vertx.sharedData()
         vertx.eventBus().consumer<JsonObject>(SYSTEM_CONFIGURATION_SUBSCRIBE).handler {
-            sharedData.getLocalAsyncMap<String, String>("config").onSuccess { it1 ->
-                it1.put("mongodb.host", it.body().getString("mongodb.host") ?: "")
-            }
-            sharedData.getLocalAsyncMap<String, String>("auth").onSuccess { it1 ->
-                it1.put("tokenStyle", it.body().getString("tokenStyle") ?: "")
+            it.body().forEach { it1 ->
+                if (it1.value is JsonObject) {
+                    sharedData.getLocalAsyncMap<String, Any>(it1.key).onSuccess { data ->
+                        (it1.value as JsonObject).forEach { it2 ->
+                            data.put(it2.key, it2.value)
+                        }
+                    }
+                }
             }
         }
         vertx.eventBus().send(SYSTEM_CONFIGURATION_FRESH, "")
         routerInstance.route()
             .handler(ResponseContentTypeHandler.create())
             .handler(BodyHandler.create())
-            .produces(HttpHeaderValues.APPLICATION_JSON.toString())
-            .consumes(HttpHeaderValues.APPLICATION_JSON.toString())
-            .failureHandler(RouteFailureHandler.create())
-        routerInstance.route().handler {
-            it.addHeadersEndHandler { _ ->
-                val origin = it.request().getHeader("Origin")
-                if (origin != null && origin.isNotEmpty()) {
-                    val res = it.response()
-                    res.putHeader("Access-Control-Allow-Origin", origin)
-                    res.putHeader("Access-Control-Allow-Credentials", "true")
-                    res.putHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE")
-                    res.putHeader(
-                        "Access-Control-Allow-Headers",
-                        "Authorization, Content-Type, If-Match, If-Modified-Since, If-None-Match, If-Unmodified-Since, X-Requested-With"
-                    )
-                }
-            }
-            val origin = it.request().getHeader("Origin")
-            if (origin != null && origin.isNotEmpty() && it.request().method() == HttpMethod.OPTIONS) {
-                it.end("")
-            } else {
-                it.next()
-            }
-        }
+            .handler(CommonHandler.instance)
+            .failureHandler(RouteFailureHandler.instance)
+            .handler(AuthServiceHandler.instance)
+
         initRouter()
         val server = vertx.createHttpServer()
         server.requestHandler(routerInstance).listen(port) {
