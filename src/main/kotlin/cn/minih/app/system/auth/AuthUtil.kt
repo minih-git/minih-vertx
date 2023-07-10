@@ -42,12 +42,12 @@ object AuthUtil {
 
     suspend fun login(
         id: Any,
-        device: String = DEFAULT_DEVICE,
+        device: String? = DEFAULT_DEVICE,
         timeout: Long = -1L,
         loginConfig: AuthLoginModel = AuthLoginModel()
     ): TokenInfo {
         val config = getConfig()
-        loginConfig.device = device
+        loginConfig.device = device ?: DEFAULT_DEVICE
         loginConfig.timeout = if (timeout == -1L) config.timeout else timeout
         val tokenValue = AuthLogic.createLoginSession(id, loginConfig)
         return TokenInfo(
@@ -84,8 +84,6 @@ object AuthUtil {
             throw AuthLoginException(errorCode = MinihErrorCode.ERR_CODE_LOGIN_TOKEN_FREEZE)
         }
         return loginId
-
     }
-
 
 }

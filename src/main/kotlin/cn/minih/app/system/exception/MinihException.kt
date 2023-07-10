@@ -7,7 +7,7 @@ import cn.minih.app.system.constants.MinihErrorCode
  * @date 2023/7/10
  * @desc
  */
-open class MinihException(msg: String? = null, val errorCode: MinihErrorCode = MinihErrorCode.ERR_CODE_UNDEFINED) :
+open class MinihException(val msg: String? = null, val errorCode: MinihErrorCode = MinihErrorCode.ERR_CODE_UNDEFINED) :
     RuntimeException("错误代码:${errorCode.code},${msg ?: errorCode.msg}"){
 
     }

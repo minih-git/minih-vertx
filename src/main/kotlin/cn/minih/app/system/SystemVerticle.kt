@@ -1,8 +1,8 @@
 package cn.minih.app.system
 
+import cn.minih.app.system.auth.coroutineJsonHandlerHasAuth
 import cn.minih.app.system.config.MinihVerticle
 import cn.minih.app.system.user.UserServiceHandler
-import cn.minih.app.system.utils.coroutineJsonHandler
 import io.netty.handler.codec.http.HttpHeaderValues
 
 
@@ -16,6 +16,6 @@ class SystemVerticle(port: Int) : MinihVerticle(port) {
         router.post("/test")
             .produces(HttpHeaderValues.APPLICATION_JSON.toString())
             .consumes(HttpHeaderValues.APPLICATION_JSON.toString())
-            .coroutineJsonHandler(UserServiceHandler::getData)
+            .coroutineJsonHandlerHasAuth(UserServiceHandler::getData)
     }
 }

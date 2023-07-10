@@ -22,7 +22,7 @@ class RouteFailureHandler private constructor() : Handler<RoutingContext> {
         val ex = ctx.failure()
         var r = R.err(ex.message)
         if (ex is MinihException) {
-            r = R.err(null, ex.errorCode)
+            r = R.err(ex.msg, ex.errorCode)
         }
         ctx.json(r.toJsonObject())
     }

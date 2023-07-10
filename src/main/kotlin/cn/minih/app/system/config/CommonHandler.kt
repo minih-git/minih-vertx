@@ -1,7 +1,5 @@
 package cn.minih.app.system.config
 
-import cn.minih.app.system.auth.AuthServiceHandler
-
 import io.vertx.core.Handler
 import io.vertx.core.http.HttpMethod
 import io.vertx.ext.web.RoutingContext

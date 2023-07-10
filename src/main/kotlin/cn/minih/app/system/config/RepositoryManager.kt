@@ -22,7 +22,7 @@ abstract class RepositoryManager(private val tableName: String) {
             "username" to config.getString("mongodb.username"),
             "password" to config.getString("mongodb.password"),
             "authSource" to (config.getString("mongodb.source") ?: "admin"),
-            "socketTimeoutMS" to 50000,
+            "socketTimeoutMS" to 500000,
             "serverSelectionTimeoutMS" to 50000,
             "maxIdleTimeMS" to 300000,
             "maxLifeTimeMS" to 3600000,

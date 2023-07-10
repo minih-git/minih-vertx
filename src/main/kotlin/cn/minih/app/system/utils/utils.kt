@@ -1,6 +1,5 @@
 package cn.minih.app.system.utils
 
-import cn.minih.app.system.auth.data.AuthSession
 import com.google.gson.Gson
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -12,8 +11,6 @@ import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.*
 import java.net.InetAddress
 import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
-import kotlin.reflect.KFunction1
 
 
 val log: KLogger = KotlinLogging.logger {}
@@ -27,25 +24,14 @@ fun Any.toJsonString(): String {
     return Gson().toJson(this)
 }
 
+fun <T : Any> JsonObject.covertTo(clazz: KClass<T>): T {
+    return this.mapTo(clazz.java)
+}
+
 fun <T : Any> String.jsonConvertData(clazz: KClass<T>): T {
     return Gson().fromJson(this, clazz.java)
 }
 
-@OptIn(DelicateCoroutinesApi::class)
-fun Route.coroutineJsonHandler(fn: KFunction<Any>) {
-    val v: CoroutineDispatcher = Vertx.currentContext().dispatcher()
-    handler { ctx ->
-        GlobalScope.launch(v) {
-            try {
-                val body = ctx.body().asJsonObject()
-                val annotations = fn.annotations
-                ctx.json(R.ok(fn.call(body)).toJsonObject())
-            } catch (e: Exception) {
-                ctx.fail(e)
-            }
-        }
-    }
-}
 
 @OptIn(DelicateCoroutinesApi::class)
 fun Route.coroutineHandler(fn: suspend (RoutingContext) -> Unit) {
