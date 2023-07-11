@@ -1,15 +1,17 @@
 package cn.minih.app.system.config
 
 import cn.minih.app.system.auth.AuthServiceHandler
-import cn.minih.app.system.constants.SYSTEM_CONFIGURATION_FRESH
 import cn.minih.app.system.constants.SYSTEM_CONFIGURATION_SUBSCRIBE
 import cn.minih.app.system.utils.log
-import io.netty.handler.codec.http.HttpHeaderValues
-import io.vertx.core.http.HttpMethod
+import io.vertx.config.ConfigRetriever
+import io.vertx.config.ConfigRetrieverOptions
+import io.vertx.config.ConfigStoreOptions
+import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.ResponseContentTypeHandler
+import io.vertx.kotlin.core.json.get
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 
@@ -29,19 +31,7 @@ abstract class MinihVerticle(private val port: Int = 8080) : CoroutineVerticle()
 
     override suspend fun start() {
         this.routerInstance = Router.router(vertx)
-        val sharedData = vertx.sharedData()
-        vertx.eventBus().consumer<JsonObject>(SYSTEM_CONFIGURATION_SUBSCRIBE).handler {
-            it.body().forEach { it1 ->
-                if (it1.value is JsonObject) {
-                    sharedData.getLocalAsyncMap<String, Any>(it1.key).onSuccess { data ->
-                        (it1.value as JsonObject).forEach { it2 ->
-                            data.put(it2.key, it2.value)
-                        }
-                    }
-                }
-            }
-        }
-        vertx.eventBus().send(SYSTEM_CONFIGURATION_FRESH, "")
+        initConfig()
         routerInstance.route()
             .handler(ResponseContentTypeHandler.create())
             .handler(BodyHandler.create())
@@ -57,6 +47,35 @@ abstract class MinihVerticle(private val port: Int = 8080) : CoroutineVerticle()
             }
         }
 
+    }
+
+    private suspend fun initConfig() {
+        val retriever = ConfigRetriever.create(
+            Vertx.vertx(), ConfigRetrieverOptions()
+                .addStore(ConfigStoreOptions().setType("env").setFormat("json"))
+                .addStore(
+                    ConfigStoreOptions().setType("file").setFormat("yaml")
+                        .setConfig(JsonObject().put("path", "app.yaml"))
+                )
+        )
+
+        retriever.config.await().forEach {
+            val config = Vertx.currentContext().config()
+            if (it.key.contains(".")) {
+                val key = it.key.substring(0, it.key.indexOf("."))
+                val subKey = it.key.substring(it.key.indexOf(".") + 1)
+                val value = it.value
+                val map = config.get<JsonObject>(key) ?: JsonObject()
+                map.put(subKey, value)
+                config.put(key, map)
+            }
+            config.put(it.key, it.value)
+        }
+        vertx.eventBus().consumer<JsonObject>(SYSTEM_CONFIGURATION_SUBSCRIBE).handler { config ->
+            config.body().forEach {
+                Vertx.currentContext().config().put(it.key, it.value)
+            }
+        }
     }
 
     abstract suspend fun initRouter()

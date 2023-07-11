@@ -11,11 +11,13 @@ import io.netty.handler.codec.http.HttpHeaderValues
  * @date 2023/7/6
  * @desc
  */
-class SystemVerticle(port: Int) : MinihVerticle(port) {
+class SystemVerticle(port: Int = 8080) : MinihVerticle(port) {
     override suspend fun initRouter() {
-        router.post("/test")
+        router.route()
             .produces(HttpHeaderValues.APPLICATION_JSON.toString())
             .consumes(HttpHeaderValues.APPLICATION_JSON.toString())
-            .coroutineJsonHandlerHasAuth(UserServiceHandler::getData)
+
+        router.get("/user/getInfo").coroutineJsonHandlerHasAuth(UserServiceHandler::getUserInfo)
+
     }
 }

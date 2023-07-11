@@ -15,13 +15,13 @@ abstract class RepositoryManager(private val tableName: String) {
 
 
     private val client by lazy {
-        val config = Vertx.currentContext().config()
+        val config = Vertx.currentContext().config().getJsonObject("mongodb")
         val mongoOptions = jsonObjectOf(
-            "host" to config.getString("mongodb.host"),
+            "host" to config.getString("host"),
             "port" to 3717,
-            "username" to config.getString("mongodb.username"),
-            "password" to config.getString("mongodb.password"),
-            "authSource" to (config.getString("mongodb.source") ?: "admin"),
+            "username" to config.getString("username"),
+            "password" to config.getString("password"),
+            "authSource" to config.getString("source", "admin"),
             "socketTimeoutMS" to 500000,
             "serverSelectionTimeoutMS" to 50000,
             "maxIdleTimeMS" to 300000,
@@ -35,7 +35,6 @@ abstract class RepositoryManager(private val tableName: String) {
     suspend fun findOne(vararg fields: Pair<String, Any?>): JsonObject? {
         val document = jsonObjectOf(*fields)
         return client.findOne(tableName, document, jsonObjectOf()).await()
-
     }
 
 

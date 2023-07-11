@@ -3,15 +3,14 @@ package cn.minih.app.system.auth
 import cn.hutool.core.text.AntPathMatcher
 import cn.hutool.core.util.URLUtil
 import cn.minih.app.system.auth.annotation.AuthCheckRole
-import cn.minih.app.system.auth.annotation.AuthCheckRoleAnd
-import cn.minih.app.system.auth.annotation.AuthCheckRoleOr
+import cn.minih.app.system.auth.annotation.CheckRoleType
 import cn.minih.app.system.auth.data.TokenInfo
 import cn.minih.app.system.constants.CONTEXT_LOGIN_ID
-import cn.minih.app.system.constants.DEVICE_KEY
 import cn.minih.app.system.constants.MinihErrorCode
 import cn.minih.app.system.constants.TOKEN_CONNECTOR_CHAT
 import cn.minih.app.system.exception.AuthLoginException
 import cn.minih.app.system.utils.R
+import cn.minih.app.system.utils.getRequestBody
 import cn.minih.app.system.utils.toJsonObject
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
@@ -19,39 +18,55 @@ import io.vertx.core.http.Cookie
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Route
 import io.vertx.ext.web.RoutingContext
+import io.vertx.kotlin.core.json.get
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.reflect.KFunction
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 
 @OptIn(DelicateCoroutinesApi::class)
-fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any>) {
+fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
     val v: CoroutineDispatcher = Vertx.currentContext().dispatcher()
     handler { ctx ->
         GlobalScope.launch(v) {
             try {
-                val body = ctx.body().asJsonObject()
-                if (fn.hasAnnotation<AuthCheckRole>()) {
-                    val annotations = fn.findAnnotation<AuthCheckRole>()
-                    AuthServiceHandler.instance.checkRole(ctx.get(CONTEXT_LOGIN_ID), listOf(annotations!!.value), true)
+                authCheckRole(fn, ctx)
+                val args = generateArgs(fn.parameters, ctx)
+                val result = when (fn.parameters.size) {
+                    0 -> if (fn.isSuspend) fn.callSuspend() else fn.call()
+                    else -> if (fn.isSuspend) fn.callSuspend(*args) else fn.call(*args)
                 }
-                if (fn.hasAnnotation<AuthCheckRoleAnd>()) {
-                    val annotations = fn.findAnnotation<AuthCheckRoleAnd>()
-                    AuthServiceHandler.instance.checkRole(ctx.get(CONTEXT_LOGIN_ID),annotations!!.value.toList(), true)
-                }
-                if (fn.hasAnnotation<AuthCheckRoleOr>()) {
-                    val annotations = fn.findAnnotation<AuthCheckRoleOr>()
-                    AuthServiceHandler.instance.checkRole(ctx.get(CONTEXT_LOGIN_ID), annotations!!.value.toList(), false)
-                }
-                ctx.json(R.ok(fn.call(body)).toJsonObject())
+                ctx.json(R.ok(result).toJsonObject())
             } catch (e: Exception) {
                 ctx.fail(e)
             }
         }
+    }
+}
+
+private fun generateArgs(argsNeed: List<KParameter>, ctx: RoutingContext): Array<Any?> {
+    val args = mutableListOf<Any?>()
+    val params = getRequestBody(ctx)
+    if (params != null) {
+        argsNeed.forEach { args.add(it.name?.let { name -> params[name] }) }
+    }
+    return args.toTypedArray()
+}
+
+private suspend fun authCheckRole(fn: KFunction<Any?>, ctx: RoutingContext) {
+    if (fn.hasAnnotation<AuthCheckRole>()) {
+        val annotations = fn.findAnnotation<AuthCheckRole>()
+        AuthServiceHandler.instance.checkRole(
+            ctx.get(CONTEXT_LOGIN_ID),
+            annotations!!.value.toList(),
+            annotations.type == CheckRoleType.AND
+        )
     }
 }
 
@@ -87,27 +102,20 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         val v: CoroutineDispatcher = Vertx.currentContext().dispatcher()
         GlobalScope.launch(v) {
             try {
-                val request = ctx.request()
-                val path = request.path()
+                val path = ctx.request().path()
                 if (path == AuthUtil.getConfig().loginPath) {
-                    val body = ctx.body().asJsonObject()
-                    val tokenInfo = login(body)
+                    val tokenInfo = login(
+                        getRequestBody(ctx)
+                            ?: throw AuthLoginException(errorCode = MinihErrorCode.ERR_CODE_LOGIN_NO_LOGIN_INFO)
+                    )
                     val config = AuthUtil.getConfig()
                     val tokenValue = config.tokenPrefix.plus(TOKEN_CONNECTOR_CHAT).plus(tokenInfo.tokenValue)
-                    ctx.response().addCookie(
-                        Cookie.cookie(
-                            config.tokenName,
-                            URLUtil.encode(tokenValue)
-                        )
-                    )
-                    ctx.response().putHeader(
-                        config.tokenName,
-                        tokenValue
-                    )
+                    ctx.response().addCookie(Cookie.cookie(config.tokenName, URLUtil.encode(tokenValue)))
+                    ctx.response().putHeader(config.tokenName, tokenValue)
+                    ctx.put(CONTEXT_LOGIN_ID, tokenInfo.loginId)
                     ctx.json(R.ok(tokenInfo).toJsonObject())
                 } else {
-                    val loginId = checkLogin(ctx)
-                    ctx.put(CONTEXT_LOGIN_ID, loginId)
+                    checkLogin(ctx)
                     ctx.next()
                 }
             } catch (e: Exception) {
@@ -116,30 +124,33 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         }
     }
 
+
     private suspend fun login(params: JsonObject): TokenInfo {
-        val loginId = authService.login(params.map)
-        val tokenInfo = AuthUtil.login(loginId, params.getString(DEVICE_KEY))
+        val loginModel = authService.login(params.map)
+        val tokenInfo = AuthUtil.login(loginModel.id, loginConfig = loginModel)
         authService.setLoginRole(tokenInfo.loginId)
         return tokenInfo
     }
 
-    private suspend fun checkLogin(ctx: RoutingContext): String {
+    private suspend fun checkLogin(ctx: RoutingContext) {
         var tokenValue: String? = ""
         val config = AuthUtil.getConfig()
         val request = ctx.request()
         if (config.ignoreAuthUri.any { AntPathMatcher().match(it, request.path()) }) {
-            return ""
+            return
         }
         if (tokenValue.isNullOrBlank() && config.isReadHeader) {
             tokenValue = request.getHeader(config.tokenName)
         }
         if (tokenValue.isNullOrBlank() && config.isReadBody) {
-            tokenValue = ctx.body().asJsonObject().getString(config.tokenName)
+            tokenValue = ctx.body()?.asJsonObject()?.getString(config.tokenName)
         }
         if (tokenValue.isNullOrBlank() && config.isReadParams) {
             tokenValue = request.getParam(config.tokenName)
         }
-        return AuthUtil.checkLogin(tokenValue)
+        val loginId = AuthUtil.checkLogin(tokenValue)
+        Vertx.currentContext().put(CONTEXT_LOGIN_ID, loginId)
+        ctx.put(CONTEXT_LOGIN_ID, loginId)
     }
 
     suspend fun checkRole(longId: String, needRoles: List<String>, and: Boolean) {
@@ -150,8 +161,9 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         if (roleIds.isEmpty()) {
             throw AuthLoginException(errorCode = MinihErrorCode.ERR_CODE_LOGIN_TOKEN_NO_AUTH)
         }
+        println(roleIds)
         if (and) {
-            if (!roleIds.all { needRoles.contains(it) }) {
+            if (!needRoles.all { roleIds.contains(it) }) {
                 throw AuthLoginException(errorCode = MinihErrorCode.ERR_CODE_LOGIN_TOKEN_NO_AUTH)
             }
         } else {

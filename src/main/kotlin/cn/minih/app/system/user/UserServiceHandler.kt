@@ -1,7 +1,10 @@
 package cn.minih.app.system.user
 
-import cn.minih.app.system.auth.data.AuthSession
-import io.vertx.core.json.JsonObject
+import cn.minih.app.system.auth.AuthUtil
+import cn.minih.app.system.constants.MinihErrorCode
+import cn.minih.app.system.exception.UserSystemException
+import cn.minih.app.system.user.data.UserInfo
+import cn.minih.app.system.utils.Assert
 
 /**
  * @author hubin
@@ -10,16 +13,13 @@ import io.vertx.core.json.JsonObject
  */
 object UserServiceHandler {
 
-
-    @A
-    fun getData(params: JsonObject): AuthSession {
-        println(params)
-        return AuthSession()
+    suspend fun getUserInfo(): UserInfo? {
+        val username = AuthUtil.getCurrentLoginId()
+        val sysUser = UserRepository.instance.getUserByUsername(username)
+        Assert.notNull(sysUser) { UserSystemException(errorCode = MinihErrorCode.ERR_CODE_USER_SYSTEM_DATA_UN_FIND) }
+        return sysUser?.let { UserInfo(it) }
     }
 
 
+
 }
-
-
-@Target(AnnotationTarget.FUNCTION)
-annotation class A

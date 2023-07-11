@@ -8,7 +8,10 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Route
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.net.InetAddress
 import kotlin.reflect.KClass
 
@@ -25,11 +28,19 @@ fun Any.toJsonString(): String {
 }
 
 fun <T : Any> JsonObject.covertTo(clazz: KClass<T>): T {
-    return this.mapTo(clazz.java)
+    return Gson().fromJson(this.toString(), clazz.java)
 }
 
 fun <T : Any> String.jsonConvertData(clazz: KClass<T>): T {
     return Gson().fromJson(this, clazz.java)
+}
+
+fun getRequestBody(ctx: RoutingContext): JsonObject? {
+    var body = ctx.body().asJsonObject()
+    if (body == null) {
+        body = ctx.request().params()?.toJsonObject()
+    }
+    return body
 }
 
 

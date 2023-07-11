@@ -1,5 +1,6 @@
 package cn.minih.app.system.auth
 
+import cn.minih.app.system.auth.data.AuthLoginModel
 import cn.minih.app.system.constants.SYSTEM_AME
 
 /**
@@ -10,7 +11,7 @@ import cn.minih.app.system.constants.SYSTEM_AME
 interface AuthService {
     val loginRoleKey: String get() = "$SYSTEM_AME:auth:login-role:"
 
-    suspend fun login(params: MutableMap<String, Any>): String
+    suspend fun login(params: MutableMap<String, Any>): AuthLoginModel
     suspend fun setLoginRole(loginId: String)
     suspend fun getLoginRole(loginId: String): List<String>
 

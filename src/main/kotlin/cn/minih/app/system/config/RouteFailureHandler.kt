@@ -20,6 +20,7 @@ class RouteFailureHandler private constructor() : Handler<RoutingContext> {
 
     override fun handle(ctx: RoutingContext) {
         val ex = ctx.failure()
+        ex.printStackTrace()
         var r = R.err(ex.message)
         if (ex is MinihException) {
             r = R.err(ex.msg, ex.errorCode)

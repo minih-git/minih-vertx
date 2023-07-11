@@ -3,17 +3,16 @@
 package cn.minih.app.system.utils
 
 import cn.minih.app.system.constants.MinihErrorCode
-import java.io.Serializable
 
 /**
  * @author hubin
  * @date 2023/3/15
  * @desc
  */
-data class R<T>(var code: Int?, var msg: String?, val data: T?) : Serializable {
+data class R<T>(var code: Int?, var msg: String?, val data: T?) {
     companion object {
         fun <T> ok(data: T?): R<T> {
-            var rce = MinihErrorCode.SUCCESS_UNDEFINED
+            var rce = MinihErrorCode.SUCCESS_CODE_UNDEFINED
             if (data is Boolean && !data) {
                 rce = MinihErrorCode.ERR_CODE_UNDEFINED
             }

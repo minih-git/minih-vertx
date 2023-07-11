@@ -3,6 +3,7 @@ package cn.minih.app.system.auth
 import cn.minih.app.system.auth.data.AuthConfig
 import cn.minih.app.system.auth.data.AuthLoginModel
 import cn.minih.app.system.auth.data.TokenInfo
+import cn.minih.app.system.constants.CONTEXT_LOGIN_ID
 import cn.minih.app.system.constants.DEFAULT_DEVICE
 import cn.minih.app.system.constants.MinihErrorCode
 import cn.minih.app.system.constants.TOKEN_CONNECTOR_CHAT
@@ -41,7 +42,7 @@ object AuthUtil {
     }
 
     suspend fun login(
-        id: Any,
+        id: String,
         device: String? = DEFAULT_DEVICE,
         timeout: Long = -1L,
         loginConfig: AuthLoginModel = AuthLoginModel()
@@ -53,7 +54,7 @@ object AuthUtil {
         return TokenInfo(
             tokenValue = tokenValue,
             tokenName = config.tokenName,
-            loginId = id.toString(),
+            loginId = id,
             expired = AuthLogic.getTokenTimeout(tokenValue),
             loginDevice = loginConfig.device,
             tokenPrefix = config.tokenPrefix
@@ -85,5 +86,14 @@ object AuthUtil {
         }
         return loginId
     }
+
+    fun getCurrentLoginId(): String {
+        return try {
+            Vertx.currentContext().get(CONTEXT_LOGIN_ID)
+        } catch (e: Exception) {
+            throw AuthLoginException(errorCode = MinihErrorCode.ERR_CODE_LOGIN_NO_TOKEN)
+        }
+    }
+
 
 }

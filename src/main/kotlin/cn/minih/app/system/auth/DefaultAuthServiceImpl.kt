@@ -1,9 +1,10 @@
 package cn.minih.app.system.auth
 
-import cn.hutool.core.lang.Assert
+import cn.minih.app.system.auth.data.AuthLoginModel
 import cn.minih.app.system.config.RedisManager
 import cn.minih.app.system.exception.AuthLoginException
 import cn.minih.app.system.user.UserRepository
+import cn.minih.app.system.utils.Assert
 import io.vertx.kotlin.coroutines.await
 
 /**
@@ -11,7 +12,7 @@ import io.vertx.kotlin.coroutines.await
  * @date 2023/7/10
  * @desc
  */
-class DefaultAuthServiceImpl private constructor(): AuthService {
+class DefaultAuthServiceImpl private constructor() : AuthService {
 
     companion object {
         val instance by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
@@ -19,21 +20,21 @@ class DefaultAuthServiceImpl private constructor(): AuthService {
         }
     }
 
-    private val userRepository = UserRepository.instance
-    override suspend fun login(params: MutableMap<String, Any>): String {
-        val username = params["username"].toString()
-        val password = params["password"].toString()
+    override suspend fun login(params: MutableMap<String, Any>): AuthLoginModel {
+        val username = params["username"]
+        val password = params["password"]
         Assert.notBlank(username) { AuthLoginException("username不能为空!") }
         Assert.notBlank(password) { AuthLoginException("password不能为空!") }
-        val user = userRepository.getUserByUsername(username) ?: throw AuthLoginException("未找到用户!")
+        val user =
+            username?.let { UserRepository.instance.getUserByUsername(it.toString()) } ?: throw AuthLoginException("未找到用户,$username")
         if (user.password != password) {
             throw AuthLoginException("密码不正确!")
         }
-        return user.username
+        return AuthLoginModel(user.username)
     }
 
     override suspend fun setLoginRole(loginId: String) {
-        val user = userRepository.getUserByUsername(loginId) ?: throw AuthLoginException("未找到用户!")
+        val user = UserRepository.instance.getUserByUsername(loginId) ?: throw AuthLoginException("未找到用户!")
         if (user.role.isEmpty()) {
             return
         }

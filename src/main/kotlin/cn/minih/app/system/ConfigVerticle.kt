@@ -1,6 +1,5 @@
 package cn.minih.app.system
 
-import cn.minih.app.system.constants.SYSTEM_CONFIGURATION_FRESH
 import cn.minih.app.system.constants.SYSTEM_CONFIGURATION_SUBSCRIBE
 import cn.minih.app.system.utils.log
 import io.vertx.config.ConfigChange
@@ -19,21 +18,18 @@ class ConfigVerticle : CoroutineVerticle() {
     override suspend fun start() {
         val retriever = ConfigRetriever.create(
             vertx, ConfigRetrieverOptions()
-                .addStore(ConfigStoreOptions().setType("env"))
                 .addStore(
                     ConfigStoreOptions().setType("file").setFormat("yaml")
-                        .setConfig(JsonObject().put("path", "app.yaml"))
+                        .setConfig(
+                            JsonObject().put(
+                                "path",
+                                "/Users/hubin/IdeaProjects/minih-vertx/src/main/resources/app.yaml"
+                            )
+                        )
                 )
         )
-        vertx.eventBus().consumer<JsonObject>(SYSTEM_CONFIGURATION_FRESH) {
-            retriever.config.onSuccess { it1 ->
-                it.reply(it1)
-                vertx.eventBus().publish(SYSTEM_CONFIGURATION_SUBSCRIBE, it1)
-            }
-        }
         retriever.listen { change: ConfigChange ->
-            val json: JsonObject = change.newConfiguration
-            vertx.eventBus().publish(SYSTEM_CONFIGURATION_SUBSCRIBE, json)
+            vertx.eventBus().publish(SYSTEM_CONFIGURATION_SUBSCRIBE, change.newConfiguration)
         }
         log.info("配置中心启动完毕...")
     }

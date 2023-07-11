@@ -14,6 +14,7 @@ const val TOKEN_STYLE_TIK = "random-tik"
 const val TOKEN_STYLE_SNOWFLAKE = "snowflake"
 const val DEVICE_KEY = "device"
 const val DEFAULT_DEVICE = "default-device"
+const val DEFAULT_LOGIN_TYPE = "default-type"
 const val DEFAULT_TOKEN_NAME = "Authorization"
 const val DEFAULT_TIME_OUT = 60 * 60 * 24 * 30L
 const val DEFAULT_TOKEN_STYLE = TOKEN_STYLE_UUID

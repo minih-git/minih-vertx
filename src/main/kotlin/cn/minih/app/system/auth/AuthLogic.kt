@@ -38,15 +38,15 @@ object AuthLogic {
         return token
     }
 
-    suspend fun createLoginSession(id: Any, loginConfig: AuthLoginModel): String {
+    suspend fun createLoginSession(id: String, loginConfig: AuthLoginModel): String {
         checkLoginId(id)
         val redisApi = RedisManager.instance.getReidApi()
         val tokenValue = distUsableToken(id, loginConfig)
         val session = getSessionByLoginId(id, true, loginConfig)!!
         updateSessionTimeout(session, loginConfig)
-        val tokenSign = TokenSign(tokenValue, loginConfig.device);
+        val tokenSign = TokenSign(tokenValue, loginConfig.device)
         addTokenSign(session, tokenSign)
-        redisApi.set(listOf(getTokenKey(tokenValue), id.toString(), "EX", trans(loginConfig.timeout).toString()))
+        redisApi.set(listOf(getTokenKey(tokenValue), id, "EX", trans(loginConfig.timeout).toString()))
         return tokenValue
     }
 
@@ -81,10 +81,7 @@ object AuthLogic {
         return if (value == NEVER_EXPIRE) Long.MAX_VALUE else value
     }
 
-    /**
-     *为指定账号 id 的登录操作，分配一个可用的 token
-     */
-    private suspend fun distUsableToken(id: Any, loginConfig: AuthLoginModel): String {
+    private suspend fun distUsableToken(id: String, loginConfig: AuthLoginModel): String {
         val isConcurrent = getConfig().isConcurrent
         if (!isConcurrent) {
             replaced(id, loginConfig)
@@ -140,7 +137,7 @@ object AuthLogic {
         return cs == Int::class || cs == Short::class || cs == Long::class || cs == Byte::class || cs == Float::class || cs == Double::class || cs == Boolean::class || cs == Char::class
     }
 
-    private suspend fun getTokenValueByLoginId(id: Any, device: String): String? {
+    private suspend fun getTokenValueByLoginId(id: String, device: String): String? {
         val session = getSessionByLoginId(id)
         val tokenSigns = session?.tokenSignList?.filter { it1 ->
             it1.device == device
@@ -153,7 +150,7 @@ object AuthLogic {
     }
 
     private suspend fun getSessionByLoginId(
-        id: Any,
+        id: String,
         isCreate: Boolean = false,
         loginConfig: AuthLoginModel = AuthLoginModel()
     ): AuthSession? {
@@ -178,7 +175,7 @@ object AuthLogic {
         return "${SYSTEM_AME}:auth:token-session:$token"
     }
 
-    private fun getSessionKey(id: Any): String {
+    private fun getSessionKey(id: String): String {
         return "${SYSTEM_AME}:auth:login-session:$id"
     }
 }

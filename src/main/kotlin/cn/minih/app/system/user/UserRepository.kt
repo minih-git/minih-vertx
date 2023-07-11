@@ -9,7 +9,7 @@ import cn.minih.app.system.utils.covertTo
  * @date 2023/7/7
  * @desc
  */
-class UserRepository private constructor() : RepositoryManager("sys_user") {
+class UserRepository private constructor() : RepositoryManager("sysUser") {
 
     companion object {
         val instance by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
@@ -18,8 +18,6 @@ class UserRepository private constructor() : RepositoryManager("sys_user") {
     }
 
     suspend fun getUserByUsername(username: String): SysUser? {
-        val a = findOne("username" to username)
-        println(a.toString())
-        return a?.covertTo(SysUser::class)
+        return findOne("username" to username)?.covertTo(SysUser::class)
     }
 }
