@@ -6,5 +6,6 @@ package cn.minih.app.system.user.data
  * @desc
  */
 data class UserInfo(
-    val sysUser: SysUser = SysUser()
+    val sysUser: SysUser = SysUser(),
+    val userExtra: UserExtra = UserExtra()
 )

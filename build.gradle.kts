@@ -37,6 +37,8 @@ dependencies {
     //utils
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("cn.hutool:hutool-core:5.8.20")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
+
 
     //测试
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.0")
