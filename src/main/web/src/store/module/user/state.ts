@@ -1,8 +1,7 @@
-import {SessionInfo} from "../../../api/login.ts";
-import {UserInfo} from "./user-info.ts";
+import {UserState} from "./user-types";
 
-export const userState = () => ({
-    token: String,
-    sessionInfo: SessionInfo,
-    userInfo: UserInfo,
-})
+export const userState: UserState = {
+    sessionInfo: undefined,
+    token: "",
+    userInfo: undefined
+}

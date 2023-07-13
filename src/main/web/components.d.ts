@@ -8,13 +8,8 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     BasicForm: typeof import('./src/components/login/form/BasicForm.vue')['default']
-    ElButton: typeof import('element-plus/es')['ElButton']
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
-    ElForm: typeof import('element-plus/es')['ElForm']
-    ElFormItem: typeof import('element-plus/es')['ElFormItem']
     ElIcon: typeof import('element-plus/es')['ElIcon']
-    ElInput: typeof import('element-plus/es')['ElInput']
-    ElSwitch: typeof import('element-plus/es')['ElSwitch']
     Home: typeof import('./src/components/Home.vue')['default']
     Login: typeof import('./src/components/login/Login.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
