@@ -19,7 +19,7 @@ import kotlin.reflect.jvm.jvmName
 
 
 class ServiceProxyCodeGen {
-    private val baseUrl = System.getProperty("user.dir") + "/src/main/kotlin"
+    private val baseUrl = System.getProperty("index.dir") + "/src/main/kotlin"
     private val list = arrayListOf(
         //把这个地方替换成需要自动生成代理的类
         ServiceProxyCodeGen::class
