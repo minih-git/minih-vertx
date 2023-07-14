@@ -1,5 +1,5 @@
 import {MutationTree} from "vuex";
-import {UserState} from "./user-types";
+import {UserInfo, UserState} from "./user-types";
 import {RootState} from "../root-types";
 import {SessionInfo} from "../../../api/login";
 
@@ -9,6 +9,9 @@ export const userMutations: MutationTree<UserState, RootState> = {
     },
     setToken(state, data: string) {
         state.token = data
+    },
+    setUserInfo(state, data: UserInfo) {
+        state.userInfo = data
     }
 
 }

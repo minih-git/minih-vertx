@@ -31,14 +31,21 @@ fun <T : Any> JsonObject.covertTo(clazz: KClass<T>): T {
     return Gson().fromJson(this.toString(), clazz.java)
 }
 
+fun <T : Any> JsonObject.covertTo(clazz: Class<T>): T {
+    return Gson().fromJson(this.toString(), clazz)
+}
+
 fun <T : Any> String.jsonConvertData(clazz: KClass<T>): T {
     return Gson().fromJson(this, clazz.java)
 }
 
-fun getRequestBody(ctx: RoutingContext): JsonObject? {
-    var body = ctx.body().asJsonObject()
-    if (body == null) {
-        body = ctx.request().params()?.toJsonObject()
+fun getRequestBody(ctx: RoutingContext): JsonObject {
+    val body = JsonObject()
+    ctx.body()?.asJsonObject()?.map {
+        body.put(it.key, it.value)
+    }
+    ctx.request()?.params()?.map {
+        body.put(it.key, it.value)
     }
     return body
 }

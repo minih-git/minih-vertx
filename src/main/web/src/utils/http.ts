@@ -16,17 +16,6 @@ export interface RequestOptions extends RequestInit {
     url: string,
 }
 
-class NotLoginError extends Error {
-    code: number = 0
-    msg: string = ""
-
-    constructor(code: number, msg: string) {
-        super(msg)
-        this.msg = msg;
-        this.code = code;
-    }
-}
-
 class MinihError extends Error {
     code: number = 0
     msg: string = ""
@@ -37,6 +26,10 @@ class MinihError extends Error {
         this.code = code;
     }
 }
+
+class NotLoginError extends MinihError {
+}
+
 
 const processHeaders = (params, needAuth, headers, type: string) => {
     let header = headers || {
@@ -53,18 +46,18 @@ const processHeaders = (params, needAuth, headers, type: string) => {
             throw new NotLoginError(-11, "未能读取到有效 token！")
         }
     }
-    return headers
+    return header
 }
 
 export const get = async (url: string, params = {}, needAuth = true, headers = undefined): Promise<BaseData> => {
     try {
         return request({
             method: "GET",
-            url: url,
-            body: stringify(params),
+            url: url + stringify(params),
             headers: new Headers(processHeaders(params, needAuth, headers, "GET"))
         })
     } catch (e: any) {
+        console.log(e)
         return globalHandleError(e)
     }
 }
@@ -88,6 +81,7 @@ export const request = async (options: RequestOptions): Promise<BaseData> => {
         data: JSON,
         msg: "服务器发生错误，请稍后重试！"
     }
+    console.log(options)
     try {
         let res = await fetch(baseUrl + "" + options.url, options)
         let resultJson = await res.json()
@@ -99,7 +93,7 @@ export const request = async (options: RequestOptions): Promise<BaseData> => {
                 return resultData
             }
             if (resultJson.code <= -9 && resultJson.code >= -18) {
-                throw new NotLoginError(resultJson.code, resultJson.data)
+                throw new NotLoginError(resultJson.code, resultJson.msg)
             }
             throw new MinihError(resultJson.code, resultJson.msg)
         }
@@ -119,6 +113,7 @@ export const request = async (options: RequestOptions): Promise<BaseData> => {
 }
 
 const globalHandleError = (e) => {
+    console.log(e)
     let errData = {
         code: -1,
         data: JSON,
@@ -128,8 +123,8 @@ const globalHandleError = (e) => {
         errData.code = e.code
         errData.msg = e.msg
     }
-    if (e instanceof NotLoginError) {
-       window.location.href = "/login"
+    if (e instanceof NotLoginError && e.code == -11) {
+        // window.location.href = "/login"
     }
     ElMessage({
         message: errData.code + "，" + errData.msg,

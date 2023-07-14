@@ -16,7 +16,6 @@ repositories {
 val vertxVersion = "4.4.4"
 
 dependencies {
-
     //vertx
     implementation("io.vertx:vertx-core:$vertxVersion")
     implementation("io.vertx:vertx-web:$vertxVersion")

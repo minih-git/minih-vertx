@@ -10,6 +10,7 @@ import cn.minih.app.system.constants.MinihErrorCode
 import cn.minih.app.system.constants.TOKEN_CONNECTOR_CHAT
 import cn.minih.app.system.exception.AuthLoginException
 import cn.minih.app.system.utils.R
+import cn.minih.app.system.utils.covertTo
 import cn.minih.app.system.utils.getRequestBody
 import cn.minih.app.system.utils.toJsonObject
 import io.vertx.core.Handler
@@ -53,8 +54,13 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
 private fun generateArgs(argsNeed: List<KParameter>, ctx: RoutingContext): Array<Any?> {
     val args = mutableListOf<Any?>()
     val params = getRequestBody(ctx)
-    if (params != null) {
-        argsNeed.forEach { args.add(it.name?.let { name -> params[name] }) }
+    argsNeed.forEach { argsType ->
+        println(argsType.type)
+        if (AuthLogic.isBasicType(argsType.type.classifier)) {
+            args.add(argsType.name?.let { name -> params[name] })
+        } else {
+            args.add(argsType.name?.let { params.covertTo(argsType.type.javaClass) })
+        }
     }
     return args.toTypedArray()
 }

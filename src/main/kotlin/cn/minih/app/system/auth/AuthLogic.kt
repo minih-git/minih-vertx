@@ -14,7 +14,7 @@ import cn.minih.app.system.utils.log
 import cn.minih.app.system.utils.toJsonString
 import io.vertx.kotlin.coroutines.await
 import java.util.*
-import kotlin.reflect.KClass
+import kotlin.reflect.KClassifier
 
 /**
  * @author hubin
@@ -129,11 +129,11 @@ object AuthLogic {
         }
     }
 
-    private fun isBasicType(cs: KClass<out Any>): Boolean {
+    fun isBasicType(cs: KClassifier?): Boolean {
         return isWrapper(cs) || cs == String::class
     }
 
-    private fun isWrapper(cs: KClass<out Any>): Boolean {
+    private fun isWrapper(cs: KClassifier?): Boolean {
         return cs == Int::class || cs == Short::class || cs == Long::class || cs == Byte::class || cs == Float::class || cs == Double::class || cs == Boolean::class || cs == Char::class
     }
 

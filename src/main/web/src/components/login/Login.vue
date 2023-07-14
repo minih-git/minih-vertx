@@ -26,11 +26,6 @@ import BasicForm from "./form/BasicForm.vue";
 </script>
 
 <style scoped>
-#bg {
-  --model-with: 800px;
-  --login-model-padding: 60px;
-  --background-color: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
-}
 
 #bg {
   width: 100vw;

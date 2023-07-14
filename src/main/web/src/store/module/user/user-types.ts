@@ -1,16 +1,16 @@
 import {SessionInfo} from "../../../api/login";
 
 export interface UserInfo {
-    username: string | undefined
-    name: string | undefined
-    avatar: string | undefined
-    state: Number | undefined
-    role: string | undefined
-    mobile: Date | undefined
+    username?: string
+    name?: string
+    avatar?: string
+    state?: Number
+    role?: string[]
+    mobile?: Date
 }
 
 export interface UserState {
-    token: string
-    sessionInfo: SessionInfo  | undefined
-    userInfo: UserInfo | undefined
+    token?: string
+    sessionInfo?: SessionInfo
+    userInfo?: UserInfo
 }

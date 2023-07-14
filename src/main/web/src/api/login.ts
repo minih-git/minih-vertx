@@ -1,27 +1,27 @@
-import {post} from "../utils/http";
+import {post, get} from "../utils/http";
 import {store} from "../store";
+import {UserInfo} from "../store/module/user/user-types.ts";
 
 export interface FormInfo {
-    username?: string | undefined
-    password?: string | undefined
-    mobile?: string | undefined;
+    username?: string
+    password?: string
+    mobile?: string
     code?: string
 }
 
 export interface SessionInfo {
-    tokenValue: string | undefined
-    tokenName: string | undefined
-    loginId: string | undefined
-    expired: number | undefined
-    loginDevice: string | undefined
-    tokenPrefix: string | undefined
+    tokenVale?: string
+    tokenName?: string
+    loginId?: string
+    expired?: number
+    loginDevice?: string
+    tokenPrefix?: string
 }
 
 
 export async function login(form: FormInfo): Promise<SessionInfo> {
     let url = "/auth/login"
     let res = await post(url, form, false)
-    console.log(res)
     let sessionInfo = {
         expired: res.data['expired'],
         loginDevice: res.data['loginDevice'],
@@ -32,4 +32,20 @@ export async function login(form: FormInfo): Promise<SessionInfo> {
     }
     await store.dispatch("user/setSessionInfo", sessionInfo)
     return sessionInfo
+}
+
+export async function info(): Promise<UserInfo> {
+    let url = "/user/info"
+    let res = await get(url, {})
+    console.log(res)
+    let userInfo = {
+        username: res.data["sysUser"]["username"],
+        name: res.data["sysUser"]["name"],
+        avatar: res.data["sysUser"]["avatar"],
+        state: res.data["sysUser"]["state"],
+        role: res.data["sysUser"]["role"],
+        mobile: res.data["userExtra"]["mobile"],
+    }
+    await store.dispatch("user/setUserInfo", userInfo)
+    return userInfo
 }

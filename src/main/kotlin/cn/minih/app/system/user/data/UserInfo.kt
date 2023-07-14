@@ -7,5 +7,12 @@ package cn.minih.app.system.user.data
  */
 data class UserInfo(
     val sysUser: SysUser = SysUser(),
-    val userExtra: UserExtra = UserExtra()
+    val userExtra: UserExtra? = UserExtra()
+)
+
+data class UserInfoCondition(
+    val name: String?,
+    val username: String?,
+    val state: Int?,
+    val mobile: String?,
 )

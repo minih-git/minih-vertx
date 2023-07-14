@@ -2,10 +2,10 @@ package cn.minih.app.system.config
 
 import io.vertx.core.Future
 import io.vertx.core.Vertx
-import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
-import io.vertx.core.streams.ReadStream
+import io.vertx.ext.mongo.FindOptions
 import io.vertx.ext.mongo.MongoClient
+import io.vertx.ext.mongo.MongoClientUpdateResult
 import io.vertx.kotlin.core.json.jsonObjectOf
 
 /**
@@ -38,18 +38,28 @@ abstract class RepositoryManager(private val tableName: String) {
         return client.findOne(tableName, jsonObjectOf(*fields), jsonObjectOf())
     }
 
-    fun findBatch(vararg fields: Pair<String, Any?>): ReadStream<JsonObject>? {
-        return client.findBatch(tableName, jsonObjectOf(*fields))
+    fun findOne(queryOption: JsonObject): Future<JsonObject>? {
+        return client.findOne(tableName, queryOption, jsonObjectOf())
     }
 
-    fun find(vararg fields: Pair<String, Any?>): Future<List<JsonObject>>? {
-        return client.find(tableName, jsonObjectOf(*fields))
+    fun find(
+        queryOption: JsonObject,
+        options: FindOptions = FindOptions().setBatchSize(100)
+    ): Future<List<JsonObject>>? {
+        return client.findWithOptions(tableName, queryOption, options)
     }
 
-    fun aggregate(pipeline: JsonArray): ReadStream<JsonObject>? {
-        return client.aggregate(tableName, pipeline)
+    fun insert(vararg fields: Pair<String, Any?>): Future<String> {
+        return client.save(tableName, jsonObjectOf(*fields))
     }
 
+    fun delete(vararg fields: Pair<String, Any?>): Future<JsonObject> {
+        return client.findOneAndDelete(tableName, jsonObjectOf(*fields))
+    }
+
+    fun update(vararg fields: Pair<String, Any?>, updateData: JsonObject): Future<MongoClientUpdateResult> {
+        return client.updateCollection(tableName, jsonObjectOf(*fields), updateData)
+    }
 
 
 }
