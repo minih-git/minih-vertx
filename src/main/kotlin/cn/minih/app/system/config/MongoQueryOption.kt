@@ -1,0 +1,16 @@
+package cn.minih.app.system.config
+
+import io.vertx.core.json.JsonObject
+import kotlin.reflect.KProperty1
+
+/**
+ * @author hubin
+ * @date 2023/7/14
+ * @desc
+ */
+class MongoQueryOption<V> : JsonObject() {
+    fun put(k: KProperty1<V, Any>, v: Any) {
+        super.put(k.name, v)
+
+    }
+}

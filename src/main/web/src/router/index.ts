@@ -3,6 +3,7 @@ import Login from "../components/login/Login.vue";
 import Home from "../components/Home.vue";
 import {store} from "../store";
 import ErrorPage from "../components/ErrorPage.vue";
+import List from "../components/user/List.vue";
 
 
 const routes = [
@@ -23,6 +24,15 @@ const routes = [
         meta: {
             needAuth: true
         },
+        children:[
+            {path: '/user',
+                name: "用户列表",
+                component: List,
+                meta: {
+                    needAuth: true
+                },
+            }
+        ]
     },
     {
         path: "/noAuth",

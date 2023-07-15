@@ -55,11 +55,10 @@ private fun generateArgs(argsNeed: List<KParameter>, ctx: RoutingContext): Array
     val args = mutableListOf<Any?>()
     val params = getRequestBody(ctx)
     argsNeed.forEach { argsType ->
-        println(argsType.type)
-        if (AuthLogic.isBasicType(argsType.type.classifier)) {
+        if (AuthLogic.isBasicType(argsType.type)) {
             args.add(argsType.name?.let { name -> params[name] })
         } else {
-            args.add(argsType.name?.let { params.covertTo(argsType.type.javaClass) })
+            args.add(argsType.name?.let { params.covertTo(argsType.type) })
         }
     }
     return args.toTypedArray()
@@ -167,7 +166,6 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         if (roleIds.isEmpty()) {
             throw AuthLoginException(errorCode = MinihErrorCode.ERR_CODE_LOGIN_TOKEN_NO_AUTH)
         }
-        println(roleIds)
         if (and) {
             if (!needRoles.all { roleIds.contains(it) }) {
                 throw AuthLoginException(errorCode = MinihErrorCode.ERR_CODE_LOGIN_TOKEN_NO_AUTH)

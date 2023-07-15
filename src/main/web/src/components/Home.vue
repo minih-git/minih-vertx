@@ -1,95 +1,105 @@
 <template>
-  <el-container id="container">
-    <el-header id="header" height="60">
-      <el-row :gutter="20" style="height: 100%">
-        <el-col :span="4" style="height: 100%">
-          <div id="logo"></div>
-        </el-col>
-        <el-col :span="16">
-        </el-col>
-        <el-col :span="4">
-          <div id="user">
-            <el-space wrap large>
-              <h6>欢迎你！{{ store.state.user.sessionInfo.loginId }}</h6>
+    <el-container id="container">
+        <el-affix :offset="0">
+            <el-header id="header" height="60">
+                <el-row :gutter="20" style="height: 100%">
+                    <el-col :span="3" style="height: 100%">
+                        <div id="logo"></div>
+                    </el-col>
+                    <el-col :span="18">
+                    </el-col>
+                    <el-col :span="3">
+                        <div id="user">
+                            <el-space large wrap>
+                                <h6>欢迎你！{{ store.state.user.sessionInfo.loginId }}</h6>
 
-              <el-dropdown style="outline: none">
-                <el-avatar
-                    src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-                />
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item>
-                      <el-icon>
-                        <Edit/>
-                      </el-icon>
-                      修改密码
-                    </el-dropdown-item>
-                    <el-dropdown-item>
-                      <el-icon>
-                        <Star/>
-                      </el-icon>
-                      个人信息
-                    </el-dropdown-item>
-                    <el-dropdown-item>
-                      <el-icon>
-                        <Promotion/>
-                      </el-icon>
-                      退出登录
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
+                                <el-dropdown style="outline: none">
+                                    <el-avatar
+                                        src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+                                    />
+                                    <template #dropdown>
+                                        <el-dropdown-menu>
+                                            <el-dropdown-item>
+                                                <el-icon>
+                                                    <Edit/>
+                                                </el-icon>
+                                                修改密码
+                                            </el-dropdown-item>
+                                            <el-dropdown-item>
+                                                <el-icon>
+                                                    <Star/>
+                                                </el-icon>
+                                                个人信息
+                                            </el-dropdown-item>
+                                            <el-dropdown-item>
+                                                <el-icon>
+                                                    <Promotion/>
+                                                </el-icon>
+                                                退出登录
+                                            </el-dropdown-item>
+                                        </el-dropdown-menu>
+                                    </template>
+                                </el-dropdown>
 
-            </el-space>
-          </div>
-        </el-col>
-      </el-row>
+                            </el-space>
+                        </div>
+                    </el-col>
+                </el-row>
 
-    </el-header>
-    <el-container id="center" style="padding-top: 30px">
-      <el-aside width="200px" id="aside">
-        <div class='menu-icon' style="padding-left: 13px">
-          <el-icon class="menu-icon-rotate" @click="isCollapse = !isCollapse">
-            <Menu/>
-          </el-icon>
+            </el-header>
+        </el-affix>
 
-        </div>
-        <el-menu
-            default-active="1"
-            :collapse="isCollapse"
-        >
-          <el-sub-menu index="1">
-            <template #title>
-              <el-icon>
-                <Setting/>
-              </el-icon>
-              <span>系统设置</span>
-            </template>
-            <el-menu-item index="1-1">
-              <span><el-icon><User/></el-icon>用户列表</span>
-            </el-menu-item>
-            <el-menu-item index="1-2">
-              <span><el-icon><Lock/></el-icon>角色列表</span>
-            </el-menu-item>
-            <el-menu-item index="1-3">
-              <span><el-icon><FullScreen/></el-icon>资源列表</span>
-            </el-menu-item>
-          </el-sub-menu>
-        </el-menu>
+        <el-container id="center">
+            <el-aside id="aside" width="200px">
+
+                <div class="menu">
+                    <div class="sub-menu">
+                        <div class="sub-menu-text">
+                            <span><el-icon><Setting/></el-icon>系统管理</span>
+                        </div>
+                        <div class="sub-menu-con">
+                            <div v-for="item in subMenu" :class="{'is-active':currenSelect===item.id}"
+                                 class="menu-item "
+                                 @click=" (currenSelect = item.id) && router.push({path:item.path})">
+                                <el-icon>
+                                    <component :is="item.icon" class="icons"></component>
+                                </el-icon>
+                                <span style="margin-left: 10px">{{ item.name }}</span>
+                            </div>
+                        </div>
+                        <div class="sub-menu-split-line"></div>
+
+                    </div>
+
+                </div>
 
 
-      </el-aside>
-      <el-container>
-        <el-main id="main">
-          <router-view></router-view>
-        </el-main>
-      </el-container>
+            </el-aside>
+            <el-container id="main">
+                <el-main id="main-con">
+                    <el-affix :offset="0" target="#main-con">
+                        <el-page-header>
+                            <template #breadcrumb>
+                                <el-breadcrumb separator="/">
+                                    <el-breadcrumb-item :to="{ path: '/' }">
+                                        首页
+                                    </el-breadcrumb-item>
 
+                                </el-breadcrumb>
+                            </template>
+                            <template #content>
+                                <span class="text-large font-600 mr-3"> {{ route.name }} </span>
+                            </template>
+                        </el-page-header>
+                    </el-affix>
+                    <div style="margin-top: 20px">
+                        <router-view></router-view>
+                    </div>
+                </el-main>
+            </el-container>
+
+        </el-container>
     </el-container>
-    <el-container>
-      <el-footer id="footer">Footer</el-footer>
-    </el-container>
-  </el-container>
 
 
 </template>
@@ -97,108 +107,153 @@
 <script setup lang="ts">
 
 import {useStore} from "../store";
+import {useRoute, useRouter} from "vue-router";
 import {Edit, Star, Promotion, Setting, Menu, User, Lock, FullScreen} from "@element-plus/icons-vue";
-import {ref} from "vue";
-
-const isCollapse = ref<boolean>(false)
+import {ref,shallowRef} from "vue";
 
 const store = useStore()
+const route = useRoute()
+const router = useRouter()
+const currenSelect = ref<number>(0)
+const subMenu = ref<any>([
+    {id: 1, name: "用户列表", path: "/user", icon: shallowRef(User)},
+    {id: 2, name: "角色列表", path: "/role", icon: shallowRef(Lock)},
+    {id: 3, name: "资源列表", path: "/resource", icon: shallowRef(FullScreen)},
+])
 
 
 </script>
 
 
 <style scoped>
+
+
 #container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
+    background-color: #F7F9FA;
+    color: rgb(51, 51, 51);
+    height: 100%;
+    overflow: hidden;
 
-  #header {
-    flex: 1;
-    height: 60px;
-    color: var(--second-color);
-    border-bottom: 1px solid var(--first-color);
+    #header {
+        height: 50px;
+        box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.16);
+        color: #666;
 
-    #logo {
-      width: 120px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-    }
-
-    #user {
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-  }
-
-  #center {
-    flex: 8;
-
-    #aside {
-      text-align: left;
-      --el-menu-item-height: 32px;
-      --el-menu-sub-item-height: 28px;
-      --el-menu-base-level-padding: 10px;
-
-      .menu-icon {
-        font-size: 21px;
-        cursor: pointer;
-      }
-
-      .menu-icon i:hover {
-        color: #8caede;
-
-      }
-
-      .menu-icon i:active {
-        opacity: .5;
-        animation: rotate linear .2s;
-        transform-origin: center;
-      }
-
-
-      .el-menu {
-        border-right: none;
-
-        .is-active:not(.el-sub-menu) {
-          background-image: var(--background-color-50);
-          color: #FFF
+        #logo {
+            width: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
         }
-      }
 
-      .el-sub-menu__title {
-        border-radius: 15px;
-        margin: 10px;
-      }
+        #user {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-      .el-menu-item {
-        border-radius: 15px;
-        margin: 20px;
-
-      }
     }
-  }
 
-  #footer {
-    flex: 1;
+    #center {
+        flex: 8;
 
-  }
+        #aside {
+            text-align: left;
+            --el-menu-item-height: 32px;
+            --el-menu-sub-item-height: 28px;
+            --el-menu-base-level-padding: 10px;
+            --el-menu-bg-color: transparent;
+            --el-menu-text-color: rgb(51, 51, 51);
+            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.16);
+            padding-top: 25px;
+            height: 100%;
+
+            .menu {
+
+                .sub-menu-text {
+                    order: 0;
+                    flex: 0 1 auto;
+                    align-self: auto;
+                    font-weight: 700;
+                    color: rgb(51, 51, 51);
+                    margin: 20px;
+                }
+
+                .sub-menu-split-line {
+                    height: 1px;
+                    margin: 20px 0;
+                    border: 0;
+                    background: linear-gradient(to right, rgb(249, 249, 249), rgb(203, 203, 203), rgb(249, 249, 249)) rgb(203, 203, 203);
+                }
+
+                .menu-item {
+                    padding: 8px;
+                    margin: 10px 0;
+                    cursor: pointer;
+                //border-radius: 15px; display: flex; justify-content: center;
+                }
+
+                .menu-item:hover {
+                    background-image: linear-gradient(120deg, transparent 0%, var(--second-color) 100%);
+
+                }
+
+                .is-active {
+                    background-image: linear-gradient(120deg, transparent 0%, var(--second-color) 80%, var(--third-color) 100%);
+                    color: #6b6161;
+                    font-weight: bold;
+                }
+            }
+
+
+            .el-menu {
+                border-right: none;
+
+
+            }
+
+            .el-sub-menu__title {
+                border-radius: 15px;
+                margin: 10px;
+            }
+
+            .el-menu-item {
+                border-radius: 15px;
+                margin: 20px;
+
+            }
+        }
+
+        #main {
+            flex-direction: column;
+            overflow-y: auto;
+
+            #main-con {
+                flex: 1;
+            }
+
+            #footer {
+                flex: none;
+                height: 50px;
+
+
+            }
+        }
+    }
 
 
 }
 
 @keyframes rotate {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(180deg);
-  }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(180deg);
+    }
 }
 </style>

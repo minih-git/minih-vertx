@@ -14,6 +14,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.net.InetAddress
 import kotlin.reflect.KClass
+import kotlin.reflect.KClassifier
+import kotlin.reflect.KType
 
 
 val log: KLogger = KotlinLogging.logger {}
@@ -31,8 +33,8 @@ fun <T : Any> JsonObject.covertTo(clazz: KClass<T>): T {
     return Gson().fromJson(this.toString(), clazz.java)
 }
 
-fun <T : Any> JsonObject.covertTo(clazz: Class<T>): T {
-    return Gson().fromJson(this.toString(), clazz)
+fun JsonObject.covertTo(kType: KType): Any {
+    return this.covertTo(kType.classifier as KClass<*>)
 }
 
 fun <T : Any> String.jsonConvertData(clazz: KClass<T>): T {

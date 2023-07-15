@@ -15,6 +15,8 @@ import cn.minih.app.system.utils.toJsonString
 import io.vertx.kotlin.coroutines.await
 import java.util.*
 import kotlin.reflect.KClassifier
+import kotlin.reflect.KType
+import kotlin.reflect.full.createType
 
 /**
  * @author hubin
@@ -124,16 +126,16 @@ object AuthLogic {
     }
 
     private fun checkLoginId(id: Any) {
-        if (!isBasicType(id::class)) {
+        if (!isBasicType(id::class.createType())) {
             log.warn("loginId 应该为简单类型，例如：String | int | long，不推荐使用复杂类型：${id::class}")
         }
     }
 
-    fun isBasicType(cs: KClassifier?): Boolean {
+    fun isBasicType(cs: KType?): Boolean {
         return isWrapper(cs) || cs == String::class
     }
 
-    private fun isWrapper(cs: KClassifier?): Boolean {
+    private fun isWrapper(cs: KType?): Boolean {
         return cs == Int::class || cs == Short::class || cs == Long::class || cs == Byte::class || cs == Float::class || cs == Double::class || cs == Boolean::class || cs == Char::class
     }
 

@@ -13,7 +13,7 @@ import io.vertx.kotlin.core.json.jsonObjectOf
  * @date 2023/7/7
  * @desc
  */
-abstract class RepositoryManager(private val tableName: String) {
+abstract class RepositoryManager<T>(private val tableName: String) {
 
 
     private val client by lazy {
@@ -38,12 +38,12 @@ abstract class RepositoryManager(private val tableName: String) {
         return client.findOne(tableName, jsonObjectOf(*fields), jsonObjectOf())
     }
 
-    fun findOne(queryOption: JsonObject): Future<JsonObject>? {
+    fun findOne(queryOption: MongoQueryOption<T>): Future<JsonObject>? {
         return client.findOne(tableName, queryOption, jsonObjectOf())
     }
 
     fun find(
-        queryOption: JsonObject,
+        queryOption: MongoQueryOption<T>,
         options: FindOptions = FindOptions().setBatchSize(100)
     ): Future<List<JsonObject>>? {
         return client.findWithOptions(tableName, queryOption, options)

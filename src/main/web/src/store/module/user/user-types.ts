@@ -4,11 +4,15 @@ export interface UserInfo {
     username?: string
     name?: string
     avatar?: string
-    state?: Number
+    state?: number
     role?: string[]
-    mobile?: Date
+    createTime?: number
+    mobile?: string
 }
-
+export interface Page<T> {
+    nextCursor?: string
+    data: T []
+}
 export interface UserState {
     token?: string
     sessionInfo?: SessionInfo
