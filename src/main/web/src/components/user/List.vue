@@ -19,7 +19,7 @@
                             <el-icon>
                                 <timer/>
                             </el-icon>
-                            <span style="margin-left: 10px">{{ new Date(scope.row.createTime) }}</span>
+                            <span style="margin-left: 10px">{{ DateFormat.format(new Date(scope.row.createTime),'yyyy-MM-dd HH:mm:ss') }}</span>
                         </div>
                     </template>
                 </el-table-column>
@@ -70,6 +70,7 @@ import {ref} from "vue";
 import {Timer} from "@element-plus/icons-vue";
 import {UserInfo} from "../../store/module/user/user-types";
 import {userList} from "../../api/user";
+import {DateFormat} from "../../utils/utils.ts";
 
 
 const tableData = ref<UserInfo []>()

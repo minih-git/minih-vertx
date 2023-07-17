@@ -32,6 +32,10 @@ data class R<T>(var code: Int?, var msg: String?, val data: T?) {
             return R(errorCode.code, errorCode.msg, null)
         }
 
+        fun err(code: Int, msg: String): R<String> {
+            return R(code, msg, null)
+        }
+
         fun <T> err(): R<T> {
             return err(null)
         }

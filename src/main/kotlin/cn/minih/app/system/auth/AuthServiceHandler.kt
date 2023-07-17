@@ -109,10 +109,7 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
             try {
                 val path = ctx.request().path()
                 if (path == AuthUtil.getConfig().loginPath) {
-                    val tokenInfo = login(
-                        getRequestBody(ctx)
-                            ?: throw AuthLoginException(errorCode = MinihErrorCode.ERR_CODE_LOGIN_NO_LOGIN_INFO)
-                    )
+                    val tokenInfo = login(getRequestBody(ctx))
                     val config = AuthUtil.getConfig()
                     val tokenValue = config.tokenPrefix.plus(TOKEN_CONNECTOR_CHAT).plus(tokenInfo.tokenValue)
                     ctx.response().addCookie(Cookie.cookie(config.tokenName, URLUtil.encode(tokenValue)))

@@ -11,6 +11,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.ResponseContentTypeHandler
+import io.vertx.ext.web.handler.impl.ErrorHandlerImpl
 import io.vertx.kotlin.core.json.get
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
@@ -31,6 +32,10 @@ abstract class MinihVerticle(private val port: Int = 8080) : CoroutineVerticle()
 
     override suspend fun start() {
         this.routerInstance = Router.router(vertx)
+        routerInstance.errorHandler(404,RouteFailureHandler.instance)
+        routerInstance.errorHandler(405,RouteFailureHandler.instance)
+        routerInstance.errorHandler(406,RouteFailureHandler.instance)
+        routerInstance.errorHandler(500,RouteFailureHandler.instance)
         initConfig()
         routerInstance.route()
             .handler(ResponseContentTypeHandler.create())

@@ -43,6 +43,9 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
 
+    implementation("org.mindrot:jbcrypt:0.4")
+
+
 
 }
 

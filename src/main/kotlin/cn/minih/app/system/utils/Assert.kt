@@ -20,4 +20,11 @@ object Assert {
             throw fn()
         }
     }
+
+    fun isTrue(obj: Boolean?, fn: () -> Throwable) {
+        if (obj == null || !obj) {
+            throw fn()
+        }
+
+    }
 }

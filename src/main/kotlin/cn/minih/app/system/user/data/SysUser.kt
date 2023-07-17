@@ -9,18 +9,21 @@ import com.google.gson.annotations.SerializedName
  */
 data class SysUser(
     @SerializedName("_id")
-    val id: Long = 0L,
+    var id: Long = 0L,
     val username: String = "",
-    val password: String = "",
-    val name: String = "",
-    val avatar: String = "",
-    val state: Int = 1,
-    val role: List<String> = mutableListOf(),
+    var password: String = "",
+    var name: String = "",
+    var avatar: String = "",
+    var state: Int = 1,
+    var role: List<String> = mutableListOf(),
     val createTime: Long = 0L,
 )
 
 data class UserExtra(
     @SerializedName("_id")
-    val id: Long = 0L,
-    val mobile: String = "",
+    var id: Long = 0L,
+    var mobile: String = "",
+    var realName: String = "",
+    var idType: String = "",
+    var idNo: String = "",
 )

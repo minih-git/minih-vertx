@@ -2,50 +2,41 @@
     <el-container id="container">
         <el-affix :offset="0">
             <el-header id="header" height="60">
-                <el-row :gutter="20" style="height: 100%">
-                    <el-col :span="3" style="height: 100%">
-                        <div id="logo"></div>
-                    </el-col>
-                    <el-col :span="18">
-                    </el-col>
-                    <el-col :span="3">
-                        <div id="user">
-                            <el-space large wrap>
-                                <h6>欢迎你！{{ store.state.user.sessionInfo.loginId }}</h6>
+              <div id="logo"></div>
+              <div id="user">
+                <el-space large wrap>
+                  <h6>欢迎你！{{ store.state.user.sessionInfo.loginId }}</h6>
 
-                                <el-dropdown style="outline: none">
-                                    <el-avatar
-                                        src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-                                    />
-                                    <template #dropdown>
-                                        <el-dropdown-menu>
-                                            <el-dropdown-item>
-                                                <el-icon>
-                                                    <Edit/>
-                                                </el-icon>
-                                                修改密码
-                                            </el-dropdown-item>
-                                            <el-dropdown-item>
-                                                <el-icon>
-                                                    <Star/>
-                                                </el-icon>
-                                                个人信息
-                                            </el-dropdown-item>
-                                            <el-dropdown-item>
-                                                <el-icon>
-                                                    <Promotion/>
-                                                </el-icon>
-                                                退出登录
-                                            </el-dropdown-item>
-                                        </el-dropdown-menu>
-                                    </template>
-                                </el-dropdown>
+                  <el-dropdown style="outline: none">
+                    <el-avatar
+                        src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+                    />
+                    <template #dropdown>
+                      <el-dropdown-menu>
+                        <el-dropdown-item>
+                          <el-icon>
+                            <Edit/>
+                          </el-icon>
+                          修改密码
+                        </el-dropdown-item>
+                        <el-dropdown-item>
+                          <el-icon>
+                            <Star/>
+                          </el-icon>
+                          个人信息
+                        </el-dropdown-item>
+                        <el-dropdown-item>
+                          <el-icon>
+                            <Promotion/>
+                          </el-icon>
+                          退出登录
+                        </el-dropdown-item>
+                      </el-dropdown-menu>
+                    </template>
+                  </el-dropdown>
 
-                            </el-space>
-                        </div>
-                    </el-col>
-                </el-row>
-
+                </el-space>
+              </div>
             </el-header>
         </el-affix>
 
@@ -147,6 +138,7 @@ const subMenu = ref<any>([
             justify-content: center;
             align-items: center;
             height: 100%;
+          float: left;
         }
 
         #user {
@@ -154,6 +146,7 @@ const subMenu = ref<any>([
             display: flex;
             justify-content: center;
             align-items: center;
+          float: right;
         }
 
     }

@@ -1,5 +1,6 @@
 package cn.minih.app.system.config
 
+import cn.minih.app.system.utils.toJsonObject
 import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
@@ -49,16 +50,24 @@ abstract class RepositoryManager<T>(private val tableName: String) {
         return client.findWithOptions(tableName, queryOption, options)
     }
 
-    fun insert(vararg fields: Pair<String, Any?>): Future<String> {
-        return client.save(tableName, jsonObjectOf(*fields))
+    fun findOne(
+        vararg queryOption: Pair<String, Any?>,
+        options: FindOptions = FindOptions().setBatchSize(100)
+    ): Future<JsonObject>? {
+        return client.findOne(tableName, jsonObjectOf(*queryOption), jsonObjectOf())
+
+    }
+
+    fun insert(data: T): Future<String> {
+        return client.save(tableName, data?.toJsonObject())
     }
 
     fun delete(vararg fields: Pair<String, Any?>): Future<JsonObject> {
         return client.findOneAndDelete(tableName, jsonObjectOf(*fields))
     }
 
-    fun update(vararg fields: Pair<String, Any?>, updateData: JsonObject): Future<MongoClientUpdateResult> {
-        return client.updateCollection(tableName, jsonObjectOf(*fields), updateData)
+    fun update(vararg fields: Pair<String, Any?>, data: T): Future<MongoClientUpdateResult> {
+        return client.updateCollection(tableName, jsonObjectOf(*fields), data?.toJsonObject())
     }
 
 

@@ -1,5 +1,8 @@
 package cn.minih.app.system.utils
 
+import cn.minih.app.system.auth.AuthServiceHandler
+import cn.minih.app.system.auth.annotation.CheckRoleType
+import cn.minih.app.system.constants.CONTEXT_LOGIN_ID
 import com.google.gson.Gson
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -80,6 +83,26 @@ fun Route.coroutineVoidHandler(fn: suspend (Any?) -> Unit) {
             }
         }
     }
+}
+
+@OptIn(DelicateCoroutinesApi::class)
+fun Route.neeRole(vararg role: String, type: CheckRoleType = CheckRoleType.AND): Route {
+    putMetadata("needRoles", role)
+        .handler { ctx ->
+            GlobalScope.launch {
+                try {
+                    AuthServiceHandler.instance.checkRole(
+                        ctx.get(CONTEXT_LOGIN_ID),
+                        role.toList(),
+                        type == CheckRoleType.AND
+                    )
+                    ctx.next()
+                } catch (e: Exception) {
+                    ctx.fail(e)
+                }
+            }
+        }
+    return this
 }
 
 object SnowFlake {

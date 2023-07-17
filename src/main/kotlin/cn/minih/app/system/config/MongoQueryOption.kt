@@ -9,8 +9,8 @@ import kotlin.reflect.KProperty1
  * @desc
  */
 class MongoQueryOption<V> : JsonObject() {
-    fun put(k: KProperty1<V, Any>, v: Any) {
+    fun put(k: KProperty1<V, Any>, v: Any): MongoQueryOption<V> {
         super.put(k.name, v)
-
+        return this
     }
 }
