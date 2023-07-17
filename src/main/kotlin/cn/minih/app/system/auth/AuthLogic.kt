@@ -151,7 +151,7 @@ object AuthLogic {
 
     }
 
-    private suspend fun getSessionByLoginId(
+    suspend fun getSessionByLoginId(
         id: String,
         isCreate: Boolean = false,
         loginConfig: AuthLoginModel = AuthLoginModel()

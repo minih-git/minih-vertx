@@ -9,6 +9,7 @@ import cn.minih.app.system.utils.*
 import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.kotlin.coroutines.await
 import org.mindrot.jbcrypt.BCrypt
+import java.util.*
 
 
 /**
@@ -22,7 +23,8 @@ object UserServiceHandler {
         val username = AuthUtil.getCurrentLoginId()
         val sysUser = UserRepository.instance.getUserByUsername(username)?.await()?.covertTo(SysUser::class)
         Assert.notNull(sysUser!!) { UserSystemException(errorCode = MinihErrorCode.ERR_CODE_USER_SYSTEM_DATA_UN_FIND) }
-        return UserInfo(sysUser)
+        val extra = UserExtraRepository.instance.findOne("_id" to sysUser.id)?.await()?.covertTo(UserExtra::class)
+        return UserInfo(sysUser, extra)
     }
 
     suspend fun queryUsers(page: Page<UserInfo>, condition: UserInfoCondition): Page<UserInfo> {
@@ -41,16 +43,16 @@ object UserServiceHandler {
         if (sysUsersJson.isNullOrEmpty()) {
             return Page(0, listOf())
         }
+        val extraQueryOption = MongoQueryOption<UserExtra>()
         val userInfo = sysUsersJson.map {
-            val extraQueryOption = MongoQueryOption<UserExtra>()
             if (condition.mobile?.isNotBlank() == true) {
                 extraQueryOption.put(UserExtra::mobile, condition.mobile)
             }
-            extraQueryOption.put("_id", it.getInteger("_id"))
+            extraQueryOption.put("_id", it.getLong("_id"))
             val extra = UserExtraRepository.instance.findOne(extraQueryOption)?.await()
-            UserInfo(sysUser = it.covertTo(SysUser::class), extra?.covertTo(UserExtra::class))
+            val online = AuthUtil.getOnline(it.getString("username"))
+            UserInfo(sysUser = it.covertTo(SysUser::class), extra?.covertTo(UserExtra::class), online)
         }
-
         return Page(userInfo[userInfo.size - 1].sysUser.createTime, userInfo)
     }
 
@@ -63,8 +65,10 @@ object UserServiceHandler {
         val sysId = SnowFlake.nextId();
         val sysUser = user.toJsonObject().covertTo(SysUser::class)
         val extra = user.toJsonObject().covertTo(UserExtra::class)
-        sysUser.id = sysId
-        extra.id = sysId
+        sysUser.id = sysId.toString()
+        extra.id = sysId.toString()
+        sysUser.createTime = Date().time
+        sysUser.state = 1
         UserRepository.instance.insert(sysUser).await()
         UserExtraRepository.instance.insert(extra).await()
     }
@@ -87,7 +91,7 @@ object UserServiceHandler {
         var userExtra = UserExtraRepository.instance.findOne("_id" to user.id)?.await()?.covertTo(UserExtra::class)
         if (sysUser != null) {
             var update = false
-            if (userExtra == null || userExtra.id == 0L) {
+            if (userExtra == null || userExtra.id.isBlank()) {
                 userExtra = UserExtra(id = sysUser.id)
             }
             user.password?.let { update = true;sysUser.password = BCrypt.hashpw(it, BCrypt.gensalt()) }
@@ -99,8 +103,8 @@ object UserServiceHandler {
             user.idNo?.let { update = true; userExtra.idNo = it }
             user.state?.let { update = true;sysUser.state = it }
             if (update) {
-                UserRepository.instance.update("_id" to sysUser.id, data = sysUser)
-                UserExtraRepository.instance.update("_id" to sysUser.id, data = userExtra)
+                UserRepository.instance.update("_id" to sysUser.id, data = sysUser).await()
+                UserExtraRepository.instance.update("_id" to sysUser.id, data = userExtra).await()
             }
         }
     }

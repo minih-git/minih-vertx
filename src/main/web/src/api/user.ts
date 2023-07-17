@@ -19,6 +19,7 @@ export async function userList(search: string): Promise<Page<UserInfo>> {
                 role: it.sysUser.role,
                 mobile: it.userExtra.mobile,
                 createTime: it.sysUser.createTime,
+                online: it.online,
             }
         })
     }

@@ -8,6 +8,7 @@ export interface UserInfo {
     role?: string[]
     createTime?: number
     mobile?: string
+    online?: number
 }
 export interface Page<T> {
     nextCursor?: string

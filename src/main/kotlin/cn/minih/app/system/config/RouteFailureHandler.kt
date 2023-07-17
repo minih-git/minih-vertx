@@ -21,24 +21,23 @@ class RouteFailureHandler private constructor() : Handler<RoutingContext>, Error
 
     override fun handle(ctx: RoutingContext) {
 
-        var r = R.err("")
-        if (ctx.statusCode() == 200) {
-            val ex = ctx.failure()
+        var r: R<String>
+        val ex = ctx.failure()
+        if (ctx.statusCode() == 200 || ex != null) {
             ex.printStackTrace()
             r = R.err(ex.message)
             if (ex is MinihException) {
                 r = R.err(ex.msg, ex.errorCode)
             }
         } else {
-            val msg = when(ctx.statusCode()){
+            val msg = when (ctx.statusCode()) {
                 400 -> "请求出错！"
                 401 -> "未授权！"
                 404 -> "路径不存在！"
                 405 -> "不允许此方法！"
-                else ->"未分类错误！"
+                else -> "未分类错误！"
             }
-
-            r = R.err(ctx.statusCode(),"")
+            r = R.err(ctx.statusCode(), msg)
         }
         ctx.json(r.toJsonObject())
     }

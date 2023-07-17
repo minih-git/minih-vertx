@@ -32,9 +32,10 @@ abstract class MinihVerticle(private val port: Int = 8080) : CoroutineVerticle()
 
     override suspend fun start() {
         this.routerInstance = Router.router(vertx)
+        routerInstance.errorHandler(400,RouteFailureHandler.instance)
+        routerInstance.errorHandler(401,RouteFailureHandler.instance)
         routerInstance.errorHandler(404,RouteFailureHandler.instance)
         routerInstance.errorHandler(405,RouteFailureHandler.instance)
-        routerInstance.errorHandler(406,RouteFailureHandler.instance)
         routerInstance.errorHandler(500,RouteFailureHandler.instance)
         initConfig()
         routerInstance.route()
@@ -56,7 +57,7 @@ abstract class MinihVerticle(private val port: Int = 8080) : CoroutineVerticle()
 
     private suspend fun initConfig() {
         val retriever = ConfigRetriever.create(
-            Vertx.vertx(), ConfigRetrieverOptions()
+            vertx, ConfigRetrieverOptions()
                 .addStore(ConfigStoreOptions().setType("env").setFormat("json"))
                 .addStore(
                     ConfigStoreOptions().setType("file").setFormat("yaml")

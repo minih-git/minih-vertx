@@ -66,8 +66,8 @@ abstract class RepositoryManager<T>(private val tableName: String) {
         return client.findOneAndDelete(tableName, jsonObjectOf(*fields))
     }
 
-    fun update(vararg fields: Pair<String, Any?>, data: T): Future<MongoClientUpdateResult> {
-        return client.updateCollection(tableName, jsonObjectOf(*fields), data?.toJsonObject())
+    fun update(vararg fields: Pair<String, Any?>, data: T): Future<JsonObject> {
+        return client.findOneAndUpdate(tableName, jsonObjectOf(*fields), jsonObjectOf("\$set" to data?.toJsonObject()))
     }
 
 

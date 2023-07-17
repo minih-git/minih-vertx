@@ -18,7 +18,7 @@ class SystemVerticle(port: Int = 8080) : MinihVerticle(port) {
             .produces(HttpHeaderValues.APPLICATION_JSON.toString())
             .consumes(HttpHeaderValues.APPLICATION_JSON.toString())
 
-        router.get("/user/info").neeRole("role_12").coroutineJsonHandlerHasAuth(UserServiceHandler::getUserInfo)
+        router.get("/user/info").coroutineJsonHandlerHasAuth(UserServiceHandler::getUserInfo)
         router.post("/user/page").coroutineJsonHandlerHasAuth(UserServiceHandler::queryUsers)
         router.post("/user/addUser").coroutineJsonHandlerHasAuth(UserServiceHandler::addUser)
         router.post("/user/editUser").coroutineJsonHandlerHasAuth(UserServiceHandler::editUser)

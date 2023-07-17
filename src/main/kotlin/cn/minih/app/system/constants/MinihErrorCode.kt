@@ -17,7 +17,7 @@ enum class MinihErrorCode(val code: Int, val msg: String) {
     ERR_CODE_LOGIN_TOKEN_TIMEOUT(-14, "token 已过期"),
     ERR_CODE_LOGIN_TOKEN_KICK_OUT(-15, "token 已被踢下线"),
     ERR_CODE_LOGIN_TOKEN_FREEZE(-16, "token 已被冻结"),
-    ERR_CODE_LOGIN_TOKEN_NO_AUTH(-17, "无权访问"),
+    ERR_CODE_LOGIN_TOKEN_NO_AUTH(-17, "未授权!"),
     ERR_CODE_LOGIN_NO_LOGIN_INFO(-18, "未能读取到有效的登录信息"),
 
 
