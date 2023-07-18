@@ -4,10 +4,8 @@ import cn.minih.auth.logic.coroutineJsonHandlerHasAuth
 import cn.minih.auth.service.MinihAuthVerticle
 import cn.minih.auth.utils.log
 import cn.minih.core.annotation.MinihServiceVerticle
-import cn.minih.core.beans.BeanFactory
 import cn.minih.core.components.MinihServiceRun
 import cn.minih.core.constants.SYSTEM_CONFIGURATION_SUBSCRIBE
-import cn.minih.system.service.user.RoleRepository
 import cn.minih.system.service.user.UserServiceHandler
 import io.netty.handler.codec.http.HttpHeaderValues
 import io.vertx.config.ConfigChange
@@ -28,14 +26,12 @@ import io.vertx.core.json.JsonObject
  */
 class Main
 
-fun main() {
+suspend fun main() {
     MinihServiceRun.run(Main::class)
-    val role = BeanFactory.instance.getBean("RoleRepository") as RoleRepository
-    role.print()
 }
 
-@MinihServiceVerticle(8090)
-class SystemVerticle : MinihAuthVerticle() {
+@MinihServiceVerticle(instance = 30)
+class SystemVerticle : MinihAuthVerticle(8090) {
     override suspend fun initRouter() {
         router.route()
             .produces(HttpHeaderValues.APPLICATION_JSON.toString())

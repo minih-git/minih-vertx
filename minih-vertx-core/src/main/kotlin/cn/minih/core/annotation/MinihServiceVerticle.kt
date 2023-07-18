@@ -8,5 +8,5 @@ package cn.minih.core.annotation
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class MinihServiceVerticle(
-    val port: Int = 8080
+    val instance: Int = 1
 )

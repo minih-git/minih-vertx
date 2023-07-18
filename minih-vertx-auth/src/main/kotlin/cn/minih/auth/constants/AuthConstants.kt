@@ -5,7 +5,7 @@ package cn.minih.auth.constants
  * @date 2023/7/10
  * @desc
  */
-const val DEFAULT_PROJECT_NAME = "Minih"
+const val DEFAULT_PROJECT_NAME = "minih"
 const val TOKEN_STYLE_UUID = "uuid"
 const val TOKEN_STYLE_SIMPLE_UUID = "simple-uuid"
 const val TOKEN_STYLE_RANDOM_32 = "random-32"
@@ -13,7 +13,6 @@ const val TOKEN_STYLE_RANDOM_64 = "random-64"
 const val TOKEN_STYLE_RANDOM_128 = "random-128"
 const val TOKEN_STYLE_TIK = "random-tik"
 const val TOKEN_STYLE_SNOWFLAKE = "snowflake"
-const val DEVICE_KEY = "device"
 const val DEFAULT_DEVICE = "default-device"
 const val DEFAULT_LOGIN_TYPE = "default-type"
 const val DEFAULT_TOKEN_NAME = "Authorization"

@@ -8,7 +8,7 @@ import cn.minih.auth.constants.*
  * @desc
  */
 data class AuthConfig(
-    val projectName: String = DEFAULT_TOKEN_NAME,
+    val projectName: String = DEFAULT_PROJECT_NAME,
     val tokenName: String = DEFAULT_TOKEN_NAME,
     val timeout: Long = DEFAULT_TIME_OUT,
     val isConcurrent: Boolean = true,

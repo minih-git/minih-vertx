@@ -1,12 +1,12 @@
 package cn.minih.auth.logic
 
-import cn.minih.auth.logic.AuthUtil.getConfig
-import cn.minih.auth.logic.AuthUtil.getRandomString
+import cn.minih.auth.constants.*
 import cn.minih.auth.data.AuthLoginModel
 import cn.minih.auth.data.AuthSession
 import cn.minih.auth.data.TokenSign
-import cn.minih.auth.constants.*
 import cn.minih.auth.exception.AuthLoginException
+import cn.minih.auth.logic.AuthUtil.getConfig
+import cn.minih.auth.logic.AuthUtil.getRandomString
 import cn.minih.auth.utils.log
 import cn.minih.core.utils.SnowFlake
 import cn.minih.core.utils.jsonConvertData

@@ -1,6 +1,5 @@
 package cn.minih.core.beans
 
-import cn.minih.core.annotation.MinihServiceVerticle
 import cn.minih.core.exception.MinihException
 import cn.minih.core.utils.Assert
 import kotlin.reflect.KClass
@@ -39,13 +38,13 @@ class BeanFactory {
 
     }
 
-    fun findBeanDefinitionByAnnotation(annotationClass: KClass<*>): BeanDefinition {
+    fun findBeanDefinitionByAnnotation(annotationClass: KClass<*>): Collection<BeanDefinition> {
         return this.beanDefinitionMap.filter {
             it.value.annotations.any { annotation -> annotation.annotationClass == annotationClass }
-        }.firstNotNullOf { it.value }
+        }.values
     }
 
-    fun getBean(beanName: String): Any {
+    private fun getBean(beanName: String): Any {
         Assert.isTrue(this.beanDefinitionNames.contains(beanName)) { MinihException("$beanName 未定义！") }
         if (this.singletonObjects.containsKey(beanName)) {
             val bean = this.singletonObjects[beanName]

@@ -48,7 +48,7 @@ object UserServiceHandler {
             if (condition.mobile?.isNotBlank() == true) {
                 extraQueryOption.put(UserExtra::mobile, condition.mobile)
             }
-            extraQueryOption.put("_id", it.getLong("_id"))
+            extraQueryOption.put("_id", it.getString("_id"))
             val extra = UserExtraRepository.instance.findOne(extraQueryOption)?.await()
             val online = AuthUtil.getOnline(it.getString("username"))
             UserInfo(sysUser = it.covertTo(SysUser::class), extra?.covertTo(UserExtra::class), online)
@@ -62,7 +62,7 @@ object UserServiceHandler {
             "${user.username}@123",
             BCrypt.gensalt()
         ) else BCrypt.hashpw(user.password, BCrypt.gensalt())
-        val sysId = SnowFlake.nextId();
+        val sysId = SnowFlake.nextId()
         val sysUser = user.toJsonObject().covertTo(SysUser::class)
         val extra = user.toJsonObject().covertTo(UserExtra::class)
         sysUser.id = sysId.toString()

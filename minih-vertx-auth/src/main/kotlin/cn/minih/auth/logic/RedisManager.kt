@@ -26,6 +26,7 @@ class RedisManager private constructor() {
     init {
         val config = Vertx.currentContext().config()
         poolSize = (config.getInteger("redis.poolSize") ?: 8)
+
         for (i in 1..poolSize) {
             val redisOption = RedisOptions()
                 .addConnectionString(config.getString("redis.connectionString"))
