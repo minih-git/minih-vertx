@@ -3,15 +3,21 @@ package cn.minih.auth.logic
 import cn.minih.auth.constants.*
 import cn.minih.auth.data.AuthLoginModel
 import cn.minih.auth.data.AuthSession
+import cn.minih.auth.data.SessionKeepSign
 import cn.minih.auth.data.TokenSign
 import cn.minih.auth.exception.AuthLoginException
 import cn.minih.auth.logic.AuthUtil.getConfig
 import cn.minih.auth.logic.AuthUtil.getRandomString
 import cn.minih.auth.utils.log
+import cn.minih.core.exception.IMinihErrorCode
 import cn.minih.core.utils.SnowFlake
 import cn.minih.core.utils.jsonConvertData
+import cn.minih.core.utils.toJsonObject
 import cn.minih.core.utils.toJsonString
+import io.vertx.core.Vertx
+import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.kotlin.coroutines.await
+import org.bson.json.JsonObject
 import java.util.*
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
@@ -44,10 +50,34 @@ object AuthLogic {
         val tokenValue = distUsableToken(id, loginConfig)
         val session = getSessionByLoginId(id, true, loginConfig)!!
         updateSessionTimeout(session, loginConfig)
-        val tokenSign = TokenSign(tokenValue, loginConfig.device)
+        val tokenSign = TokenSign(tokenValue, loginConfig.device, loginConfig.timeout)
         addTokenSign(session, tokenSign)
         redisApi.set(listOf(getTokenKey(tokenValue), id, "EX", trans(loginConfig.timeout).toString()))
         return tokenValue
+    }
+
+    suspend fun keepSign(token: String) {
+        val redisApi = RedisManager.instance.getReidApi()
+        val loginId = getLoginIdByToken(token)
+        loginId?.let {
+            val sessionRaw = getSessionByLoginId(loginId)
+            sessionRaw?.let { session ->
+                val tokenSign = session.tokenSignList.first { tokenSign -> tokenSign.token == token }
+                redisApi.expire(listOf(getTokenKey(token), tokenSign.timeout.toString(), "XX"))
+                redisApi.expire(listOf(getSessionKey(session.id), tokenSign.timeout.toString(), "XX"))
+                redisApi.set(
+                    listOf(
+                        getSessionActiveKey(session.id),
+                        Date().time.toString(),
+                        "EX",
+                        tokenSign.timeout.toString()
+                    )
+                )
+                Vertx.currentContext().owner()?.eventBus()
+                    ?.publish(AUTH_SESSION_KEEP, jsonObjectOf("token" to token, "loginId" to loginId))
+            }
+        }
+
     }
 
     private suspend fun updateSessionTimeout(session: AuthSession, loginConfig: AuthLoginModel) {
@@ -67,6 +97,10 @@ object AuthLogic {
             old.first().token = tokenSign.token
             old.first().device = tokenSign.device
         }
+        updateSession(session)
+    }
+
+    private suspend fun updateSession(session: AuthSession) {
         val redisApi = RedisManager.instance.getReidApi()
         val ttl = trans(redisApi.ttl(session.id).await().toLong())
         redisApi.set(listOf(session.id, session.toJsonString(), "EX", ttl.toString()))
@@ -106,7 +140,6 @@ object AuthLogic {
             if (getLoginIdByToken(token) == null) {
                 return token
             }
-
             // 如果已经循环了 maxTryTimes 次，仍然没有创建出可用的 token，那么抛出异常
             if (i >= maxTryTimes) {
                 throw AuthLoginException("token生成失败，已尝试" + i + "次，生成算法过于简单或资源池已耗尽")
@@ -118,9 +151,43 @@ object AuthLogic {
     /**
      * 顶人下线
      */
-    fun replaced(id: Any, loginConfig: AuthLoginModel) {
+    private suspend fun offline(id: String, offlineType: IMinihErrorCode, device: String = "") {
+        val redisApi = RedisManager.instance.getReidApi()
+        val session = getSessionByLoginId(id)
+        session?.let {
+            var tokenSigns = it.tokenSignList.filter { tokenSign -> tokenSign.device == device }
+            it.tokenSignList.removeIf { tokenSign -> tokenSign.device == device }
+            if (device.isBlank()) {
+                tokenSigns = mutableListOf<TokenSign>().apply { addAll(it.tokenSignList) }
+                it.tokenSignList.clear()
+            }
+            updateSession(it)
+            tokenSigns.forEach { tokenSign ->
+                redisApi.set(
+                    listOf(
+                        getTokenKey(tokenSign.token),
+                        offlineType.code.toString(),
+                        "EX", trans(getTokenTimeout(tokenSign.token)).toString()
+                    )
+                )
+                Vertx.currentContext().owner()?.eventBus()?.publish(
+                    AUTH_SESSION_OFFLINE,
+                    jsonObjectOf("token" to tokenSign.token, "loginId" to it.loginId, "type" to offlineType.code)
+                )
+            }
+        }
+    }
 
+    private suspend fun replaced(id: String, loginConfig: AuthLoginModel) {
+        offline(id, MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_REPLACED_OUT, loginConfig.device)
+    }
 
+    suspend fun kickOut(id: String) {
+        offline(id, MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_KICK_OUT)
+    }
+
+    suspend fun logout(id: String) {
+        offline(id, MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_LOGOUT)
     }
 
     private fun checkLoginId(id: Any) {
@@ -145,8 +212,7 @@ object AuthLogic {
         if (tokenSigns.isEmpty()) {
             return null
         }
-        return tokenSigns.first().token
-
+        return tokenSigns.last().token
     }
 
     suspend fun getSessionByLoginId(
@@ -177,5 +243,9 @@ object AuthLogic {
 
     private suspend fun getSessionKey(id: String): String {
         return "${getConfig().projectName}:auth:login-session:$id"
+    }
+
+    private suspend fun getSessionActiveKey(id: String): String {
+        return "${getConfig().projectName}:auth:session-active:$id"
     }
 }

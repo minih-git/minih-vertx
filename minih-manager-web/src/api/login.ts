@@ -1,6 +1,8 @@
 import {post, get} from "../utils/http";
 import {store} from "../store";
+import router from '../router'
 import {UserInfo} from "../store/module/user/user-types.ts";
+import {ElMessage} from "element-plus";
 
 export interface FormInfo {
     username?: string
@@ -32,6 +34,18 @@ export async function login(form: FormInfo): Promise<SessionInfo> {
     }
     await store.dispatch("user/setSessionInfo", sessionInfo)
     return sessionInfo
+}
+
+export async function logout() {
+    let url = "/auth/logout"
+    await get(url)
+    await store.dispatch("user/setSessionInfo", {})
+    await store.dispatch("user/setUserInfo", {})
+    ElMessage({
+        message: "您已成功退出！",
+        type: 'success',
+    })
+    await router.push({name: '登录'})
 }
 
 export async function info(): Promise<UserInfo> {

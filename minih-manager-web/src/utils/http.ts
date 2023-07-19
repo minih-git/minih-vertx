@@ -81,15 +81,17 @@ export const request = async (options: RequestOptions): Promise<BaseData> => {
         data: JSON,
         msg: "服务器发生错误，请稍后重试！"
     }
-    console.log(options)
     try {
         let res = await fetch(baseUrl + "" + options.url, options)
         let resultJson = await res.json()
         if (res.status == 200) {
+            console.log("resultJson",resultJson)
             if (resultJson.code == 0) {
                 resultData.code = resultJson.code
                 resultData.msg = resultJson.msg
-                resultData.data = JSON.parse(JSON.stringify(resultJson.data))
+                if(resultJson.data){
+                    resultData.data = JSON.parse(JSON.stringify(resultJson.data))
+                }
                 return resultData
             }
             if (resultJson.code <= -9 && resultJson.code >= -18) {
@@ -113,7 +115,6 @@ export const request = async (options: RequestOptions): Promise<BaseData> => {
 }
 
 const globalHandleError = (e) => {
-    console.log(e)
     let errData = {
         code: -1,
         data: JSON,
@@ -123,8 +124,8 @@ const globalHandleError = (e) => {
         errData.code = e.code
         errData.msg = e.msg
     }
-    if (e instanceof NotLoginError && e.code == -11) {
-        // window.location.href = "/login"
+    if (e instanceof NotLoginError ) {
+        window.location.href = "/login"
     }
     ElMessage({
         message: errData.code + "，" + errData.msg,

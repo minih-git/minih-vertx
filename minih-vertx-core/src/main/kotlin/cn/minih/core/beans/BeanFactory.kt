@@ -6,6 +6,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.createType
 import kotlin.reflect.full.primaryConstructor
 
 /**
@@ -34,8 +35,14 @@ class BeanFactory {
     }
 
     private fun getBeanDefinitionByType(type: KType): BeanDefinition {
-        return this.beanDefinitionMap.filter { it.value.type == type }.firstNotNullOf { it.value }
+        return this.beanDefinitionMap.filter { it.value.type == type || it.value.supertypes.contains(type) }
+            .firstNotNullOf { it.value }
+    }
 
+    fun findBeanDefinitionByType(type: KClass<*>): Collection<BeanDefinition> {
+        return this.beanDefinitionMap.filter {
+            it.value.clazz == type || it.value.type == type.createType() || it.value.supertypes.contains(type.createType())
+        }.values
     }
 
     fun findBeanDefinitionByAnnotation(annotationClass: KClass<*>): Collection<BeanDefinition> {
@@ -44,7 +51,8 @@ class BeanFactory {
         }.values
     }
 
-    private fun getBean(beanName: String): Any {
+
+    fun getBean(beanName: String): Any {
         Assert.isTrue(this.beanDefinitionNames.contains(beanName)) { MinihException("$beanName 未定义！") }
         if (this.singletonObjects.containsKey(beanName)) {
             val bean = this.singletonObjects[beanName]

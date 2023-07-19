@@ -75,25 +75,22 @@ object AuthUtil {
         if (loginId.isNullOrBlank()) {
             throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_INVALID)
         }
-        if (loginId == MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_TIMEOUT.code.toString()) {
-            throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_TIMEOUT)
+        when (loginId) {
+            MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_TIMEOUT.code.toString() -> throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_TIMEOUT)
+            MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_KICK_OUT.code.toString() -> throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_KICK_OUT)
+            MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_LOGOUT.code.toString() -> throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_LOGOUT)
+            MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_REPLACED_OUT.code.toString() -> throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_REPLACED_OUT)
+            MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_FREEZE.code.toString() -> throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_FREEZE)
         }
-        if (loginId == MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_KICK_OUT.code.toString()) {
-            throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_KICK_OUT)
-        }
-        if (loginId == MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_FREEZE.code.toString()) {
-            throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_FREEZE)
+        if (config.autoKeepSign) {
+            AuthLogic.keepSign(tokenValue)
         }
         return loginId
     }
-
-
     suspend fun getOnline(loginId: String): Int {
         val session = AuthLogic.getSessionByLoginId(loginId)
         return if (session != null) 1 else 0
-
     }
-
     fun getCurrentLoginId(): String {
         return try {
             Vertx.currentContext().get(CONTEXT_LOGIN_ID)

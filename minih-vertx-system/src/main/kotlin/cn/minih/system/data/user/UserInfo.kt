@@ -9,7 +9,7 @@ data class UserInfo(
     val sysUser: SysUser = SysUser(),
     val userExtra: UserExtra? = UserExtra(),
     var online: Int = 0,
-    )
+)
 
 data class UserInfoCondition(
     val name: String?,
@@ -17,22 +17,10 @@ data class UserInfoCondition(
     val state: Int?,
     val mobile: String?,
     var online: Int = 0,
-    )
-
-data class AddUser(
-    var username: String?,
-    var password: String?,
-    var name: String?,
-    var avatar: String?,
-    var state: Int = 1,
-    var role: List<String>?,
-    var mobile: String?,
-    var realName: String?,
-    var idType: String?,
-    var idNo: String?,
 )
 
-data class EditUser(
+
+data class UserExpand(
     var id: Long?,
     var username: String?,
     var password: String?,

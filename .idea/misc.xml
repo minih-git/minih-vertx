@@ -6,8 +6,9 @@
     <list size="0" />
   </component>
   <component name="EntryPointsManager">
-    <list size="1">
-      <item index="0" class="java.lang.String" itemvalue="cn.minih.core.annotation.MinihServiceVerticle" />
+    <list size="2">
+      <item index="0" class="java.lang.String" itemvalue="cn.minih.core.annotation.Component" />
+      <item index="1" class="java.lang.String" itemvalue="cn.minih.core.annotation.MinihServiceVerticle" />
     </list>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />

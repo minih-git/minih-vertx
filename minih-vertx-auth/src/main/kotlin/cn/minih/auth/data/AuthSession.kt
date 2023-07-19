@@ -18,7 +18,8 @@ data class AuthSession(
 
 data class TokenSign(
     var token: String,
-    var device: String
+    var device: String,
+    var timeout: Long,
 )
 
 data class TokenInfo(
@@ -28,4 +29,12 @@ data class TokenInfo(
     val expired: Long,
     val loginDevice: String,
     val tokenPrefix: String = DEFAULT_TOKEN_PREFIX,
+)
+
+data class SessionKeepSign(
+    val token: String,
+    val loginId: String,
+    val expired: Long,
+    val loginDevice: String,
+    val currentTime: Long
 )

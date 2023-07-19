@@ -9,7 +9,7 @@ object Assert {
     fun <T> notBlank(v: T?, fn: () -> Throwable) {
         notNull(v, fn)
         if (v is String) {
-            if (v.isBlank()) {
+            if (v.isBlank() || v == "null") {
                 throw fn()
             }
         }
@@ -20,6 +20,7 @@ object Assert {
             throw fn()
         }
     }
+
     fun <T> isNull(obj: T?, fn: () -> Throwable) {
         if (obj != null) {
             throw fn()

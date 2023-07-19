@@ -5,5 +5,5 @@ package cn.minih.core.constants
  * @date 2023/7/9
  * @desc
  */
-const val SYSTEM_CONFIGURATION_SUBSCRIBE = "cn.minih.system.config"
-const val SYSTEM_CONFIGURATION_FRESH = "cn.minih.system.config.fresh"
+const val SYSTEM_CONFIGURATION_SUBSCRIBE = "cn.minih.core.config"
+const val SYSTEM_CONFIGURATION_FRESH = "cn.minih.core.config.fresh"

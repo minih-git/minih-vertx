@@ -13,7 +13,7 @@ export default defineConfig({
         cors: true, // 允许跨域
         proxy: {
             '/api': {
-                target: 'http://localhost:8080/',//代理的地址
+                target: 'http://localhost:8090/',//代理的地址
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/api/, '')//这里的/需要转义
             }

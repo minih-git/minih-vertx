@@ -18,6 +18,7 @@ data class SysUser(
     var state: Int = 1,
     var role: List<String> = mutableListOf(),
     var createTime: Long = Date().time,
+    var lastActive: Long = 0
 )
 
 data class UserExtra(

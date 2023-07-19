@@ -9,7 +9,9 @@ import cn.minih.auth.constants.MinihAuthErrorCode
 import cn.minih.auth.constants.TOKEN_CONNECTOR_CHAT
 import cn.minih.auth.data.TokenInfo
 import cn.minih.auth.exception.AuthLoginException
+import cn.minih.auth.exception.MinihAuthException
 import cn.minih.auth.utils.getRequestBody
+import cn.minih.core.utils.Assert
 import cn.minih.core.utils.R
 import cn.minih.core.utils.covertTo
 import cn.minih.core.utils.toJsonObject
@@ -108,17 +110,15 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         GlobalScope.launch(v) {
             try {
                 val path = ctx.request().path()
-                if (path == AuthUtil.getConfig().loginPath) {
-                    val tokenInfo = login(getRequestBody(ctx))
-                    val config = AuthUtil.getConfig()
-                    val tokenValue = config.tokenPrefix.plus(TOKEN_CONNECTOR_CHAT).plus(tokenInfo.tokenValue)
-                    ctx.response().addCookie(Cookie.cookie(config.tokenName, URLUtil.encode(tokenValue)))
-                    ctx.response().putHeader(config.tokenName, tokenValue)
-                    ctx.put(CONTEXT_LOGIN_ID, tokenInfo.loginId)
-                    ctx.json(R.ok(tokenInfo).toJsonObject())
-                } else {
-                    checkLogin(ctx)
-                    ctx.next()
+                val config = AuthUtil.getConfig()
+                when (path) {
+                    config.loginPath -> login(ctx)
+                    config.kickOutPath -> kickOut(ctx)
+                    config.logoutPath -> logout(ctx)
+                    else -> {
+                        checkLogin(ctx)
+                        ctx.next()
+                    }
                 }
             } catch (e: Exception) {
                 ctx.fail(e)
@@ -126,6 +126,34 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         }
     }
 
+    private suspend fun login(ctx: RoutingContext) {
+        val tokenInfo = login(getRequestBody(ctx))
+        val config = AuthUtil.getConfig()
+        val tokenValue = config.tokenPrefix.plus(TOKEN_CONNECTOR_CHAT).plus(tokenInfo.tokenValue)
+        ctx.response().addCookie(Cookie.cookie(config.tokenName, URLUtil.encode(tokenValue)))
+        ctx.response().putHeader(config.tokenName, tokenValue)
+        ctx.put(CONTEXT_LOGIN_ID, tokenInfo.loginId)
+        ctx.json(R.ok(tokenInfo).toJsonObject())
+    }
+
+    private suspend fun kickOut(ctx: RoutingContext) {
+        checkLogin(ctx)
+        val self: String = ctx.get(CONTEXT_LOGIN_ID)
+        checkRole(self, listOf("role_1"))
+        val request = getRequestBody(ctx)
+        val beKick = request.getString("loginId")
+        Assert.notBlank(beKick) { MinihAuthException("loginId 不能为空！") }
+        Assert.isTrue(beKick != self) { MinihAuthException("不能踢自己下线！") }
+        AuthLogic.kickOut(beKick)
+        ctx.json(R.ok<String>().toJsonObject())
+    }
+    private suspend fun logout(ctx: RoutingContext) {
+        checkLogin(ctx)
+        val self: String = ctx.get(CONTEXT_LOGIN_ID)
+        Assert.notBlank(self) { MinihAuthException("loginId 不能为空！") }
+        AuthLogic.logout(self)
+        ctx.json(R.ok<String>().toJsonObject())
+    }
 
     private suspend fun login(params: JsonObject): TokenInfo {
         val loginModel = authService.login(params.map)
@@ -155,7 +183,7 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         ctx.put(CONTEXT_LOGIN_ID, loginId)
     }
 
-    suspend fun checkRole(longId: String, needRoles: List<String>, and: Boolean) {
+    suspend fun checkRole(longId: String, needRoles: List<String>, and: Boolean = false) {
         if (needRoles.isEmpty() || longId.isBlank()) {
             return
         }
