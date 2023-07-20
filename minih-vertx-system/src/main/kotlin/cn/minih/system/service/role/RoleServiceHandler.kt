@@ -3,6 +3,7 @@ package cn.minih.system.service.role
 import cn.minih.core.repository.MongoQueryOption
 import cn.minih.core.utils.*
 import cn.minih.system.data.role.AddRole
+import cn.minih.system.data.role.RoleCondition
 import cn.minih.system.data.role.SysRole
 import cn.minih.system.data.user.*
 import cn.minih.system.exception.MinihSystemErrorCode
@@ -23,7 +24,7 @@ import java.util.*
 object RoleServiceHandler {
 
 
-    suspend fun queryRoles(page: Page<SysRole>, condition: UserInfoCondition): Page<SysRole> {
+    suspend fun queryRoles(page: Page<SysRole>, condition: RoleCondition): Page<SysRole> {
         val queryOption = MongoQueryOption<SysRole>()
         if (condition.name?.isNotBlank() == true) {
             queryOption.put(SysRole::name, condition.name)

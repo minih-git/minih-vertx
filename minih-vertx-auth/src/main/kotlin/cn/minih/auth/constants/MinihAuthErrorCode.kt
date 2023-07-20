@@ -13,7 +13,6 @@ enum class MinihAuthErrorCode(override val code: Int, override val msg: String) 
     //鉴权系统错误
     ERR_CODE_LOGIN(-10, "登录时产生错误"),
     ERR_CODE_LOGIN_NO_TOKEN(-11, "未能读取到有效 token"),
-    ERR_CODE_LOGIN_PASSWORD_ERROR(-12, "密码错误"),
     ERR_CODE_LOGIN_TOKEN_INVALID(-13, "token 无效"),
     ERR_CODE_LOGIN_TOKEN_TIMEOUT(-14, "token 已过期"),
     ERR_CODE_LOGIN_TOKEN_KICK_OUT(-15, "token 已被踢下线"),

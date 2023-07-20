@@ -1,7 +1,7 @@
 import {stringify} from 'qs'
 import {store} from "../store";
-// @ts-ignore
 import {ElMessage} from "element-plus";
+import router from '../router'
 
 
 const baseUrl: string = "/api"
@@ -12,18 +12,25 @@ export interface BaseData {
     data: JSON
 }
 
+export interface Page<T> {
+    nextCursor?: number
+    data: T []
+}
+
 export interface RequestOptions extends RequestInit {
     url: string,
 }
 
-class MinihError extends Error {
+export class MinihError extends Error {
     code: number = 0
     msg: string = ""
+    data: any = ""
 
-    constructor(code: number, msg: string) {
+    constructor(code: number, msg: string, data: any = "") {
         super(msg)
         this.msg = msg;
         this.code = code;
+        this.data = data;
     }
 }
 
@@ -53,7 +60,7 @@ export const get = async (url: string, params = {}, needAuth = true, headers = u
     try {
         return request({
             method: "GET",
-            url: url + stringify(params),
+            url: url + "?" + stringify(params),
             headers: new Headers(processHeaders(params, needAuth, headers, "GET"))
         })
     } catch (e: any) {
@@ -85,19 +92,22 @@ export const request = async (options: RequestOptions): Promise<BaseData> => {
         let res = await fetch(baseUrl + "" + options.url, options)
         let resultJson = await res.json()
         if (res.status == 200) {
-            console.log("resultJson",resultJson)
             if (resultJson.code == 0) {
                 resultData.code = resultJson.code
                 resultData.msg = resultJson.msg
-                if(resultJson.data){
+                if (resultJson.data) {
                     resultData.data = JSON.parse(JSON.stringify(resultJson.data))
                 }
                 return resultData
             }
-            if (resultJson.code <= -9 && resultJson.code >= -18) {
-                throw new NotLoginError(resultJson.code, resultJson.msg)
+            if (resultJson.code <= -10 && resultJson.code >= -20) {
+                throw new NotLoginError(resultJson.code, resultJson.msg + "，" + resultJson.data)
             }
-            throw new MinihError(resultJson.code, resultJson.msg)
+            let errorMsg = resultJson.msg
+            if (resultJson.data) {
+                errorMsg = errorMsg + "，" + resultJson.data
+            }
+            throw new MinihError(resultJson.code, errorMsg)
         }
         if (resultJson.status == 404) {
             resultData.msg = "地址错误"
@@ -115,21 +125,22 @@ export const request = async (options: RequestOptions): Promise<BaseData> => {
 }
 
 const globalHandleError = (e) => {
-    let errData = {
-        code: -1,
-        data: JSON,
-        msg: "服务器发生错误，请稍后重试！"
-    }
+    let errData: MinihError = new MinihError(
+        -1,
+        "服务器发生错误，请稍后重试！"
+    )
     if (e instanceof MinihError) {
         errData.code = e.code
         errData.msg = e.msg
     }
-    if (e instanceof NotLoginError ) {
-        window.location.href = "/login"
-    }
     ElMessage({
         message: errData.code + "，" + errData.msg,
         type: 'warning',
+        grouping: true,
     })
+    if (e instanceof NotLoginError) {
+        router.push({name: '登录'})
+    }
+
     return new Promise<BaseData>((_, reject) => reject(errData))
 }

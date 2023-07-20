@@ -11,6 +11,8 @@ import cn.minih.auth.data.TokenInfo
 import cn.minih.auth.exception.AuthLoginException
 import cn.minih.auth.exception.MinihAuthException
 import cn.minih.auth.utils.getRequestBody
+import cn.minih.core.exception.MinihArgumentErrorException
+import cn.minih.core.exception.MinihException
 import cn.minih.core.utils.Assert
 import cn.minih.core.utils.R
 import cn.minih.core.utils.covertTo
@@ -30,6 +32,7 @@ import kotlinx.coroutines.launch
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.callSuspend
+import kotlin.reflect.full.createType
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 
@@ -47,7 +50,11 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
                 }
                 ctx.json(R.ok(result).toJsonObject())
             } catch (e: Exception) {
-                ctx.fail(e)
+                if (e.cause is MinihException) {
+                    ctx.fail(e.cause)
+                } else {
+                    ctx.fail(e)
+                }
             }
         }
     }
@@ -57,11 +64,17 @@ private fun generateArgs(argsNeed: List<KParameter>, ctx: RoutingContext): Array
     val args = mutableListOf<Any?>()
     val params = getRequestBody(ctx)
     argsNeed.forEach { argsType ->
-        if (AuthLogic.isBasicType(argsType.type)) {
-            args.add(argsType.name?.let { name -> params[name] })
+        val type = argsType.type.classifier?.createType()
+        val isMarkedNullable = argsType.type.isMarkedNullable;
+        val param: Any? = if (AuthLogic.isBasicType(type)) {
+            argsType.name?.let { name -> params[name] }
         } else {
-            args.add(argsType.name?.let { params.covertTo(argsType.type) })
+            argsType.name?.let { params.covertTo(argsType.type) }
         }
+        if (!isMarkedNullable && param == null) {
+            throw MinihArgumentErrorException("参数：${argsType.name} 不能为空！")
+        }
+        args.add(param)
     }
     return args.toTypedArray()
 }
@@ -147,6 +160,7 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         AuthLogic.kickOut(beKick)
         ctx.json(R.ok<String>().toJsonObject())
     }
+
     private suspend fun logout(ctx: RoutingContext) {
         checkLogin(ctx)
         val self: String = ctx.get(CONTEXT_LOGIN_ID)

@@ -1,5 +1,5 @@
-import {post} from "../utils/http";
-import {Page, UserInfo} from "../store/module/user/user-types";
+import {BaseData, Page, post, get} from "../utils/http";
+import {UserEdit, UserInfo} from "../store/module/user/user-types";
 
 
 export async function userList(search: string): Promise<Page<UserInfo>> {
@@ -8,7 +8,7 @@ export async function userList(search: string): Promise<Page<UserInfo>> {
     let data = res.data["data"]
 
     return {
-        nextCursor: res.data["nextCursor"],
+        nextCursor: Number(res.data["nextCursor"]),
         data: data.map(it => {
             return {
                 id: it.sysUser._id,
@@ -24,4 +24,24 @@ export async function userList(search: string): Promise<Page<UserInfo>> {
             }
         })
     }
+}
+
+export async function addUser(userInfo: UserEdit): Promise<BaseData> {
+    let url = "/user/addUser"
+    return post(url, userInfo)
+}
+
+export async function checkUsername(username: string): Promise<BaseData> {
+    let url = "/user/checkUsername"
+    return get(url, {username})
+}
+
+export async function checkPassword(password: string): Promise<BaseData> {
+    let url = "/user/checkPassword"
+    return get(url, {password})
+}
+
+export async function checkMobile(mobile: string): Promise<BaseData> {
+    let url = "/user/checkMobile"
+    return get(url, {mobile})
 }

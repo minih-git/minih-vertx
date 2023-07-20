@@ -21,6 +21,7 @@ import org.bson.json.JsonObject
 import java.util.*
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
+import kotlin.reflect.jvm.internal.impl.types.SimpleType
 
 /**
  * @author hubin
@@ -197,7 +198,7 @@ object AuthLogic {
     }
 
     fun isBasicType(cs: KType?): Boolean {
-        return isWrapper(cs) || cs == String::class.createType()
+        return cs is SimpleType || isWrapper(cs) || cs == String::class.createType()
     }
 
     private fun isWrapper(cs: KType?): Boolean {

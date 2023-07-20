@@ -12,4 +12,5 @@ interface IMinihErrorCode {
 enum class MinihErrorCode(override val code: Int, override val msg: String):IMinihErrorCode {
     SUCCESS_CODE_UNDEFINED(0, "成功"),
     ERR_CODE_UNDEFINED(-1, "未指定错误类型"),
+    ERR_CODE_ARGUMENT_ERROR(-2, "参数错误"),
 }

@@ -34,7 +34,7 @@ class DefaultAuthServiceImpl private constructor() : AuthService {
 
     override suspend fun getLoginRole(loginId: String): List<String> {
         val redisAPI = RedisManager.instance.getReidApi()
-        return redisAPI.smembers("$loginRoleKey:$loginId").await().map { it.toString() }
+        return redisAPI.smembers("${getLoginRoleKey()}:$loginId").await().map { it.toString() }
     }
 
 

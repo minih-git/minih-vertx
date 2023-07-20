@@ -11,6 +11,7 @@ import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.kotlin.coroutines.await
 import org.mindrot.jbcrypt.BCrypt
 import java.util.*
+import java.util.regex.Pattern
 
 
 /**
@@ -99,6 +100,58 @@ object UserServiceHandler {
         }
     }
 
+    suspend fun checkUsername(username: String?) {
+        Assert.notBlank(username) {
+            UserSystemException(
+                msg = "登录账号不能为空！",
+                errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
+            )
+        }
+        val sysUser = UserRepository.instance.findOne("username" to username)?.await()
+        Assert.isNull(sysUser) {
+            UserSystemException(
+                msg = "账号已存在！",
+                errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
+            )
+        }
+    }
+
+    fun checkPassword(password: String?) {
+        password?.let {
+            Assert.isTrue(CheckPwdUtils.checkPwd(it, 8, 20, 3)) {
+                UserSystemException(
+                    msg = "密码强度不够！",
+                    errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
+                )
+            }
+        }
+    }
+
+    suspend fun checkMobile(mobile: String?) {
+        Assert.notBlank(mobile) {
+            UserSystemException(
+                msg = "手机号不能为空！",
+                errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
+            )
+        }
+        val regex = Regex(pattern = "^1\\d{10}\$")
+        val matched = regex.containsMatchIn(input = mobile!!)
+        Assert.isTrue(matched) {
+            UserSystemException(
+                msg = "手机号不合规！",
+                errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
+            )
+        }
+        val sysExtra = UserExtraRepository.instance.findOne("mobile" to mobile)?.await()
+        Assert.isNull(sysExtra) {
+            UserSystemException(
+                msg = "手机号已存在！",
+                errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
+            )
+        }
+
+    }
+
     private suspend fun validateAddUserParams(user: UserExpand, newAdd: Boolean = false) {
         Assert.notBlank(user.name) {
             UserSystemException(
@@ -106,42 +159,11 @@ object UserServiceHandler {
                 errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
             )
         }
-        Assert.notBlank(user.mobile) {
-            UserSystemException(
-                msg = "手机号不能为空！",
-                errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
-            )
-        }
-        user.password?.let {
-            Assert.isTrue(CheckPwdUtils.checkPwd(it, 8, 20, 3)) {
-                UserSystemException(
-                    msg = "密码强度不够！",
-                    errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
-                )
-            }
-
-        }
+        checkPassword(user.password)
+        checkMobile(user.mobile)
         if (newAdd) {
-            Assert.notBlank(user.username) {
-                UserSystemException(
-                    msg = "登录账号不能为空！",
-                    errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
-                )
-            }
-            val sysUser = UserRepository.instance.findOne("username" to user.username)?.await()
-            Assert.isNull(sysUser) {
-                UserSystemException(
-                    msg = "账号已存在！",
-                    errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
-                )
-            }
-            val sysExtra = UserExtraRepository.instance.findOne("mobile" to user.mobile)?.await()
-            Assert.isNull(sysExtra) {
-                UserSystemException(
-                    msg = "手机号已存在！",
-                    errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
-                )
-            }
+            checkUsername(user.username)
         }
     }
+
 }

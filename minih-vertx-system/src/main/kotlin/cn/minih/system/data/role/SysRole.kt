@@ -9,7 +9,7 @@ import java.util.*
  */
 data class SysRole(
     val name: String = "",
-    var resource: MutableList<String> = mutableListOf(),
+    var resources: MutableList<String> = mutableListOf(),
     var roleId: String = "",
     var state: Int = 1,
     var createTime: Long = Date().time,
@@ -17,7 +17,12 @@ data class SysRole(
 
 data class AddRole(
     val name: String? = null,
-    var resource: MutableList<String>? = null,
+    var resources: MutableList<String>? = null,
     var roleId: String? = null,
     var state: Int? = null,
+)
+
+data class RoleCondition(
+    val name: String?,
+    val state: Int?,
 )

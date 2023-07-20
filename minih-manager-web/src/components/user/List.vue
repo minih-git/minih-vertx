@@ -113,37 +113,19 @@
       direction="rtl"
       size="50%"
   >
-    <el-form label-position="top">
-
-      <el-form-item label="头像" >
-        <el-upload
-            class="avatar-uploader"
-            action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-            :show-file-list="false"
-            :on-success="handleAvatarSuccess"
-            :before-upload="beforeAvatarUpload"
-        >
-          <el-avatar :size="50" :src="imageUrl"/>
-        </el-upload>
-      </el-form-item>
-      <el-form-item label="姓名">
-        <el-input v-model="form.name"/>
-      </el-form-item>
-    </el-form>
+    <edit-form @close="drawer = false"></edit-form>
   </el-drawer>
 
 
 </template>
 
 <script lang="ts" setup>
-import {ref, reactive} from "vue";
+import {ref} from "vue";
 import {Timer, Iphone, Edit, Remove, Promotion, Check} from "@element-plus/icons-vue";
 import {UserInfo} from "../../store/module/user/user-types";
 import {userList} from "../../api/user";
 import {DateFormat} from "../../utils/utils.ts";
-import {ElMessage, UploadProps} from "element-plus";
-
-const imageUrl = ref('')
+import EditForm from "./EditForm.vue";
 
 
 const tableData = ref<UserInfo []>()
@@ -153,29 +135,6 @@ userList("").then(it => {
   tableData.value = it.data
 })
 
-
-const form = reactive<UserInfo>({
-  username: "",
-  name: "",
-  avatar: "string",
-  state: 1,
-  role: [],
-  mobile: "",
-})
-
-const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
-  if (rawFile.type !== 'image/jpeg') {
-    ElMessage.error('Avatar picture must be JPG format!')
-    return false
-  } else if (rawFile.size / 1024 / 1024 > 2) {
-    ElMessage.error('Avatar picture size can not exceed 2MB!')
-    return false
-  }
-  return true
-}
-const handleAvatarSuccess: UploadProps['onSuccess'] = () => {
-
-}
 
 
 </script>

@@ -30,7 +30,7 @@ class AuthServiceImpl private constructor() : AuthService {
         Assert.notBlank(password) { AuthLoginException("password不能为空!") }
         val user = UserRepository.instance.getUserByUsername(username.toString())?.await()?.covertTo(SysUser::class)
         Assert.notNull(user) { throw AuthLoginException("未找到用户,$username") }
-        Assert.isTrue(user!!.password == password) { AuthLoginException("密码不正确!") }
+        Assert.isTrue(user!!.password == password) { AuthLoginException("密码错误!") }
         return AuthLoginModel(user.username)
     }
 
@@ -41,7 +41,7 @@ class AuthServiceImpl private constructor() : AuthService {
             return
         }
         val redisAPI = RedisManager.instance.getReidApi()
-        val args = mutableListOf("$loginRoleKey:$loginId")
+        val args = mutableListOf("${getLoginRoleKey()}:$loginId")
         args.addAll(user.role)
         redisAPI.sadd(args)
 
@@ -49,7 +49,7 @@ class AuthServiceImpl private constructor() : AuthService {
 
     override suspend fun getLoginRole(loginId: String): List<String> {
         val redisAPI = RedisManager.instance.getReidApi()
-        return redisAPI.smembers("$loginRoleKey:$loginId").await().map { it.toString() }
+        return redisAPI.smembers("${getLoginRoleKey()}:$loginId").await().map { it.toString() }
     }
 
 

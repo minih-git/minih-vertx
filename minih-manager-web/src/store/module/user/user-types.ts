@@ -10,10 +10,26 @@ export interface UserInfo {
     mobile?: string
     online?: number
 }
-export interface Page<T> {
-    nextCursor?: string
-    data: T []
+export interface UserEdit {
+    username?: string
+    name?: string
+    avatar?: string
+    state?: number
+    role?: string[]
+    password?: string
+    mobile?: string
+    idType?: string
+    idNo?: string
 }
+
+export interface RoleInfo {
+    name?: string
+    state?: number
+    resource?: string[]
+    roleId?: number
+    createTime?: number
+}
+
 export interface UserState {
     token?: string
     sessionInfo?: SessionInfo
