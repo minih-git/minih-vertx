@@ -30,7 +30,8 @@ class AuthServiceImpl private constructor() : AuthService {
         Assert.notBlank(password) { AuthLoginException("password不能为空!") }
         val user = UserRepository.instance.getUserByUsername(username.toString())?.await()?.covertTo(SysUser::class)
         Assert.notNull(user) { throw AuthLoginException("未找到用户,$username") }
-        Assert.isTrue(user!!.password == password) { AuthLoginException("密码错误!") }
+        Assert.isTrue(user!!.state == 1) { AuthLoginException("账号已被永久封禁!") }
+        Assert.isTrue(user.password == password) { AuthLoginException("密码错误!") }
         return AuthLoginModel(user.username)
     }
 

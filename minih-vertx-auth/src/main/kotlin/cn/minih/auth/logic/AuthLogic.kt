@@ -3,7 +3,6 @@ package cn.minih.auth.logic
 import cn.minih.auth.constants.*
 import cn.minih.auth.data.AuthLoginModel
 import cn.minih.auth.data.AuthSession
-import cn.minih.auth.data.SessionKeepSign
 import cn.minih.auth.data.TokenSign
 import cn.minih.auth.exception.AuthLoginException
 import cn.minih.auth.logic.AuthUtil.getConfig
@@ -12,12 +11,11 @@ import cn.minih.auth.utils.log
 import cn.minih.core.exception.IMinihErrorCode
 import cn.minih.core.utils.SnowFlake
 import cn.minih.core.utils.jsonConvertData
-import cn.minih.core.utils.toJsonObject
+import cn.minih.core.utils.notBlankAndExec
 import cn.minih.core.utils.toJsonString
 import io.vertx.core.Vertx
 import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.kotlin.coroutines.await
-import org.bson.json.JsonObject
 import java.util.*
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
@@ -60,7 +58,7 @@ object AuthLogic {
     suspend fun keepSign(token: String) {
         val redisApi = RedisManager.instance.getReidApi()
         val loginId = getLoginIdByToken(token)
-        loginId?.let {
+        loginId?.notBlankAndExec {
             val sessionRaw = getSessionByLoginId(loginId)
             sessionRaw?.let { session ->
                 val tokenSign = session.tokenSignList.first { tokenSign -> tokenSign.token == token }

@@ -1,5 +1,5 @@
 import {BaseData, Page, post, get} from "../utils/http";
-import {UserEdit, UserInfo} from "../store/module/user/user-types";
+import {UserInfo} from "../store/module/user";
 
 
 export async function userList(search: string): Promise<Page<UserInfo>> {
@@ -21,13 +21,20 @@ export async function userList(search: string): Promise<Page<UserInfo>> {
                 createTime: it.sysUser.createTime,
                 lastActive: it.sysUser.lastActive,
                 online: it.online,
+                idType: it.userExtra.idType,
+                idNo: it.userExtra.idNo,
             }
         })
     }
 }
 
-export async function addUser(userInfo: UserEdit): Promise<BaseData> {
+export async function addUser(userInfo: UserInfo): Promise<BaseData> {
     let url = "/user/addUser"
+    return post(url, userInfo)
+}
+
+export async function editUser(userInfo: UserInfo): Promise<BaseData> {
+    let url = "/user/editUser"
     return post(url, userInfo)
 }
 
@@ -44,4 +51,19 @@ export async function checkPassword(password: string): Promise<BaseData> {
 export async function checkMobile(mobile: string): Promise<BaseData> {
     let url = "/user/checkMobile"
     return get(url, {mobile})
+}
+
+export async function lock(username: string): Promise<BaseData> {
+    let url = "/user/lock"
+    return get(url, {username})
+}
+
+export async function unlock(username: string): Promise<BaseData> {
+    let url = "/user/unlock"
+    return get(url, {username})
+}
+
+export async function kickOut(username: string): Promise<BaseData> {
+    let url = "/auth/kickOut"
+    return get(url, {"loginId": username})
 }

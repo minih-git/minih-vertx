@@ -15,6 +15,15 @@ import kotlin.reflect.KType
 
 val log: KLogger = KotlinLogging.logger {}
 
+suspend fun <T> T?.notBlankAndExec(fn: suspend (T) -> Unit) {
+    if (this != null) {
+        if (this is String && this.isBlank()) {
+            return
+        }
+        fn(this)
+    }
+}
+
 
 fun Any.toJsonObject(): JsonObject {
     return JsonObject(Gson().toJson(this))
@@ -38,7 +47,7 @@ fun <T : Any> String.jsonConvertData(clazz: KClass<T>): T {
 
 fun getClassesByPath(path: String): MutableList<KClass<*>> {
 
-    val slashPath = path.replace(".", "/");
+    val slashPath = path.replace(".", "/")
     val result = mutableListOf<KClass<*>>()
     var dirOrFiles: Enumeration<URL>? = null
     try {
@@ -54,8 +63,8 @@ fun getClassesByPath(path: String): MutableList<KClass<*>> {
             val filePath = dirOrFile.file
             val file = File(filePath)
             if (!file.exists()) {
-                log.warn("path: {}, file not exist", filePath);
-                continue;
+                log.warn("path: {}, file not exist", filePath)
+                continue
             }
             if (file.isDirectory) {
                 val files = file.listFiles { f -> f.isDirectory || f.name.endsWith(".class") } ?: continue

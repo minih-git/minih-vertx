@@ -64,8 +64,11 @@ private fun generateArgs(argsNeed: List<KParameter>, ctx: RoutingContext): Array
     val args = mutableListOf<Any?>()
     val params = getRequestBody(ctx)
     argsNeed.forEach { argsType ->
-        val type = argsType.type.classifier?.createType()
-        val isMarkedNullable = argsType.type.isMarkedNullable;
+        var type = argsType.type
+        if(type.isMarkedNullable){
+            type = type.classifier?.createType()!!
+        }
+        val isMarkedNullable = argsType.type.isMarkedNullable
         val param: Any? = if (AuthLogic.isBasicType(type)) {
             argsType.name?.let { name -> params[name] }
         } else {
@@ -111,10 +114,6 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
 
     fun setAuthService(authService: AuthService) {
         this.authService = authService
-    }
-
-    fun getAuthService(): AuthService {
-        return this.authService
     }
 
     @OptIn(DelicateCoroutinesApi::class)

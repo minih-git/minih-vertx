@@ -25,6 +25,8 @@ class SystemVerticle : MinihAuthVerticle(8090) {
         router.get("/user/checkUsername").coroutineJsonHandlerHasAuth(UserServiceHandler::checkUsername)
         router.get("/user/checkPassword").coroutineJsonHandlerHasAuth(UserServiceHandler::checkPassword)
         router.get("/user/checkMobile").coroutineJsonHandlerHasAuth(UserServiceHandler::checkMobile)
+        router.get("/user/lock").coroutineJsonHandlerHasAuth(UserServiceHandler::lock)
+        router.get("/user/unlock").coroutineJsonHandlerHasAuth(UserServiceHandler::unlock)
         router.post("/user/editUser").coroutineJsonHandlerHasAuth(UserServiceHandler::editUser)
 
 

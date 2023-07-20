@@ -1,7 +1,7 @@
-import {UserState} from "./user-types";
+import { UserState} from "./user-types";
 
-export const userState: UserState = {
+export const userState: Partial<UserState> = {
     token: "",
     sessionInfo: {},
-    userInfo: {}
+    userInfo: {name:"",avatar:""}
 }

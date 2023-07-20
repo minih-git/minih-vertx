@@ -33,6 +33,7 @@
       </option>
       <option name="myCustomValuesEnabled" value="true" />
     </inspection_tool>
+    <inspection_tool class="JSUnusedLocalSymbols" enabled="true" level="INFORMATION" enabled_by_default="true" />
     <inspection_tool class="JsonSchemaCompliance" enabled="true" level="INFORMATION" enabled_by_default="true" />
     <inspection_tool class="ReplaceUntilWithRangeUntil" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   </profile>

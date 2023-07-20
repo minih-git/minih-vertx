@@ -87,10 +87,20 @@ object AuthUtil {
         }
         return loginId
     }
+
     suspend fun getOnline(loginId: String): Int {
-        val session = AuthLogic.getSessionByLoginId(loginId)
-        return if (session != null) 1 else 0
+        val session = AuthLogic.getSessionByLoginId(loginId) ?: return 0
+        val tokens = session.tokenSignList
+        if (tokens.isEmpty()) return 0
+        tokens.forEach {
+            val token = it.token
+            if (AuthLogic.getLoginIdByToken(token) == loginId) {
+                return 1
+            }
+        }
+        return 0
     }
+
     fun getCurrentLoginId(): String {
         return try {
             Vertx.currentContext().get(CONTEXT_LOGIN_ID)

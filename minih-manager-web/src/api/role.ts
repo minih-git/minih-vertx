@@ -1,5 +1,5 @@
 import {Page, post} from "../utils/http";
-import {RoleInfo} from "../store/module/user/user-types";
+import {RoleInfo} from "../store/module/role";
 
 
 export async function roleList(search: string = "", nextCursor: number = 0): Promise<Page<RoleInfo>> {

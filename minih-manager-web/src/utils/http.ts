@@ -64,7 +64,6 @@ export const get = async (url: string, params = {}, needAuth = true, headers = u
             headers: new Headers(processHeaders(params, needAuth, headers, "GET"))
         })
     } catch (e: any) {
-        console.log(e)
         return globalHandleError(e)
     }
 }

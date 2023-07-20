@@ -7,7 +7,7 @@
             <svg  width="100" height="100">
               <use xlink:href="#logo-icon"/>
             </svg>
-            <svg style="margin-left: 5px;" width="100" height="100">
+            <svg fill="#FFF" height="100" style="margin-left: 5px;" width="100">
               <use xlink:href="#name"/>
             </svg>
           </div>

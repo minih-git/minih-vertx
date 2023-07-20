@@ -5,8 +5,9 @@ import {userMutations} from "./mutations.ts";
 import {UserState} from "./user-types";
 import {RootState} from "../root-types";
 
+export * from './user-types'
 
-export const  userModule: Module<UserState, RootState> = {
+export const userModule: Module<UserState, RootState> = {
     namespaced: true,
     state: userState,
     actions: userActions,
