@@ -4,9 +4,7 @@ import cn.hutool.core.text.AntPathMatcher
 import cn.hutool.core.util.URLUtil
 import cn.minih.auth.annotation.AuthCheckRole
 import cn.minih.auth.annotation.CheckRoleType
-import cn.minih.auth.constants.CONTEXT_LOGIN_ID
-import cn.minih.auth.constants.MinihAuthErrorCode
-import cn.minih.auth.constants.TOKEN_CONNECTOR_CHAT
+import cn.minih.auth.constants.*
 import cn.minih.auth.data.TokenInfo
 import cn.minih.auth.exception.AuthLoginException
 import cn.minih.auth.exception.MinihAuthException
@@ -151,7 +149,7 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
     private suspend fun kickOut(ctx: RoutingContext) {
         checkLogin(ctx)
         val self: String = ctx.get(CONTEXT_LOGIN_ID)
-        checkRole(self, listOf("role_1"))
+        checkRole(self, listOf(CONTEXT_SYSTEM_ADMIN_ROLE_TAG))
         val request = getRequestBody(ctx)
         val beKick = request.getString("loginId")
         Assert.notBlank(beKick) { MinihAuthException("loginId 不能为空！") }
@@ -179,7 +177,12 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         var tokenValue: String? = ""
         val config = AuthUtil.getConfig()
         val request = ctx.request()
-        if (AntPathMatcher().match("/ws/**", request.path()) || config.ignoreAuthUri.any { AntPathMatcher().match(it, request.path()) }) {
+        if (AntPathMatcher().match("/ws/**", request.path()) || config.ignoreAuthUri.any {
+                AntPathMatcher().match(
+                    it,
+                    request.path()
+                )
+            }) {
             return
         }
         if (tokenValue.isNullOrBlank() && config.isReadHeader) {
@@ -194,22 +197,26 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         val loginId = AuthUtil.checkLogin(tokenValue)
         Vertx.currentContext().put(CONTEXT_LOGIN_ID, loginId)
         ctx.put(CONTEXT_LOGIN_ID, loginId)
+        val roleTags = authService.getLoginRole(loginId)
+        val isSystemAdmin = roleTags.isNotEmpty() && roleTags.contains(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)
+        Vertx.currentContext().put(CONTEXT_IS_SYSTEM_ADMIN, isSystemAdmin)
+        ctx.put(CONTEXT_IS_SYSTEM_ADMIN, isSystemAdmin)
     }
 
-    suspend fun checkRole(longId: String, needRoles: List<String>, and: Boolean = false) {
-        if (needRoles.isEmpty() || longId.isBlank()) {
+    suspend fun checkRole(loginId: String, needRoles: List<String>, and: Boolean = false) {
+        if (needRoles.isEmpty() || loginId.isBlank()) {
             return
         }
-        val roleIds = authService.getLoginRole(longId)
-        if (roleIds.isEmpty()) {
+        val roleTags = authService.getLoginRole(loginId)
+        if (roleTags.isEmpty()) {
             throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_NO_AUTH)
         }
         if (and) {
-            if (!needRoles.all { roleIds.contains(it) }) {
+            if (!needRoles.all { roleTags.contains(it) }) {
                 throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_NO_AUTH)
             }
         } else {
-            if (!roleIds.any { needRoles.contains(it) }) {
+            if (!roleTags.any { needRoles.contains(it) }) {
                 throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_NO_AUTH)
             }
         }

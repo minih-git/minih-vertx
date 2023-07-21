@@ -1,14 +1,11 @@
 package cn.minih.auth.logic
 
+import cn.minih.auth.constants.*
 import cn.minih.auth.data.AuthConfig
 import cn.minih.auth.data.AuthLoginModel
 import cn.minih.auth.data.TokenInfo
-import cn.minih.auth.constants.CONTEXT_LOGIN_ID
-import cn.minih.auth.constants.DEFAULT_DEVICE
-import cn.minih.auth.constants.MinihAuthErrorCode
-import cn.minih.auth.constants.TOKEN_CONNECTOR_CHAT
-import cn.minih.core.utils.jsonConvertData
 import cn.minih.auth.exception.AuthLoginException
+import cn.minih.core.utils.jsonConvertData
 import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.shareddata.AsyncMap
@@ -109,5 +106,7 @@ object AuthUtil {
         }
     }
 
-
+    fun currentIsSysAdmin(): Boolean {
+        return Vertx.currentContext().get(CONTEXT_IS_SYSTEM_ADMIN)
+    }
 }

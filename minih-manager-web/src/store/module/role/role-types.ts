@@ -1,8 +1,10 @@
 export interface RoleInfo {
+    id: string
     name: string
     state: number
-    resource: string[]
-    roleId: string
+    resources: string[]
+    resourceInfos: string[]
+    roleTag: string
     createTime: number
 }
 

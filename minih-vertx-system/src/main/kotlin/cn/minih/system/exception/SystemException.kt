@@ -9,5 +9,5 @@ import cn.minih.core.exception.MinihException
  * @date 2023/7/11
  * @desc
  */
-class UserSystemException(msg: String? = null, errorCode: IMinihErrorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM) :
+class SystemException(msg: String? = null, errorCode: IMinihErrorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM) :
     MinihException(msg, errorCode)

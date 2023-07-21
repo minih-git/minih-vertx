@@ -8,11 +8,10 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     BasicForm: typeof import('./src/components/login/form/BasicForm.vue')['default']
-    EditForm: typeof import('./src/components/user/EditForm.vue')['default']
+    EditForm: typeof import('./src/components/resource/EditForm.vue')['default']
     ElAffix: typeof import('element-plus/es')['ElAffix']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
-    ElBadge: typeof import('element-plus/es')['ElBadge']
     ElBreadcrumb: typeof import('element-plus/es')['ElBreadcrumb']
     ElBreadcrumbItem: typeof import('element-plus/es')['ElBreadcrumbItem']
     ElButton: typeof import('element-plus/es')['ElButton']
@@ -44,7 +43,7 @@ declare module 'vue' {
     ElUpload: typeof import('element-plus/es')['ElUpload']
     ErrorPage: typeof import('./src/components/ErrorPage.vue')['default']
     Home: typeof import('./src/components/Home.vue')['default']
-    List: typeof import('./src/components/user/List.vue')['default']
+    List: typeof import('./src/components/resource/List.vue')['default']
     Login: typeof import('./src/components/login/Login.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

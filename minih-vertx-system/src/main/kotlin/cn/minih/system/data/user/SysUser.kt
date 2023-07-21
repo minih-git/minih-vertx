@@ -9,7 +9,7 @@ import java.util.*
  * @desc
  */
 data class SysUser(
-    @SerializedName("_id")
+    @SerializedName("_id", alternate = ["id"])
     var id: String = "",
     val username: String = "",
     var password: String = "",
@@ -22,7 +22,7 @@ data class SysUser(
 )
 
 data class UserExtra(
-    @SerializedName("_id")
+    @SerializedName("_id", alternate = ["id"])
     var id: String = "",
     var mobile: String = "",
     var realName: String = "",

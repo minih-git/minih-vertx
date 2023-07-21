@@ -4,12 +4,12 @@ import cn.minih.auth.logic.AuthUtil
 import cn.minih.auth.logic.coroutineJsonHandlerHasAuth
 import cn.minih.auth.service.MinihAuthVerticle
 import cn.minih.core.annotation.MinihServiceVerticle
+import cn.minih.system.service.resource.ResourceServiceHandler
 import cn.minih.system.service.role.RoleServiceHandler
 import cn.minih.system.service.user.UserServiceHandler
 import io.netty.handler.codec.http.HttpHeaderValues
 import io.vertx.core.Vertx
 import io.vertx.ext.bridge.PermittedOptions
-import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.kotlin.coroutines.dispatcher
@@ -39,6 +39,12 @@ class SystemVerticle : MinihAuthVerticle(8090) {
         router.get("/user/unlock").coroutineJsonHandlerHasAuth(UserServiceHandler::unlock)
         router.post("/user/editUser").coroutineJsonHandlerHasAuth(UserServiceHandler::editUser)
         router.post("/role/page").coroutineJsonHandlerHasAuth(RoleServiceHandler::queryRoles)
+        router.post("/role/addRole").coroutineJsonHandlerHasAuth(RoleServiceHandler::addRole)
+        router.post("/role/editRole").coroutineJsonHandlerHasAuth(RoleServiceHandler::editRole)
+        router.get("/role/checkRoleTag").coroutineJsonHandlerHasAuth(RoleServiceHandler::checkRoleTag)
+        router.post("/resource/page").coroutineJsonHandlerHasAuth(ResourceServiceHandler::queryResources)
+        router.post("/resource/addResource").coroutineJsonHandlerHasAuth(ResourceServiceHandler::addResource)
+        router.post("/resource/editResource").coroutineJsonHandlerHasAuth(ResourceServiceHandler::editResource)
 
     }
 

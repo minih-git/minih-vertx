@@ -1,5 +1,3 @@
-import {checkPassword, checkUsername} from "../api";
-import {MinihError} from "./http";
 
 export class DateFormat {
 
@@ -119,40 +117,7 @@ export const idCheck = (_: any, value: any, callback: any) => {
         }
     }
 }
-export const userNameCheck = async (_: any, value: any, callback: any) => {
-    try {
-        await checkUsername(value.toString())
-        callback()
-        return
-    } catch (e) {
-        if (e instanceof MinihError) {
-            callback(new Error(e.msg))
-            return
-        }
-        callback(new Error("用户名校验不通过"))
-        return
-    }
 
-}
-export const passwordCheck = async (_: any, value: any, callback: any) => {
-    if (!value) {
-        callback();
-        return
-    }
-    try {
-        await checkPassword(value.toString())
-        callback()
-        return
-    } catch (e) {
-        if (e instanceof MinihError) {
-            callback(new Error(e.msg))
-            return
-        }
-        callback(new Error("密码校验不通过"))
-        return
-    }
-
-}
 export const isNil = (v: unknown): boolean => {
     return typeof v === "undefined" || v === null
 }

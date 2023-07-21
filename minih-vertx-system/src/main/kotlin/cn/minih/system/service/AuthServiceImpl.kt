@@ -42,6 +42,7 @@ class AuthServiceImpl private constructor() : AuthService {
             return
         }
         val redisAPI = RedisManager.instance.getReidApi()
+        redisAPI.del(listOf("${getLoginRoleKey()}:$loginId"))
         val args = mutableListOf("${getLoginRoleKey()}:$loginId")
         args.addAll(user.role)
         redisAPI.sadd(args)

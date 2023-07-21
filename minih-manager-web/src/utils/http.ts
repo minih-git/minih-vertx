@@ -100,7 +100,7 @@ export const request = async (options: RequestOptions): Promise<BaseData> => {
             if (resultJson.data) {
                 errorMsg = errorMsg + "，" + resultJson.data
             }
-            if (resultJson.code <= -10 && resultJson.code >= -20) {
+            if (resultJson.code < -10 && resultJson.code > -19) {
                 throw new NotLoginError(resultJson.code, errorMsg)
             }
             throw new MinihError(resultJson.code, errorMsg)

@@ -1,4 +1,4 @@
-import {Page, post} from "../utils";
+import {BaseData, get, Page, post} from "../utils";
 import {RoleInfo} from "../store/module/role";
 
 
@@ -10,12 +10,29 @@ export async function roleList(search: string = "", nextCursor: number = 0): Pro
         nextCursor: res.data["nextCursor"],
         data: data.map(it => {
             return {
+                id: it._id,
                 name: it.name,
                 state: it.state,
-                roleId: it.roleId,
+                roleTag: it.roleTag,
                 createTime: it.createTime,
                 resources: it.resources,
             }
         })
     }
+}
+
+export async function addRole(roleInfo: RoleInfo): Promise<BaseData> {
+    let url = "/role/addRole"
+    return await post(url, roleInfo)
+}
+
+
+export async function editRole(roleInfo: RoleInfo): Promise<BaseData> {
+    let url = "/role/editRole"
+    return await post(url, roleInfo)
+}
+
+export async function checkRoleTag(roleTag: String): Promise<BaseData> {
+    let url = "/role/checkRoleTag"
+    return await get(url, {roleTag})
 }

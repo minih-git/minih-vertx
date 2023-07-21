@@ -1,25 +1,27 @@
-package cn.minih.system.data.role
+package cn.minih.system.data.resource
 
 import com.google.gson.annotations.SerializedName
 import java.util.*
 
 /**
  * @author hubin
- * @date 2023/7/19
+ * @date 2023/7/21
  * @desc
  */
-data class SysRole(
+data class SysResource(
     @SerializedName("_id", alternate = ["id"])
     var id: String = "",
     var name: String = "",
-    var resources: MutableList<String> = mutableListOf(),
-    var roleTag: String = "",
     var state: Int = 1,
+    var parentId: String = "",
+    var permissionTag: List<String> = mutableListOf(),
+    var path: String = "",
+    var type: String = "",
+    var icon: String = "",
     var createTime: Long = Date().time,
 )
 
-
-data class RoleCondition(
+data class ResourceCondition(
     val name: String?,
     val state: Int?,
 )

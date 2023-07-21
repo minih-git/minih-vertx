@@ -23,7 +23,7 @@
                                 <el-dropdown-menu>
                                     <el-dropdown-item @click="logout">
                                         <el-icon>
-                                            <Promotion/>
+                                            <icons.Promotion/>
                                         </el-icon>
                                         退出登录
                                     </el-dropdown-item>
@@ -39,18 +39,24 @@
         <el-container id="center">
             <el-aside id="aside" width="200px">
                 <div class="menu">
-                    <div class="sub-menu">
+                    <div v-for="item in menuGroup" :key="item.id" class="sub-menu">
                         <div class="sub-menu-text">
-                            <span><el-icon><Setting/></el-icon>系统管理</span>
-                        </div>
-                        <div class="sub-menu-con">
-                            <div v-for="item in subMenu" :class="{'is-active':currenSelect===item.id}"
-                                 class="menu-item "
-                                 @click=" (currenSelect = item.id) && router.push({path:item.path})">
+                            <span>
                                 <el-icon>
                                     <component :is="item.icon" class="icons"></component>
                                 </el-icon>
-                                <span style="margin-left: 10px">{{ item.name }}</span>
+                                {{ item.name }}
+                            </span>
+                        </div>
+                        <div class="sub-menu-con">
+                            <div v-for="cItem in menuGroupChildren[item.id]"
+                                 :class="{'is-active':currenSelect===cItem.id}"
+                                 class="menu-item "
+                                 @click=" (currenSelect = cItem.id) && router.push({path:cItem.path})">
+                                <el-icon>
+                                    <component :is="cItem.icon" class="icons"></component>
+                                </el-icon>
+                                <span style="margin-left: 10px">{{ cItem.name }}</span>
                             </div>
                         </div>
                         <div class="sub-menu-split-line"></div>
@@ -90,20 +96,35 @@
 
 import {useStore} from "../store";
 import {useRoute, useRouter} from "vue-router";
-import {FullScreen, Lock, Promotion, Setting, User} from "@element-plus/icons-vue";
+import * as icons from "@element-plus/icons-vue";
 import {ref, shallowRef} from "vue";
-import {logout} from "../api/login.ts";
+import {logout} from "../api";
+import {ResourceInfo} from "../store/module/resource";
 
 const store = useStore()
 const route = useRoute()
 const router = useRouter()
-const currenSelect = ref<number>(0)
-const subMenu = ref<any>([
-    {id: 1, name: "用户列表", path: "/user", icon: shallowRef(User)},
-    {id: 2, name: "角色列表", path: "/role", icon: shallowRef(Lock)},
-    {id: 3, name: "资源列表", path: "/resource", icon: shallowRef(FullScreen)},
-])
+const currenSelect = ref<string>("")
 
+const menuGroup = ref<ResourceInfo[]>([])
+const menuGroupChildren = ref<{}>({})
+
+const queryResourceList = async () => {
+    const resource = await store.dispatch("resource/getOrLoad", false)
+    resource.filter(it => it.type === '01').map(it => {
+        it.icon = shallowRef(icons[it.icon])
+        menuGroup.value.push(it)
+        menuGroupChildren.value[it.id] = []
+    })
+    resource.filter(it => it.type === '02').map(it => {
+        it.icon = shallowRef(icons[it.icon])
+        const parent = menuGroup.value.find(it1 => it1.id === it.parentId)
+        if (parent) {
+            menuGroupChildren.value[parent.id].push(it)
+        }
+    })
+}
+queryResourceList()
 
 </script>
 

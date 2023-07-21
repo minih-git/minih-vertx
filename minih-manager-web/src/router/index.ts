@@ -3,7 +3,9 @@ import Login from "../components/login/Login.vue";
 import Home from "../components/Home.vue";
 import {store} from "../store";
 import ErrorPage from "../components/ErrorPage.vue";
-import List from "../components/user/List.vue";
+import UserList from "../components/user/List.vue";
+import RoleList from "../components/role/List.vue";
+import ResourceList from "../components/resource/List.vue";
 
 
 const routes = [
@@ -24,14 +26,34 @@ const routes = [
         meta: {
             needAuth: true
         },
-        children:[
-            {path: '/user',
+        children: [
+            {
+                path: '/user',
                 name: "用户列表",
-                component: List,
+                component: UserList,
                 meta: {
-                    needAuth: true
+                    needAuth: true,
+                    needRole:['role_system_admin']
                 },
-            }
+            },
+            {
+                path: '/role',
+                name: "角色列表",
+                component: RoleList,
+                meta: {
+                    needAuth: true,
+                    needRole:['role_system_admin']
+                },
+            },
+            {
+                path: '/resource',
+                name: "资源列表",
+                component: ResourceList,
+                meta: {
+                    needAuth: true,
+                    needRole:['role_system_admin']
+                },
+            },
         ]
     },
     {
@@ -44,7 +66,7 @@ const routes = [
     },
     {
         path: "/:catchAll(.*)",
-        redirect: "/"
+        redirect: "/noAuth"
     },
 ]
 

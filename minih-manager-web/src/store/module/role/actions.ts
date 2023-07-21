@@ -11,7 +11,7 @@ const queryRoles = async (roleOptions: RoleInfo[], nextCursor: number) => {
     }
 }
 export const roleActions: ActionTree<RoleState, RootState> = {
-    async setRoleCacheList({commit, state}, forceRefresh: boolean = false): Promise<RoleInfo[]> {
+    async getOrLoad({commit, state}, forceRefresh: boolean = false): Promise<RoleInfo[]> {
         if (state.cache.length != '' && !forceRefresh) {
             return state.cache
         }

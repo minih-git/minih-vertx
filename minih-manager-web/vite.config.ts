@@ -5,12 +5,14 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import {ElementPlusResolver} from 'unplugin-vue-components/resolvers'
 import {createSvgIconsPlugin} from 'vite-plugin-svg-icons'
+import IconsResolver from 'unplugin-icons/resolver'
+
 import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    define:{
-        global:{},
+    define: {
+        global: {},
     },
     server: {
         host: '0.0.0.0',
@@ -34,10 +36,20 @@ export default defineConfig({
         vue(),
         requireTransform(),
         AutoImport({
-            resolvers: [ElementPlusResolver()],
+            resolvers: [
+                ElementPlusResolver(),
+                IconsResolver({
+                    prefix: 'Icon',
+                }),
+            ],
         }),
+
         Components({
-            resolvers: [ElementPlusResolver()],
+            resolvers: [
+                ElementPlusResolver(),
+                IconsResolver({
+                    enabledCollections: ['ep'],
+                }),],
         }),
         createSvgIconsPlugin({
             iconDirs: [path.resolve(process.cwd(), 'src/assets')],

@@ -1,13 +1,14 @@
 package cn.minih.system.service.user
 
 import cn.minih.auth.annotation.AuthCheckRole
+import cn.minih.auth.constants.CONTEXT_SYSTEM_ADMIN_ROLE_TAG
 import cn.minih.auth.logic.AuthLogic
 import cn.minih.auth.logic.AuthUtil
 import cn.minih.core.repository.MongoQueryOption
 import cn.minih.core.utils.*
 import cn.minih.system.data.user.*
 import cn.minih.system.exception.MinihSystemErrorCode
-import cn.minih.system.exception.UserSystemException
+import cn.minih.system.exception.SystemException
 import cn.minih.system.util.CheckPwdUtils
 import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.kotlin.coroutines.await
@@ -25,7 +26,7 @@ object UserServiceHandler {
     suspend fun getUserInfo(): UserInfo {
         val username = AuthUtil.getCurrentLoginId()
         val sysUser = UserRepository.instance.getUserByUsername(username)?.await()?.covertTo(SysUser::class)
-        Assert.notNull(sysUser!!) { UserSystemException(errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_DATA_UN_FIND) }
+        Assert.notNull(sysUser!!) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
         val extra = UserExtraRepository.instance.findOne("_id" to sysUser.id)?.await()?.covertTo(UserExtra::class)
         return UserInfo(sysUser, extra)
     }
@@ -59,7 +60,7 @@ object UserServiceHandler {
         return Page(userInfo.last().sysUser.createTime, userInfo)
     }
 
-    @AuthCheckRole("role_1")
+    @AuthCheckRole(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)
     suspend fun addUser(user: UserExpand) {
         validateUserParams(user, true)
         user.password = if (user.password == null) BCrypt.hashpw(
@@ -77,26 +78,26 @@ object UserServiceHandler {
         UserExtraRepository.instance.insert(extra).await()
     }
 
-    @AuthCheckRole("role_1")
+    @AuthCheckRole(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)
     suspend fun editUser(user: UserExpand) {
         validateUserParams(user)
         val sysUser = UserRepository.instance.findOne("username" to user.username)?.await()?.covertTo(SysUser::class)
-        Assert.notNull(sysUser) { UserSystemException(errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_DATA_UN_FIND) }
+        Assert.notNull(sysUser) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
         var userExtra = UserExtraRepository.instance.findOne("_id" to sysUser?.id)?.await()?.covertTo(UserExtra::class)
         if (sysUser != null) {
             var update = false
             if (userExtra == null || userExtra.id.isBlank()) {
                 userExtra = UserExtra(id = sysUser.id)
             }
-            user.password?.notBlankAndExec { update = true;sysUser.password = BCrypt.hashpw(it, BCrypt.gensalt()) }
-            user.avatar?.notBlankAndExec { update = true;sysUser.avatar = it }
-            user.name?.notBlankAndExec { update = true;sysUser.name = it }
-            user.mobile?.notBlankAndExec { update = true;userExtra.mobile = it }
-            user.realName?.notBlankAndExec { update = true;userExtra.realName = it }
-            user.idType?.notBlankAndExec { update = true;userExtra.idType = it }
-            user.idNo?.notBlankAndExec { update = true; userExtra.idNo = it }
-            user.state?.notBlankAndExec { update = true;sysUser.state = it }
-            user.role?.notBlankAndExec { update = true;sysUser.role = it }
+            user.password.notBlankAndExec { update = true;sysUser.password = BCrypt.hashpw(it, BCrypt.gensalt()) }
+            user.avatar.notBlankAndExec { update = true;sysUser.avatar = it }
+            user.name.notBlankAndExec { update = true;sysUser.name = it }
+            user.mobile.notBlankAndExec { update = true;userExtra.mobile = it }
+            user.realName.notBlankAndExec { update = true;userExtra.realName = it }
+            user.idType.notBlankAndExec { update = true;userExtra.idType = it }
+            user.idNo.notBlankAndExec { update = true; userExtra.idNo = it }
+            user.state.notBlankAndExec { update = true;sysUser.state = it }
+            user.role.notBlankAndExec { update = true;sysUser.role = it }
             if (update) {
                 UserRepository.instance.update("_id" to sysUser.id, data = sysUser).await()
                 UserExtraRepository.instance.update("_id" to sysUser.id, data = userExtra).await()
@@ -104,10 +105,10 @@ object UserServiceHandler {
         }
     }
 
-    @AuthCheckRole("role_1")
+    @AuthCheckRole(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)
     suspend fun lock(username: String) {
         val sysUser = UserRepository.instance.findOne("username" to username)?.await()?.covertTo(SysUser::class)
-        Assert.notNull(sysUser) { UserSystemException(errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_DATA_UN_FIND) }
+        Assert.notNull(sysUser) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
         sysUser?.let {
             sysUser.state = 0
             UserRepository.instance.update("_id" to sysUser.id, data = sysUser).await()
@@ -115,10 +116,10 @@ object UserServiceHandler {
         AuthLogic.kickOut(username)
     }
 
-    @AuthCheckRole("role_1")
+    @AuthCheckRole(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)
     suspend fun unlock(username: String) {
         val sysUser = UserRepository.instance.findOne("username" to username)?.await()?.covertTo(SysUser::class)
-        Assert.notNull(sysUser) { UserSystemException(errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_DATA_UN_FIND) }
+        Assert.notNull(sysUser) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
         sysUser?.let {
             sysUser.state = 1
             UserRepository.instance.update("_id" to sysUser.id, data = sysUser).await()
@@ -127,16 +128,16 @@ object UserServiceHandler {
 
     suspend fun checkUsername(username: String?) {
         Assert.notBlank(username) {
-            UserSystemException(
+            SystemException(
                 msg = "登录账号不能为空！",
-                errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
+                errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_ILLEGAL_ARGUMENT
             )
         }
         val sysUser = UserRepository.instance.findOne("username" to username)?.await()
         Assert.isNull(sysUser) {
-            UserSystemException(
+            SystemException(
                 msg = "账号已存在！",
-                errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
+                errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_ILLEGAL_ARGUMENT
             )
         }
     }
@@ -144,9 +145,9 @@ object UserServiceHandler {
     fun checkPassword(password: String?) {
         password?.let {
             Assert.isTrue(CheckPwdUtils.checkPwd(it, 8, 20, 3)) {
-                UserSystemException(
+                SystemException(
                     msg = "密码强度不够！",
-                    errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
+                    errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_ILLEGAL_ARGUMENT
                 )
             }
         }
@@ -157,16 +158,16 @@ object UserServiceHandler {
             val regex = Regex(pattern = "^1\\d{10}\$")
             val matched = regex.containsMatchIn(input = mobile)
             Assert.isTrue(matched) {
-                UserSystemException(
+                SystemException(
                     msg = "手机号不合规！",
-                    errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
+                    errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_ILLEGAL_ARGUMENT
                 )
             }
             val sysExtra = UserExtraRepository.instance.findOne("mobile" to mobile)?.await()
             Assert.isNull(sysExtra) {
-                UserSystemException(
+                SystemException(
                     msg = "手机号已存在！",
-                    errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
+                    errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_ILLEGAL_ARGUMENT
                 )
             }
         }
@@ -174,24 +175,24 @@ object UserServiceHandler {
 
     private suspend fun validateUserParams(user: UserExpand, newAdd: Boolean = false) {
         Assert.notBlank(user.username) {
-            UserSystemException(
+            SystemException(
                 msg = "用户名不能为空！",
-                errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
+                errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_ILLEGAL_ARGUMENT
             )
         }
         checkPassword(user.password)
         checkMobile(user.mobile)
         if (newAdd) {
             Assert.notBlank(user.name) {
-                UserSystemException(
+                SystemException(
                     msg = "用户名字不能为空！",
-                    errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
+                    errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_ILLEGAL_ARGUMENT
                 )
             }
             Assert.notBlank(user.mobile) {
-                UserSystemException(
+                SystemException(
                     msg = "手机号不能为空！",
-                    errorCode = MinihSystemErrorCode.ERR_CODE_USER_SYSTEM_ILLEGAL_ARGUMENT
+                    errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_ILLEGAL_ARGUMENT
                 )
             }
             checkUsername(user.username)
