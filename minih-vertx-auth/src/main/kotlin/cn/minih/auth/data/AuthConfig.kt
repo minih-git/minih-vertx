@@ -22,6 +22,6 @@ data class AuthConfig(
     val isReadBody: Boolean = true,
     val isReadParams: Boolean = true,
     val autoKeepSign: Boolean = true,
-    val ignoreAuthUri: List<String> = mutableListOf(),
+    val ignoreAuthUri: List<String> = mutableListOf("/authEventbus"),
 
     )

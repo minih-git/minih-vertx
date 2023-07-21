@@ -16,7 +16,7 @@ import cn.minih.core.utils.toJsonObject
 abstract class RepositoryManager<T>(private val tableName: String) {
 
 
-    private val client by lazy {
+    private val client: MongoClient = let {
         val config = Vertx.currentContext().config().getJsonObject("mongodb")
         val mongoOptions = jsonObjectOf(
             "host" to config.getString("host"),

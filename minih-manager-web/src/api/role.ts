@@ -1,4 +1,4 @@
-import {Page, post} from "../utils/http";
+import {Page, post} from "../utils";
 import {RoleInfo} from "../store/module/role";
 
 

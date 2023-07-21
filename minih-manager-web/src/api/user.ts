@@ -1,4 +1,4 @@
-import {BaseData, Page, post, get} from "../utils/http";
+import {BaseData, Page, post, get} from "../utils";
 import {UserInfo} from "../store/module/user";
 
 

@@ -1,4 +1,4 @@
-import {checkPassword, checkUsername} from "../api/user";
+import {checkPassword, checkUsername} from "../api";
 import {MinihError} from "./http";
 
 export class DateFormat {

@@ -1,8 +1,9 @@
-import {post, get} from "../utils/http";
+import {post, get} from "../utils";
 import {store} from "../store";
 import router from '../router'
 import {UserInfo} from "../store/module/user";
 import {ElMessage} from "element-plus";
+import {MessageOptions} from "element-plus/es/components/message/src/message";
 
 export interface FormInfo {
     username: string
@@ -21,7 +22,7 @@ export interface SessionInfo {
 }
 
 
-export async function login(form: Partial<FormInfo>): Promise<SessionInfo> {
+export const login = async (form: Partial<FormInfo>): Promise<SessionInfo> => {
     let url = "/auth/login"
     let res = await post(url, form, false)
     let sessionInfo = {
@@ -36,19 +37,13 @@ export async function login(form: Partial<FormInfo>): Promise<SessionInfo> {
     return sessionInfo
 }
 
-export async function logout() {
+export const logout = async () => {
     let url = "/auth/logout"
     await get(url)
-    await store.dispatch("user/setSessionInfo", {})
-    await store.dispatch("user/setUserInfo", {})
-    ElMessage({
-        message: "您已成功退出！",
-        type: 'success',
-    })
-    await router.push({name: '登录'})
+    await logoutHandler()
 }
 
-export async function info(): Promise<UserInfo> {
+export const info = async (): Promise<UserInfo> => {
     let url = "/user/info"
     let res = await get(url, {})
     let userInfo = {
@@ -63,4 +58,31 @@ export async function info(): Promise<UserInfo> {
     }
     await store.dispatch("user/setUserInfo", userInfo)
     return userInfo
+}
+
+const logoutHandler = async (code: number = 0, message: string = "您已成功退出！") => {
+    await store.dispatch("user/setSessionInfo", {})
+    await store.dispatch("user/setUserInfo", {})
+    const msg: MessageOptions = {
+        message,
+        type: 'success',
+    }
+    if (code != 0) {
+        msg.type = "warning"
+    }
+    ElMessage(msg)
+    await router.push({name: '登录'})
+}
+export const authEventBusHandler = () => {
+    // @ts-ignore
+    const eb = new window.EventBus("/ws/authEventbus")
+    eb.onopen = () => {
+        eb.registerHandler('cn.minih.auth.session.offline', async (_, message) => {
+            if (message.body.token == store.state.user.rawToken) {
+                await logoutHandler(message.body.type, message.body.msg)
+            }
+        });
+    }
+
+
 }

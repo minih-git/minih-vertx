@@ -1,6 +1,9 @@
 package cn.minih.system
 
+import cn.minih.auth.logic.AuthLogic
+import cn.minih.auth.logic.AuthUtil
 import cn.minih.auth.utils.log
+import cn.minih.core.annotation.MinihServiceVerticle
 import cn.minih.core.components.MinihServiceRun
 import cn.minih.core.constants.SYSTEM_CONFIGURATION_SUBSCRIBE
 import io.vertx.config.ConfigChange
@@ -12,6 +15,15 @@ import io.vertx.core.Promise
 import io.vertx.core.Verticle
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
+import io.vertx.ext.bridge.PermittedOptions
+import io.vertx.ext.web.Router
+import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
+import io.vertx.ext.web.handler.sockjs.SockJSHandler
+import io.vertx.kotlin.coroutines.CoroutineVerticle
+import io.vertx.kotlin.coroutines.dispatcher
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -24,7 +36,6 @@ class Main
 suspend fun main() {
     MinihServiceRun.run(Main::class)
 }
-
 
 class ConfigVerticle : Verticle {
 

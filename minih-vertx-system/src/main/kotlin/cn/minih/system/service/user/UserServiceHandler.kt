@@ -91,10 +91,7 @@ object UserServiceHandler {
             user.password?.notBlankAndExec { update = true;sysUser.password = BCrypt.hashpw(it, BCrypt.gensalt()) }
             user.avatar?.notBlankAndExec { update = true;sysUser.avatar = it }
             user.name?.notBlankAndExec { update = true;sysUser.name = it }
-            user.mobile?.notBlankAndExec {
-                println(it)
-                update = true;userExtra.mobile = it
-            }
+            user.mobile?.notBlankAndExec { update = true;userExtra.mobile = it }
             user.realName?.notBlankAndExec { update = true;userExtra.realName = it }
             user.idType?.notBlankAndExec { update = true;userExtra.idType = it }
             user.idNo?.notBlankAndExec { update = true; userExtra.idNo = it }

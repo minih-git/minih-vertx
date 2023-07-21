@@ -2,7 +2,7 @@ export interface RoleInfo {
     name: string
     state: number
     resource: string[]
-    roleId: number
+    roleId: string
     createTime: number
 }
 

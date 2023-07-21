@@ -14,6 +14,7 @@
     "qs": "^6.11.2",
     "unplugin-auto-import": "^0.16.6",
     "unplugin-vue-components": "^0.25.1",
+    "vite-plugin-require-transform": "^1.0.21",
     "vite-plugin-svg-icons": "^2.0.1",
     "vue": "^3.3.4",
     "vue-router": "4",

@@ -7,8 +7,12 @@ import cn.minih.core.utils.covertTo
 import cn.minih.core.utils.notBlankAndExec
 import cn.minih.system.data.user.SysUser
 import cn.minih.system.service.user.UserRepository
+import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.await
+import io.vertx.kotlin.coroutines.dispatcher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
 
 /**

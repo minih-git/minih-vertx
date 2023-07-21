@@ -10,6 +10,9 @@ export const userMutations: MutationTree<UserState, RootState> = {
     setToken(state: UserState, data: string) {
         state.token = data
     },
+    setRawToken(state: UserState, data: string) {
+        state.rawToken = data
+    },
     setUserInfo(state: UserState, data: UserInfo) {
         state.userInfo = data
     }

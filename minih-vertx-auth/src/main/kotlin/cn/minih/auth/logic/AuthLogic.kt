@@ -51,7 +51,7 @@ object AuthLogic {
         updateSessionTimeout(session, loginConfig)
         val tokenSign = TokenSign(tokenValue, loginConfig.device, loginConfig.timeout)
         addTokenSign(session, tokenSign)
-        redisApi.set(listOf(getTokenKey(tokenValue), id, "EX", trans(loginConfig.timeout).toString()))
+        redisApi.set(listOf(getTokenKey(tokenValue), id, "EX", trans(loginConfig.timeout).toString())).await()
         return tokenValue
     }
 
@@ -62,8 +62,8 @@ object AuthLogic {
             val sessionRaw = getSessionByLoginId(loginId)
             sessionRaw?.let { session ->
                 val tokenSign = session.tokenSignList.first { tokenSign -> tokenSign.token == token }
-                redisApi.expire(listOf(getTokenKey(token), tokenSign.timeout.toString(), "XX"))
-                redisApi.expire(listOf(getSessionKey(session.id), tokenSign.timeout.toString(), "XX"))
+                redisApi.expire(listOf(getTokenKey(token), tokenSign.timeout.toString()))
+                redisApi.expire(listOf(getSessionKey(session.id), tokenSign.timeout.toString()))
                 redisApi.set(
                     listOf(
                         getSessionActiveKey(session.id),
@@ -84,7 +84,7 @@ object AuthLogic {
         val curr = trans(redisApi.ttl(session.id).await().toLong())
         val timeout = trans(loginConfig.timeout)
         if (curr < timeout) {
-            redisApi.expire(mutableListOf(session.id, timeout.toString(), "XX"))
+            redisApi.expire(listOf(session.id, timeout.toString()))
         }
     }
 
@@ -171,7 +171,12 @@ object AuthLogic {
                 )
                 Vertx.currentContext().owner()?.eventBus()?.publish(
                     AUTH_SESSION_OFFLINE,
-                    jsonObjectOf("token" to tokenSign.token, "loginId" to it.loginId, "type" to offlineType.code)
+                    jsonObjectOf(
+                        "token" to tokenSign.token,
+                        "loginId" to it.loginId,
+                        "type" to offlineType.code,
+                        "msg" to offlineType.msg
+                    )
                 )
             }
         }

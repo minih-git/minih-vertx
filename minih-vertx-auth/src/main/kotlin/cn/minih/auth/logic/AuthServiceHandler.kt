@@ -65,7 +65,7 @@ private fun generateArgs(argsNeed: List<KParameter>, ctx: RoutingContext): Array
     val params = getRequestBody(ctx)
     argsNeed.forEach { argsType ->
         var type = argsType.type
-        if(type.isMarkedNullable){
+        if (type.isMarkedNullable) {
             type = type.classifier?.createType()!!
         }
         val isMarkedNullable = argsType.type.isMarkedNullable
@@ -179,7 +179,7 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         var tokenValue: String? = ""
         val config = AuthUtil.getConfig()
         val request = ctx.request()
-        if (config.ignoreAuthUri.any { AntPathMatcher().match(it, request.path()) }) {
+        if (AntPathMatcher().match("/ws/**", request.path()) || config.ignoreAuthUri.any { AntPathMatcher().match(it, request.path()) }) {
             return
         }
         if (tokenValue.isNullOrBlank() && config.isReadHeader) {

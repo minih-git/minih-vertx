@@ -44,7 +44,7 @@
 <script setup lang="ts">
 import {reactive, ref} from "vue";
 import {Hide, Loading, Lock, User, View} from "@element-plus/icons-vue";
-import {FormInfo, info, login} from "../../../api/login";
+import {FormInfo, info, login} from "../../../api";
 import {useRouter, useRoute} from 'vue-router'
 import {useStore} from "../../../store";
 

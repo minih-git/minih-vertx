@@ -18,6 +18,8 @@ import io.vertx.config.ConfigRetrieverOptions
 import io.vertx.config.ConfigStoreOptions
 import io.vertx.core.DeploymentOptions
 import io.vertx.core.Vertx
+import io.vertx.core.impl.ContextInternal
+import io.vertx.core.impl.VertxImpl
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.kotlin.coroutines.await
@@ -75,6 +77,13 @@ object MinihServiceRun {
                 Vertx.currentContext().config().put(it.key, it.value)
             }
         }
+        val consumers = BeanFactory.instance.findBeanDefinitionByType(EventBusConsumer::class)
+        consumers.forEach { consumer ->
+            val bean = BeanFactory.instance.getBean(consumer.beanName) as EventBusConsumer
+            vertx.eventBus().consumer<JsonObject>(bean.channel).handler { obj ->
+                GlobalScope.launch(Vertx.currentContext().dispatcher()) { bean.exec(obj.body()) }
+            }
+        }
 
         services.forEach {
             val annoOptions =
@@ -83,15 +92,8 @@ object MinihServiceRun {
             if (instance >= MAX_INSTANCE_COUNT) {
                 instance = MAX_INSTANCE_COUNT
             }
-            vertx.deployVerticle(it.clazz.createType().toString(), options.setInstances(instance)) { re ->
+            vertx.deployVerticle(it.clazz.createType().toString(), options.setInstances(instance)).onComplete { re ->
                 if (re.succeeded()) {
-                    val consumers = BeanFactory.instance.findBeanDefinitionByType(EventBusConsumer::class)
-                    consumers.forEach { consumer ->
-                        val bean = BeanFactory.instance.getBean(consumer.beanName) as EventBusConsumer
-                        vertx.eventBus().consumer<JsonObject>(bean.channel).handler { msg ->
-                            GlobalScope.launch(vertx.dispatcher()) { bean.exec(msg.body()) }
-                        }
-                    }
                     log.info("[${it.beanName}]服务部署成功,实例数量：$instance")
                 }
             }
@@ -109,6 +111,7 @@ object MinihServiceRun {
         )
         val config = JsonObject()
         retriever.config.await().forEach {
+            val vertxConfig = Vertx.currentContext().config()
             if (it.key.contains(".")) {
                 val key = it.key.substring(0, it.key.indexOf("."))
                 val subKey = it.key.substring(it.key.indexOf(".") + 1)
@@ -116,8 +119,10 @@ object MinihServiceRun {
                 val map = config.getJsonObject(key, jsonObjectOf())
                 map.put(subKey, value)
                 config.put(key, map)
+                vertxConfig.put(key, map)
             }
             config.put(it.key, it.value)
+            vertxConfig.put(it.key, it.value)
         }
         return config
 

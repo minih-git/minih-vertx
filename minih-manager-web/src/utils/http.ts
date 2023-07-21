@@ -13,7 +13,7 @@ export interface BaseData {
 }
 
 export interface Page<T> {
-    nextCursor?: number
+    nextCursor: number
     data: T []
 }
 
@@ -37,7 +37,6 @@ export class MinihError extends Error {
 class NotLoginError extends MinihError {
 }
 
-
 const processHeaders = (params, needAuth, headers, type: string) => {
     let header = headers || {
         "Content-Type": "application/json",
@@ -55,7 +54,6 @@ const processHeaders = (params, needAuth, headers, type: string) => {
     }
     return header
 }
-
 export const get = async (url: string, params = {}, needAuth = true, headers = undefined): Promise<BaseData> => {
     try {
         return request({
@@ -80,7 +78,6 @@ export const post = async (url: string, params = {}, needAuth = true, headers = 
     }
 
 }
-
 export const request = async (options: RequestOptions): Promise<BaseData> => {
     let resultData = {
         code: -1,
@@ -99,12 +96,12 @@ export const request = async (options: RequestOptions): Promise<BaseData> => {
                 }
                 return resultData
             }
-            if (resultJson.code <= -10 && resultJson.code >= -20) {
-                throw new NotLoginError(resultJson.code, resultJson.msg + "，" + resultJson.data)
-            }
             let errorMsg = resultJson.msg
             if (resultJson.data) {
                 errorMsg = errorMsg + "，" + resultJson.data
+            }
+            if (resultJson.code <= -10 && resultJson.code >= -20) {
+                throw new NotLoginError(resultJson.code, errorMsg)
             }
             throw new MinihError(resultJson.code, errorMsg)
         }
@@ -122,8 +119,7 @@ export const request = async (options: RequestOptions): Promise<BaseData> => {
 
 
 }
-
-const globalHandleError = (e) => {
+const globalHandleError = async (e) => {
     let errData: MinihError = new MinihError(
         -1,
         "服务器发生错误，请稍后重试！"
@@ -138,7 +134,7 @@ const globalHandleError = (e) => {
         grouping: true,
     })
     if (e instanceof NotLoginError) {
-        router.push({name: '登录'})
+        await router.push({name: '登录'})
     }
 
     return new Promise<BaseData>((_, reject) => reject(errData))
