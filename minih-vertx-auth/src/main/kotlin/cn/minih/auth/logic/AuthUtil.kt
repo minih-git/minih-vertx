@@ -102,6 +102,7 @@ object AuthUtil {
         return try {
             Vertx.currentContext().get(CONTEXT_LOGIN_ID)
         } catch (e: Exception) {
+            e.printStackTrace()
             throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_NO_TOKEN)
         }
     }

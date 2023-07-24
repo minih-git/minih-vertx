@@ -22,9 +22,9 @@ import kotlinx.coroutines.launch
  * @date 2023/7/19
  * @desc
  */
-@MinihServiceVerticle(instance = 30)
+@MinihServiceVerticle(instance = 8)
 class SystemVerticle : MinihAuthVerticle(8090) {
-    override suspend fun initRouter() {
+    override suspend fun initRouterHandler() {
         createSystemEventBusListener()
         router.route()
             .produces(HttpHeaderValues.APPLICATION_JSON.toString())

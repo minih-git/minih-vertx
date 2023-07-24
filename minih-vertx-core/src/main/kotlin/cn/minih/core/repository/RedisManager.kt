@@ -1,4 +1,4 @@
-package cn.minih.auth.logic
+package cn.minih.core.repository
 
 import io.vertx.core.Vertx
 import io.vertx.redis.client.Redis
@@ -30,6 +30,9 @@ class RedisManager private constructor() {
         for (i in 1..poolSize) {
             val redisOption = RedisOptions()
                 .addConnectionString(config.getString("redis.connectionString"))
+                .setMaxPoolSize(512)
+                .setMaxPoolWaiting(1512)
+
             pools.add(RedisAPI.api(Redis.createClient(Vertx.currentContext().owner(), redisOption)))
         }
     }

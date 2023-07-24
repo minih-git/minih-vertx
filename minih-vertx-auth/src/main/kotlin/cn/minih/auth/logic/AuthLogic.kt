@@ -9,6 +9,7 @@ import cn.minih.auth.logic.AuthUtil.getConfig
 import cn.minih.auth.logic.AuthUtil.getRandomString
 import cn.minih.auth.utils.log
 import cn.minih.core.exception.IMinihErrorCode
+import cn.minih.core.repository.RedisManager
 import cn.minih.core.utils.SnowFlake
 import cn.minih.core.utils.jsonConvertData
 import cn.minih.core.utils.notBlankAndExec

@@ -1,4 +1,4 @@
-package cn.minih.auth.components
+package cn.minih.core.handler
 
 import cn.minih.core.exception.MinihException
 import cn.minih.core.utils.R

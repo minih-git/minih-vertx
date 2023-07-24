@@ -2,6 +2,7 @@ package cn.minih.auth.logic
 
 import cn.minih.auth.data.AuthLoginModel
 import cn.minih.auth.exception.AuthLoginException
+import cn.minih.core.repository.RedisManager
 import cn.minih.core.utils.Assert
 import io.vertx.kotlin.coroutines.await
 

@@ -3,7 +3,7 @@ package cn.minih.system.service
 import cn.minih.auth.data.AuthLoginModel
 import cn.minih.auth.exception.AuthLoginException
 import cn.minih.auth.logic.AuthService
-import cn.minih.auth.logic.RedisManager
+import cn.minih.core.repository.RedisManager
 import cn.minih.core.utils.Assert
 import cn.minih.core.utils.covertTo
 import cn.minih.system.data.user.SysUser
