@@ -25,6 +25,8 @@ dependencyResolutionManagement {
             library("bcrypt", "org.mindrot:jbcrypt:0.4")
             library("kotlin-reflect", "org.jetbrains.kotlin:kotlin-reflect:1.9.0")
 
+            library("smsapi", "com.aliyun:alibabacloud-dysmsapi20170525:2.0.24")
+
 
         }
     }

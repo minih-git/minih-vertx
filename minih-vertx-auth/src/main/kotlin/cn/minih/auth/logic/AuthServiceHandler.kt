@@ -5,16 +5,14 @@ import cn.hutool.core.util.URLUtil
 import cn.minih.auth.annotation.AuthCheckRole
 import cn.minih.auth.annotation.CheckRoleType
 import cn.minih.auth.constants.*
+import cn.minih.auth.data.LockType
 import cn.minih.auth.data.TokenInfo
 import cn.minih.auth.exception.AuthLoginException
 import cn.minih.auth.exception.MinihAuthException
 import cn.minih.auth.utils.getRequestBody
 import cn.minih.core.exception.MinihArgumentErrorException
 import cn.minih.core.exception.MinihException
-import cn.minih.core.utils.Assert
-import cn.minih.core.utils.R
-import cn.minih.core.utils.covertTo
-import cn.minih.core.utils.toJsonObject
+import cn.minih.core.utils.*
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.http.Cookie
@@ -41,6 +39,29 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
         GlobalScope.launch(v) {
             try {
                 authCheckRole(fn, ctx)
+                val args = generateArgs(fn.parameters, ctx)
+                val result = when (fn.parameters.size) {
+                    0 -> if (fn.isSuspend) fn.callSuspend() else fn.call()
+                    else -> if (fn.isSuspend) fn.callSuspend(*args) else fn.call(*args)
+                }
+                ctx.json(R.ok(result).toJsonObject())
+            } catch (e: Exception) {
+                if (e.cause is MinihException) {
+                    ctx.fail(e.cause)
+                } else {
+                    ctx.fail(e)
+                }
+            }
+        }
+    }
+}
+
+@OptIn(DelicateCoroutinesApi::class)
+fun Route.coroutineJsonHandlerNoAuth(fn: KFunction<Any?>) {
+    val v: CoroutineDispatcher = Vertx.currentContext().dispatcher()
+    handler { ctx ->
+        GlobalScope.launch(v) {
+            try {
                 val args = generateArgs(fn.parameters, ctx)
                 val result = when (fn.parameters.size) {
                     0 -> if (fn.isSuspend) fn.callSuspend() else fn.call()
@@ -137,13 +158,35 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
     }
 
     private suspend fun login(ctx: RoutingContext) {
-        val tokenInfo = login(getRequestBody(ctx))
         val config = AuthUtil.getConfig()
-        val tokenValue = config.tokenPrefix.plus(TOKEN_CONNECTOR_CHAT).plus(tokenInfo.tokenValue)
-        ctx.response().addCookie(Cookie.cookie(config.tokenName, URLUtil.encode(tokenValue)))
-        ctx.response().putHeader(config.tokenName, tokenValue)
-        ctx.put(CONTEXT_LOGIN_ID, tokenInfo.loginId)
-        ctx.json(R.ok(tokenInfo).toJsonObject())
+        val body = getRequestBody(ctx)
+        try {
+            val tokenInfo = login(body)
+            val tokenValue = config.tokenPrefix.plus(TOKEN_CONNECTOR_CHAT).plus(tokenInfo.tokenValue)
+            ctx.response().addCookie(Cookie.cookie(config.tokenName, URLUtil.encode(tokenValue)))
+            ctx.response().putHeader(config.tokenName, tokenValue)
+            ctx.put(CONTEXT_LOGIN_ID, tokenInfo.loginId)
+            ctx.json(R.ok(tokenInfo).toJsonObject())
+        } catch (e: Exception) {
+            var key = ""
+            if (config.loginMaxTryLockType == LockType.ACCOUNT) {
+                if (body.containsKey("username")) {
+                    key = body.getString("username")
+                }
+                if (body.containsKey("mobile")) {
+                    key = body.getString("mobile")
+                }
+            }
+            if (config.loginMaxTryLockType == LockType.IP) {
+                key = getRemoteIp(ctx.request())
+            }
+            if (key.isNotBlank()) {
+                AuthLogic.checkLoginState(key)
+            }
+
+            throw e
+        }
+
     }
 
     private suspend fun kickOut(ctx: RoutingContext) {

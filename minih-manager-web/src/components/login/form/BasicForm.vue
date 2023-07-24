@@ -45,8 +45,7 @@
 import {reactive, ref} from "vue";
 import {Hide, Loading, Lock, User, View} from "@element-plus/icons-vue";
 import {FormInfo, info, login} from "../../../api";
-import {useRouter, useRoute} from 'vue-router'
-import {useStore} from "../../../store";
+import {useRouter} from 'vue-router'
 
 
 const showPwd = ref<Boolean>(true)
@@ -54,13 +53,7 @@ const config = JSON.parse(localStorage.getItem("config") || "{}")
 const savePassword = ref<Boolean>(config?.savePassword)
 let isLoading = ref(false)
 const router = useRouter()
-const route = useRoute()
-const store = useStore()
 
-if (store.state.user.sessionInfo.tokenVale) {
-    let target = route.query['target']?.toString() || '/home'
-    router.push({path: target})
-}
 
 const formData = reactive<Partial<FormInfo>>({
     username: config?.localUser,

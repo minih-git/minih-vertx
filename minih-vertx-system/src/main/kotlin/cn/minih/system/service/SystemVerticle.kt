@@ -2,6 +2,7 @@ package cn.minih.system.service
 
 import cn.minih.auth.logic.AuthUtil
 import cn.minih.auth.logic.coroutineJsonHandlerHasAuth
+import cn.minih.auth.logic.coroutineJsonHandlerNoAuth
 import cn.minih.auth.service.MinihAuthVerticle
 import cn.minih.core.annotation.MinihServiceVerticle
 import cn.minih.system.service.resource.ResourceServiceHandler
@@ -45,6 +46,7 @@ class SystemVerticle : MinihAuthVerticle(8090) {
         router.post("/resource/page").coroutineJsonHandlerHasAuth(ResourceServiceHandler::queryResources)
         router.post("/resource/addResource").coroutineJsonHandlerHasAuth(ResourceServiceHandler::addResource)
         router.post("/resource/editResource").coroutineJsonHandlerHasAuth(ResourceServiceHandler::editResource)
+        router.post("/system/vCode").coroutineJsonHandlerNoAuth(SystemServiceHandler::smsSendVCode)
 
     }
 
@@ -71,4 +73,5 @@ class SystemVerticle : MinihAuthVerticle(8090) {
         }
         router.route("/ws/systemEvent/*").subRouter(bridge)
     }
+
 }

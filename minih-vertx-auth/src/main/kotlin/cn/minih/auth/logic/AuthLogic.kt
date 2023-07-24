@@ -29,7 +29,7 @@ import kotlin.reflect.jvm.internal.impl.types.SimpleType
  */
 object AuthLogic {
 
-    private suspend fun createTokenValue(): String {
+    private fun createTokenValue(): String {
         val config = getConfig()
         val token = when (config.tokenStyle) {
             TOKEN_STYLE_UUID -> UUID.randomUUID().toString()
@@ -76,6 +76,18 @@ object AuthLogic {
                 Vertx.currentContext().owner()?.eventBus()
                     ?.publish(AUTH_SESSION_KEEP, jsonObjectOf("token" to token, "loginId" to loginId))
             }
+        }
+
+    }
+
+    suspend fun checkLoginState(key: String) {
+        val redisApi = RedisManager.instance.getReidApi()
+        var count = redisApi.get(getLoginErrorKey(key))?.await()?.toInteger() ?: 0
+        count++
+        val config = getConfig()
+        redisApi.set(listOf(getLoginErrorKey(key), count.toString(), "EX", config.loginMaxTryLockTimes.toString()))
+        if (count > config.loginMaxTryTimes) {
+            throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_TRY_MAX_TIMES)
         }
 
     }
@@ -130,7 +142,7 @@ object AuthLogic {
     }
 
     private suspend fun generateUniqueToken(): String {
-        val maxTryTimes = getConfig().maxTryTimes
+        val maxTryTimes = getConfig().tokenGenMaxTryTimes
         var i = 0
         while (true) {
             val token = createTokenValue()
@@ -242,15 +254,19 @@ object AuthLogic {
         return RedisManager.instance.getReidApi().get(getTokenKey(token)).await()?.toString()
     }
 
-    private suspend fun getTokenKey(token: String): String {
+    private fun getTokenKey(token: String): String {
         return "${getConfig().projectName}:auth:token-session:$token"
     }
 
-    private suspend fun getSessionKey(id: String): String {
+    private fun getSessionKey(id: String): String {
         return "${getConfig().projectName}:auth:login-session:$id"
     }
 
-    private suspend fun getSessionActiveKey(id: String): String {
+    private fun getSessionActiveKey(id: String): String {
         return "${getConfig().projectName}:auth:session-active:$id"
+    }
+
+    private fun getLoginErrorKey(key: String): String {
+        return "${getConfig().projectName}:auth:login-error:$key"
     }
 }

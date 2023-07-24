@@ -38,7 +38,7 @@
                 </el-table-column>
                 <el-table-column align="center" label="角色" prop="roleInfos">
                     <template #default="scope">
-                        <el-popover :width="250" placement="right" trigger="hover">
+                        <el-popover :width="350" placement="right" trigger="hover">
                             <template #reference>
                                 <el-tag effect="plain">
                                     <el-icon>
@@ -49,7 +49,7 @@
                             </template>
                             <el-table :data="scope.row.roleInfos">
                                 <el-table-column align="center" label="角色名字" property="name" width="150"/>
-                                <el-table-column align="center" label="角色标志" property="roleTag" width="80"/>
+                                <el-table-column align="center" label="角色标志" property="roleTag" width="180"/>
                             </el-table>
                         </el-popover>
 
@@ -159,7 +159,7 @@ const queryUserList = () => {
         userList("").then(async it => {
             const roles: RoleInfo[] = await store.dispatch("role/getOrLoad")
             it.data.map(it => {
-                it.roleInfos = roles.filter(it1 => it.role.includes(it1.id))
+                it.roleInfos = roles.filter(it1 => it.role.includes(it1.roleTag))
             })
             tableData.value = it.data
             loading.value = false

@@ -18,7 +18,7 @@ enum class MinihAuthErrorCode(override val code: Int, override val msg: String) 
     ERR_CODE_LOGIN_TOKEN_LOGOUT(-15, "已退出登录"),
     ERR_CODE_LOGIN_TOKEN_REPLACED_OUT(-16, "已在其他地方登录"),
     ERR_CODE_LOGIN_TOKEN_FREEZE(-17, "账户已被冻结"),
-    ERR_CODE_LOGIN_NO_LOGIN_INFO(-18, "未能读取到有效的登录信息"),
+    ERR_CODE_LOGIN_TRY_MAX_TIMES(-18, "错误次数过多，账户已锁定"),
     ERR_CODE_LOGIN_TOKEN_NO_AUTH(-19, "未授权!"),
     ;
 }

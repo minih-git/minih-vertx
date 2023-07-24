@@ -23,6 +23,7 @@ class RequestMonitorHandler : Handler<RoutingContext> {
         val time = Date().time / 1000 / 60
         path?.let {
             if (path.contains("ws")) {
+                ctx.next()
                 return
             }
             redisApi.incr(getMonitorKey(time.toString(), path))

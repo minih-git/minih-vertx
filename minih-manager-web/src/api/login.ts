@@ -1,4 +1,4 @@
-import {post, get} from "../utils";
+import {get, post} from "../utils";
 import {store} from "../store";
 import router from '../router'
 import {UserInfo} from "../store/module/user";
@@ -35,6 +35,10 @@ export const login = async (form: Partial<FormInfo>): Promise<SessionInfo> => {
     }
     await store.dispatch("user/setSessionInfo", sessionInfo)
     return sessionInfo
+}
+export const submitGetCode = async (form: Partial<FormInfo>) => {
+    let url = "/system/vCode"
+    await post(url, form, false)
 }
 
 export const logout = async () => {

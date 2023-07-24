@@ -34,6 +34,7 @@ object ResourceServiceHandler {
             queryOption.put(SysResource::state, condition.state)
         }
         queryOption.put(SysResource::createTime, jsonObjectOf("\$gt" to page.nextCursor))
+        log.info("用户是系统管理员,{}",AuthUtil.currentIsSysAdmin())
         if (!AuthUtil.currentIsSysAdmin()) {
             val roleTags = AuthServiceImpl.instance.getLoginRole(AuthUtil.getCurrentLoginId())
             val roleCondition = MongoQueryOption<SysRole>()

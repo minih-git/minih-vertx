@@ -23,4 +23,6 @@ dependencies {
     api(libs.logback)
     api(libs.logging)
 
+    api(libs.smsapi)
+
 }

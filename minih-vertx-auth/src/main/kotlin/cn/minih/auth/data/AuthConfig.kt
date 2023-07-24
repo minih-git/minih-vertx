@@ -2,6 +2,10 @@ package cn.minih.auth.data
 
 import cn.minih.auth.constants.*
 
+enum class LockType(val code: Int) {
+    ACCOUNT(1), IP(2)
+}
+
 /**
  * @author hubin
  * @date 2023/7/10
@@ -12,7 +16,10 @@ data class AuthConfig(
     val tokenName: String = DEFAULT_TOKEN_NAME,
     val timeout: Long = DEFAULT_TIME_OUT,
     val isConcurrent: Boolean = false,
-    val maxTryTimes: Int = 5,
+    val tokenGenMaxTryTimes: Int = 5,
+    val loginMaxTryTimes: Int = 5,
+    val loginMaxTryLockTimes: Int = 5 * 60,
+    val loginMaxTryLockType: LockType = LockType.ACCOUNT,
     val tokenStyle: String = DEFAULT_TOKEN_STYLE,
     val tokenPrefix: String = DEFAULT_TOKEN_PREFIX,
     val loginPath: String = DEFAULT_LOGIN_PATH,
@@ -22,6 +29,6 @@ data class AuthConfig(
     val isReadBody: Boolean = true,
     val isReadParams: Boolean = true,
     val autoKeepSign: Boolean = true,
-    val ignoreAuthUri: List<String> = mutableListOf("/authEventbus"),
+    val ignoreAuthUri: List<String> = listOf(),
 
     )

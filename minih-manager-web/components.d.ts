@@ -15,6 +15,7 @@ declare module 'vue' {
     ElBreadcrumb: typeof import('element-plus/es')['ElBreadcrumb']
     ElBreadcrumbItem: typeof import('element-plus/es')['ElBreadcrumbItem']
     ElButton: typeof import('element-plus/es')['ElButton']
+    ElButtonGroup: typeof import('element-plus/es')['ElButtonGroup']
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElContainer: typeof import('element-plus/es')['ElContainer']
     ElDrawer: typeof import('element-plus/es')['ElDrawer']
@@ -45,6 +46,7 @@ declare module 'vue' {
     Home: typeof import('./src/components/Home.vue')['default']
     List: typeof import('./src/components/resource/List.vue')['default']
     Login: typeof import('./src/components/login/Login.vue')['default']
+    PhoneCodeForm: typeof import('./src/components/login/form/PhoneCodeForm.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }

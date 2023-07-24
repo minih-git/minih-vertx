@@ -4,6 +4,7 @@ import cn.minih.auth.logic.AuthServiceHandler
 import cn.minih.core.handler.RouteFailureHandler
 import cn.minih.core.web.MinihVerticle
 import io.vertx.ext.bridge.PermittedOptions
+import io.vertx.ext.web.AllowForwardHeaders
 import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 
@@ -27,6 +28,9 @@ abstract class MinihAuthVerticle(port: Int = 8080) : MinihVerticle(port) {
         router.errorHandler(404, RouteFailureHandler.instance)
         router.errorHandler(405, RouteFailureHandler.instance)
         router.errorHandler(500, RouteFailureHandler.instance)
+        router.allowForward(AllowForwardHeaders.FORWARD)
+        router.allowForward(AllowForwardHeaders.X_FORWARD)
+
         router.route()
             .handler(AuthServiceHandler.instance)
         initRouterHandler()

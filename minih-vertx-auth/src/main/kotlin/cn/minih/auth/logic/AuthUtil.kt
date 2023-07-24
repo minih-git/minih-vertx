@@ -5,11 +5,9 @@ import cn.minih.auth.data.AuthConfig
 import cn.minih.auth.data.AuthLoginModel
 import cn.minih.auth.data.TokenInfo
 import cn.minih.auth.exception.AuthLoginException
-import cn.minih.core.utils.jsonConvertData
-import io.vertx.core.Future
+import cn.minih.core.utils.covertTo
 import io.vertx.core.Vertx
-import io.vertx.core.shareddata.AsyncMap
-import io.vertx.kotlin.coroutines.await
+import io.vertx.core.json.JsonObject
 import java.util.concurrent.ThreadLocalRandom
 
 /**
@@ -18,14 +16,14 @@ import java.util.concurrent.ThreadLocalRandom
  * @desc
  */
 object AuthUtil {
-    private val shareConfig: Future<AsyncMap<String, Any>>
+    private val shareConfig: JsonObject
         get() {
-            val sharedData = Vertx.currentContext().owner().sharedData()
-            return sharedData.getLocalAsyncMap("auth")
+            val sharedData = Vertx.currentContext().config()
+            return sharedData.getJsonObject("auth")
         }
 
-    suspend fun getConfig(): AuthConfig {
-        return shareConfig.await().entries().await().toString().jsonConvertData(AuthConfig::class)
+    fun getConfig(): AuthConfig {
+        return shareConfig.covertTo(AuthConfig::class)
     }
 
     fun getRandomString(length: Int): String {

@@ -1,2 +1,5 @@
 auth:
   tokenStyle: "random-64"
+  loginMaxTryLockType: "IP"
+  ignoreAuthUri:
+    - /system/vCode

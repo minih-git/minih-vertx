@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":minih-vertx-auth"))
     implementation(libs.bcrypt)
     implementation(libs.vertx.config.yaml)
+    implementation(libs.smsapi)
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")

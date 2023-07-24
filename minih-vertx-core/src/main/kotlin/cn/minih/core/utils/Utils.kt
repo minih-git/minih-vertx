@@ -1,14 +1,26 @@
 package cn.minih.core.utils
 
+import cn.minih.core.constants.SMS_REDIS_EXPIRE
+import cn.minih.core.constants.SMS_REDIS_KEY_PREFIX
+import cn.minih.core.repository.RedisManager
+import com.aliyun.auth.credentials.Credential
+import com.aliyun.auth.credentials.provider.StaticCredentialProvider
+import com.aliyun.sdk.service.dysmsapi20170525.AsyncClient
+import com.aliyun.sdk.service.dysmsapi20170525.models.SendSmsRequest
 import com.google.gson.Gson
+import darabonba.core.client.ClientOverrideConfiguration
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.vertx.core.http.HttpServerRequest
 import io.vertx.core.json.JsonObject
+import io.vertx.kotlin.core.json.jsonObjectOf
+import io.vertx.kotlin.coroutines.await
 import java.io.File
 import java.io.IOException
 import java.net.InetAddress
 import java.net.URL
 import java.util.*
+import kotlin.math.pow
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
@@ -85,6 +97,54 @@ fun getClassesByPath(path: String): MutableList<KClass<*>> {
     return result
 }
 
+suspend fun smsSendVerifyCode(phone: String) {
+    val redisApi = RedisManager.instance.getReidApi()
+    val provider = StaticCredentialProvider.create(
+        Credential.builder()
+            .accessKeyId("LTAI5tGfUXxsnrC9tf2CgQj2")
+            .accessKeySecret("ZL96vjn9LuAx5lxumaf9e3LdJ1jhAg")
+            .build()
+    )
+    val client = AsyncClient.builder().region("cn-hangzhou")
+        .credentialsProvider(provider).overrideConfiguration(
+            ClientOverrideConfiguration.create()
+                .setEndpointOverride("dysmsapi.aliyuncs.com")
+        )
+        .build()
+    var code = redisApi.get(SMS_REDIS_KEY_PREFIX + phone)?.await()?.toString()
+    if (code.isNullOrBlank()) {
+        code = ((Math.random() * 9 + 1) * 10.0.pow(5.0)).toInt().toString()
+        redisApi.set(listOf(SMS_REDIS_KEY_PREFIX + phone, code, "EX", SMS_REDIS_EXPIRE.toString()))
+    }
+    val sendSmsRequest = SendSmsRequest.builder()
+        .signName("阿里云短信测试")
+        .templateCode("SMS_154950909")
+        .phoneNumbers("15999603031")
+        .templateParam(jsonObjectOf("code" to code).toString())
+        .build()
+    client.sendSms(sendSmsRequest)
+    client.close()
+}
+
+fun getRemoteIp(request: HttpServerRequest): String {
+    var ip: String? = request.getHeader("x-forwarded-for")
+    if (ip.isNullOrEmpty() || "unknown".equals(ip, ignoreCase = true)) {
+        ip = request.getHeader("Proxy-Client-IP")
+    }
+    if (ip.isNullOrEmpty() || "unknown".equals(ip, ignoreCase = true)) {
+        ip = request.getHeader("WL-Proxy-Client-IP")
+    }
+    if (ip.isNullOrEmpty() || "unknown".equals(ip, ignoreCase = true)) {
+        ip = request.getHeader("HTTP_CLIENT_IP")
+    }
+    if (ip.isNullOrEmpty() || "unknown".equals(ip, ignoreCase = true)) {
+        ip = request.getHeader("HTTP_X_FORWARDED_FOR")
+    }
+    if (ip.isNullOrEmpty() || "unknown".equals(ip, ignoreCase = true)) {
+        ip = request.remoteAddress().host()
+    }
+    return ip ?: ""
+}
 
 object SnowFlake {
     private val workerId = getWorkId(InetAddress.getLocalHost().hostAddress)
