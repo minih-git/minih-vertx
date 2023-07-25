@@ -21,7 +21,7 @@ export async function roleList(search: string = "", nextCursor: number = 0): Pro
     }
 }
 
-export async function addRole(roleInfo: RoleInfo): Promise<BaseData> {
+export async function addRole(roleInfo: Partial<RoleInfo>): Promise<BaseData> {
     let url = "/role/addRole"
     return await post(url, roleInfo)
 }

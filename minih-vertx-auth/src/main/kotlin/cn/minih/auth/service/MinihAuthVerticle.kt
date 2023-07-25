@@ -33,7 +33,6 @@ abstract class MinihAuthVerticle(port: Int = 8080) : MinihVerticle(port) {
 
         router.route()
             .handler(AuthServiceHandler.instance)
-        initRouterHandler()
         super.start()
     }
 

@@ -27,6 +27,7 @@ class RequestMonitorHandler : Handler<RoutingContext> {
                 return
             }
             redisApi.incr(getMonitorKey(time.toString(), path))
+            redisApi.expire(listOf(getMonitorKey(time.toString(), path), (60 * 60 * 24).toString()))
         }
         ctx.next()
     }

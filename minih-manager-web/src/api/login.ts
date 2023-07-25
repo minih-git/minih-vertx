@@ -1,4 +1,4 @@
-import {get, post} from "../utils";
+import {encrypt, get, post} from "../utils";
 import {store} from "../store";
 import router from '../router'
 import {UserInfo} from "../store/module/user";
@@ -22,8 +22,10 @@ export interface SessionInfo {
 }
 
 
-export const login = async (form: Partial<FormInfo>): Promise<SessionInfo> => {
+export const login = async (formRaw: Partial<FormInfo>): Promise<SessionInfo> => {
     let url = "/auth/login"
+    const form = JSON.parse(JSON.stringify(formRaw))
+    form.password = encrypt(form.password, await store.dispatch("system/getOrLoadSecret"))
     let res = await post(url, form, false)
     let sessionInfo = {
         tokenValue: res.data['tokenValue'],

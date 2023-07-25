@@ -1,5 +1,5 @@
-import {SessionInfo} from "../../../api/login";
-import {Optional} from "../../../utils/utils";
+import {SessionInfo} from "../../../api";
+import {Optional} from "../../../utils";
 import {RoleInfo} from "../role";
 
 export interface SysUser {

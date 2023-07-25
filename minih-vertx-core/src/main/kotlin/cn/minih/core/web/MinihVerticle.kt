@@ -2,6 +2,9 @@ package cn.minih.core.web
 
 import cn.minih.core.handler.RequestMonitorHandler
 import cn.minih.core.handler.RouteFailureHandler
+import cn.minih.core.utils.R
+import cn.minih.core.utils.getConfig
+import cn.minih.core.utils.toJsonObject
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
@@ -30,6 +33,9 @@ abstract class MinihVerticle(private val port: Int = 8080) : CoroutineVerticle()
         options.addOutboundPermitted(PermittedOptions().setAddressRegex("cn.minih.*"))
         routerInstance.route("/ws/minihEventbus/*")
             .subRouter(sockJSHandler.bridge(options))
+        routerInstance.route("/options").handler {
+            it.json(R.ok(mapOf("se" to getConfig().aesSecret)).toJsonObject())
+        }
         routerInstance.route()
             .handler(ResponseContentTypeHandler.create())
             .handler(BodyHandler.create())

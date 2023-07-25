@@ -24,7 +24,7 @@ export async function resourceList(search: string = "", nextCursor: number = 0):
     }
 }
 
-export async function addResource(resourceInfo: ResourceInfo): Promise<BaseData> {
+export async function addResource(resourceInfo: Partial<ResourceInfo>): Promise<BaseData> {
     let url = "/resource/addResource"
     return await post(url, resourceInfo)
 }

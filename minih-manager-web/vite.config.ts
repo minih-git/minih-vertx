@@ -11,9 +11,6 @@ import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    define: {
-        global: {},
-    },
     server: {
         host: '0.0.0.0',
         port: 4500, // 设置服务启动端口号
@@ -57,4 +54,11 @@ export default defineConfig({
             symbolId: '[name]'
         })
     ],
+    build: {
+        rollupOptions: {
+            external: [
+                "element-plus"
+            ]
+        }
+    }
 })

@@ -3,25 +3,19 @@ package cn.minih.core.components
 import cn.minih.core.annotation.Component
 import cn.minih.core.annotation.ComponentScan
 import cn.minih.core.annotation.MinihServiceVerticle
-import cn.minih.core.beans.BeanDefinition
 import cn.minih.core.beans.BeanDefinitionBuilder
 import cn.minih.core.beans.BeanFactory
 import cn.minih.core.constants.MAX_INSTANCE_COUNT
 import cn.minih.core.constants.SYSTEM_CONFIGURATION_SUBSCRIBE
 import cn.minih.core.handler.BeforeDeployHandler
 import cn.minih.core.handler.EventBusConsumer
-import cn.minih.core.utils.getClassesByPath
-import cn.minih.core.utils.log
-import cn.minih.core.utils.toJsonObject
+import cn.minih.core.utils.*
 import io.vertx.config.ConfigRetriever
 import io.vertx.config.ConfigRetrieverOptions
 import io.vertx.config.ConfigStoreOptions
 import io.vertx.core.DeploymentOptions
 import io.vertx.core.Vertx
-import io.vertx.core.impl.ContextInternal
-import io.vertx.core.impl.VertxImpl
 import io.vertx.core.json.JsonObject
-import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -31,7 +25,6 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
-import kotlin.reflect.full.superclasses
 
 /**
  * @author hubin
@@ -109,24 +102,32 @@ object MinihServiceRun {
                         .setConfig(JsonObject().put("path", "app.yaml"))
                 )
         )
-        val config = JsonObject()
-        retriever.config.await().forEach {
-            val vertxConfig = Vertx.currentContext().config()
+        val config = retriever.config.await()
+        config.put("minih.core.aesSecret", generateAesSecret())
+        val obj = config.covertTo(com.google.gson.JsonObject::class)
+        config.forEach {
             if (it.key.contains(".")) {
-                val key = it.key.substring(0, it.key.indexOf("."))
-                val subKey = it.key.substring(it.key.indexOf(".") + 1)
-                val value = it.value
-                val map = config.getJsonObject(key, jsonObjectOf())
-                map.put(subKey, value)
-                config.put(key, map)
-                vertxConfig.put(key, map)
+                updateJson(obj, it.key.split("."), it.value.toString())
             }
-            config.put(it.key, it.value)
+        }
+        obj.entrySet().forEach {
+            val vertxConfig = Vertx.currentContext().config()
             vertxConfig.put(it.key, it.value)
         }
-        return config
+        return obj.toJsonObject()
 
     }
+
+    private fun updateJson(jsonObj: com.google.gson.JsonObject, keys: List<String>, newValue: String) {
+        val key = keys[0]
+        if (keys.size == 1) {
+            jsonObj.addProperty(key, newValue)
+        } else {
+            val nextObj = jsonObj.getAsJsonObject(key) ?: com.google.gson.JsonObject().also { jsonObj.add(key, it) }
+            updateJson(nextObj, keys.drop(1), newValue)
+        }
+    }
+
 
     private fun hasComponentsAnnotation(clazz: KClass<*>): Boolean {
         try {

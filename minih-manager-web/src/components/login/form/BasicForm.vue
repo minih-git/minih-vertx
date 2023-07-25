@@ -50,10 +50,9 @@ import {useRouter} from 'vue-router'
 
 const showPwd = ref<Boolean>(true)
 const config = JSON.parse(localStorage.getItem("config") || "{}")
-const savePassword = ref<Boolean>(config?.savePassword)
+const savePassword = ref<Boolean>(config.savePassword === true)
 let isLoading = ref(false)
 const router = useRouter()
-
 
 const formData = reactive<Partial<FormInfo>>({
     username: config?.localUser,

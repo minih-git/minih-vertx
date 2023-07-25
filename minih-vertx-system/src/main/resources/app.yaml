@@ -1,5 +1,6 @@
-auth:
-  tokenStyle: "random-64"
-  loginMaxTryLockType: "IP"
-  ignoreAuthUri:
-    - /system/vCode
+minih:
+  auth:
+    tokenStyle: "random-64"
+    loginMaxTryLockType: "IP"
+    ignoreAuthUri:
+      - /system/vCode

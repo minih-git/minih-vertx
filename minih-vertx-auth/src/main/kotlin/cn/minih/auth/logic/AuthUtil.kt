@@ -5,6 +5,7 @@ import cn.minih.auth.data.AuthConfig
 import cn.minih.auth.data.AuthLoginModel
 import cn.minih.auth.data.TokenInfo
 import cn.minih.auth.exception.AuthLoginException
+import cn.minih.core.constants.PROJECT_NAME
 import cn.minih.core.utils.covertTo
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
@@ -19,7 +20,7 @@ object AuthUtil {
     private val shareConfig: JsonObject
         get() {
             val sharedData = Vertx.currentContext().config()
-            return sharedData.getJsonObject("auth")
+            return sharedData.getJsonObject(PROJECT_NAME).getJsonObject("auth")
         }
 
     fun getConfig(): AuthConfig {

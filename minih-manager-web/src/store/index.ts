@@ -5,6 +5,7 @@ import {userModule} from './module/user'
 import createPersistedState from 'vuex-persistedstate'
 import {roleModule} from "./module/role";
 import {resourceModule} from "./module/resource";
+import {systemModule} from "./module/system";
 
 export const key: InjectionKey<Store<RootState>> = Symbol()
 
@@ -12,7 +13,8 @@ export const store = createStore<RootState>({
     modules: {
         user: userModule,
         role: roleModule,
-        resource: resourceModule
+        resource: resourceModule,
+        system: systemModule
     },
     plugins: [createPersistedState({
         storage: window.sessionStorage,

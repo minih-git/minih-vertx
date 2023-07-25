@@ -9,6 +9,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/minih-manager-web" />
             <option value="$PROJECT_DIR$/minih-vertx-auth" />
             <option value="$PROJECT_DIR$/minih-vertx-core" />
             <option value="$PROJECT_DIR$/minih-vertx-system" />

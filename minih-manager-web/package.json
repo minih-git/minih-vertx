@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@types/qs": "^6.9.7",
+    "crypto-js": "^4.1.1",
     "element-plus": "^2.3.7",
     "qs": "^6.11.2",
     "unplugin-auto-import": "^0.16.6",

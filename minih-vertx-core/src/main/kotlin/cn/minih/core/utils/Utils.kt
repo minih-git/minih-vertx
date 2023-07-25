@@ -1,5 +1,7 @@
 package cn.minih.core.utils
 
+import cn.minih.core.config.CoreConfig
+import cn.minih.core.constants.PROJECT_NAME
 import cn.minih.core.constants.SMS_REDIS_EXPIRE
 import cn.minih.core.constants.SMS_REDIS_KEY_PREFIX
 import cn.minih.core.repository.RedisManager
@@ -11,6 +13,7 @@ import com.google.gson.Gson
 import darabonba.core.client.ClientOverrideConfiguration
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServerRequest
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.core.json.jsonObjectOf
@@ -19,13 +22,23 @@ import java.io.File
 import java.io.IOException
 import java.net.InetAddress
 import java.net.URL
+import java.security.SecureRandom
 import java.util.*
+import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.spec.SecretKeySpec
 import kotlin.math.pow
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
 
 val log: KLogger = KotlinLogging.logger {}
+
+fun getConfig(): CoreConfig {
+    val sharedData = Vertx.currentContext().config()
+    return sharedData.getJsonObject(PROJECT_NAME)
+        .getJsonObject("core").covertTo(CoreConfig::class)
+}
 
 suspend fun <T> T?.notBlankAndExec(fn: suspend (T) -> Unit) {
     if (this != null) {
@@ -35,7 +48,6 @@ suspend fun <T> T?.notBlankAndExec(fn: suspend (T) -> Unit) {
         fn(this)
     }
 }
-
 
 fun Any.toJsonObject(): JsonObject {
     return JsonObject(Gson().toJson(this))
@@ -99,10 +111,11 @@ fun getClassesByPath(path: String): MutableList<KClass<*>> {
 
 suspend fun smsSendVerifyCode(phone: String) {
     val redisApi = RedisManager.instance.getReidApi()
+    val config = getConfig()
     val provider = StaticCredentialProvider.create(
         Credential.builder()
-            .accessKeyId("LTAI5tGfUXxsnrC9tf2CgQj2")
-            .accessKeySecret("ZL96vjn9LuAx5lxumaf9e3LdJ1jhAg")
+            .accessKeyId(config.aliyunApiKey)
+            .accessKeySecret(config.aliyunApiSecret)
             .build()
     )
     val client = AsyncClient.builder().region("cn-hangzhou")
@@ -145,6 +158,42 @@ fun getRemoteIp(request: HttpServerRequest): String {
     }
     return ip ?: ""
 }
+
+fun generateAesSecret(): String {
+    val keyGenerator = KeyGenerator.getInstance("AES")
+    keyGenerator.init(128, SecureRandom())
+    val secretKey = keyGenerator.generateKey()
+    return secretKey.encoded.joinToString("") { "%02x".format(it) }
+}
+
+fun encrypt(strToEncrypt: String, secret: String): String {
+    try {
+        val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
+        val secretKey = SecretKeySpec(secret.toByteArray(), "AES")
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey)
+        return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.toByteArray(Charsets.UTF_8)))
+    } catch (e: Exception) {
+        println("Error while encrypting: $e")
+    }
+    return ""
+}
+
+fun decrypt(strToDecrypt: String, secret: String): String {
+    try {
+        val cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING")
+        val secretKey = SecretKeySpec(secret.toByteArray(), "AES")
+        cipher.init(Cipher.DECRYPT_MODE, secretKey)
+        return String(cipher.doFinal(Base64.getDecoder().decode(strToDecrypt)))
+    } catch (e: Exception) {
+        println("Error while decrypting: $e")
+    }
+    return ""
+}
+
+fun main() {
+    print(decrypt("j2iTIIShca5N3kDFJOT+Vw==","2185c344b99547f82d9948c7b68ee11c"))
+}
+
 
 object SnowFlake {
     private val workerId = getWorkId(InetAddress.getLocalHost().hostAddress)

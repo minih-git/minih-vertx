@@ -63,7 +63,7 @@ if (config.countdown && Number(config.countdown) > 0) {
     btnText.value = config.countdown
 }
 let isLoading = ref(false)
-const mobileRef = ref(null);
+const mobileRef = ref();
 
 
 const router = useRouter()
@@ -96,7 +96,7 @@ if (config.countdown && Number(config.countdown) > 0) {
 
 
 const getCode = async () => {
-    let msg: string
+    let msg: string = ""
 
     if (!formData.mobile) {
         msg = "请输入手机号"

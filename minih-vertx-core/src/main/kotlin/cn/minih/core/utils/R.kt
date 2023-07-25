@@ -10,7 +10,7 @@ import cn.minih.core.exception.MinihErrorCode
  * @date 2023/3/15
  * @desc
  */
-data class R<T>(var code: Int?, var msg: String?, val data: T?) {
+data class R<T>(var code: Int?, var msg: String?, val data: T?, val encrypt: Boolean = false) {
     companion object {
         fun <T> ok(data: T?): R<T> {
             var rce = MinihErrorCode.SUCCESS_CODE_UNDEFINED
@@ -18,6 +18,14 @@ data class R<T>(var code: Int?, var msg: String?, val data: T?) {
                 rce = MinihErrorCode.ERR_CODE_UNDEFINED
             }
             return R(rce.code, rce.msg, data)
+        }
+
+        fun <T> encryptOk(data: T?): R<T> {
+            var rce = MinihErrorCode.SUCCESS_CODE_UNDEFINED
+            if (data is Boolean && !data) {
+                rce = MinihErrorCode.ERR_CODE_UNDEFINED
+            }
+            return R(rce.code, rce.msg, data, true)
         }
 
         fun <T> ok(): R<T> {

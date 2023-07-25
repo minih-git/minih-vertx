@@ -5,7 +5,6 @@ package cn.minih.auth.constants
  * @date 2023/7/10
  * @desc
  */
-const val DEFAULT_PROJECT_NAME = "minih"
 const val TOKEN_STYLE_UUID = "uuid"
 const val TOKEN_STYLE_SIMPLE_UUID = "simple-uuid"
 const val TOKEN_STYLE_RANDOM_32 = "random-32"

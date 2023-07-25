@@ -32,4 +32,4 @@ dependencyResolutionManagement {
     }
 }
 
-include("minih-vertx-system","minih-vertx-auth", "minih-vertx-core")
+include("minih-vertx-system","minih-vertx-auth", "minih-vertx-core","minih-manager-web")

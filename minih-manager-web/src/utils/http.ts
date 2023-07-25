@@ -2,6 +2,7 @@ import {stringify} from 'qs'
 import {store} from "../store";
 import {ElMessage} from "element-plus";
 import router from '../router'
+import {decrypt} from "./utils.ts";
 
 
 const baseUrl: string = "/api"
@@ -89,10 +90,22 @@ export const request = async (options: RequestOptions): Promise<BaseData> => {
         let resultJson = await res.json()
         if (res.status == 200) {
             if (resultJson.code == 0) {
+
                 resultData.code = resultJson.code
                 resultData.msg = resultJson.msg
                 if (resultJson.data) {
-                    resultData.data = JSON.parse(JSON.stringify(resultJson.data))
+                    let data = resultJson.data
+                    if (resultJson.encrypt) {
+                        try {
+                            let secret = await store.dispatch("system/getOrLoadSecret")
+                            data = JSON.parse(decrypt(resultJson.data, secret))
+                        } catch (e) {
+                            let secret = await store.dispatch("system/getOrLoadSecret", true)
+                            data = JSON.parse(decrypt(resultJson.data, secret))
+                        }
+                    }
+                    resultData.data = JSON.parse(JSON.stringify(data))
+
                 }
                 return resultData
             }

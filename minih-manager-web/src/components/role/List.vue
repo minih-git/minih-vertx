@@ -1,7 +1,9 @@
+<!--suppress TypeScriptValidateTypes -->
+
 <template>
     <el-container class="user-list">
         <div class="operation">
-            <el-button type="primary" @click="editInfo.value={};drawer=true">新增</el-button>
+            <el-button type="primary" @click="editInfo={};drawer=true">新增</el-button>
         </div>
         <div class="table">
             <el-table v-loading="loading" :data="tableData" height="100%" style="width: 100%">
@@ -43,7 +45,7 @@
                             style="cursor: pointer"
                         >
                             <el-button :icon="Edit" circle size="small" type="primary"
-                                       @click="editInfo.value=scope.row;drawer=true"/>
+                                       @click="editInfo=scope.row;drawer=true"/>
 
                         </el-tooltip>
                     </template>
@@ -55,7 +57,7 @@
         v-model="drawer"
         direction="rtl"
     >
-        <edit-form :edit-info="editInfo.value" @close="drawer = false" @update="queryRoleList"></edit-form>
+        <edit-form :edit-info="editInfo" @close="drawer = false" @update="queryRoleList"></edit-form>
     </el-drawer>
 
 
@@ -73,7 +75,7 @@ import {ResourceInfo} from "../../store/module/resource";
 const tableData = ref<RoleInfo []>()
 const drawer = ref<Boolean>(false)
 const loading = ref<Boolean>(true)
-const editInfo = ref<RoleInfo | {}>({})
+const editInfo = ref<Partial<RoleInfo>>({})
 const store = useStore()
 
 

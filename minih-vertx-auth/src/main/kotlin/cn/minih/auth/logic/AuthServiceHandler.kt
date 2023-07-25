@@ -40,11 +40,13 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
             try {
                 authCheckRole(fn, ctx)
                 val args = generateArgs(fn.parameters, ctx)
-                val result = when (fn.parameters.size) {
+                var result = when (fn.parameters.size) {
                     0 -> if (fn.isSuspend) fn.callSuspend() else fn.call()
                     else -> if (fn.isSuspend) fn.callSuspend(*args) else fn.call(*args)
                 }
-                ctx.json(R.ok(result).toJsonObject())
+                val se = getConfig().aesSecret
+                result = encrypt(result!!.toJsonString(), se)
+                ctx.json(R.encryptOk(result).toJsonObject())
             } catch (e: Exception) {
                 if (e.cause is MinihException) {
                     ctx.fail(e.cause)

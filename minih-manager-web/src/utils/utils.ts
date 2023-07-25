@@ -1,4 +1,3 @@
-
 export class DateFormat {
 
     public static format(datetime: Date | string, formatting: string): string {
@@ -41,9 +40,7 @@ export class DateFormat {
 
 }
 
-// @ts-ignore
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
-
 export const idCheck = (_: any, value: any, callback: any) => {
     let city = {
         11: '北京',
@@ -117,7 +114,6 @@ export const idCheck = (_: any, value: any, callback: any) => {
         }
     }
 }
-
 export const isNil = (v: unknown): boolean => {
     return typeof v === "undefined" || v === null
 }
@@ -165,4 +161,20 @@ export const arrayIsEqual = (a1: Array<any>, a2: Array<any>, ignoreArrayPosition
             ) // 忽略数据位置的话，那么只要其中一个数组每个元素都可以在另一个数组可以找到，并且每个元素在两个数组的数量是相等的话，那么就可以判定为相等
         }
     }
+}
+
+const CryptoJS = require('crypto-js');
+export const decrypt = (cipherText, secret) => {
+    const bytes = CryptoJS.AES.decrypt(cipherText, CryptoJS.enc.Utf8.parse(secret), {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+    });
+    return bytes.toString(CryptoJS.enc.Utf8);
+}
+export const encrypt = (text, secret) => {
+    const bytes = CryptoJS.AES.encrypt(text, CryptoJS.enc.Utf8.parse(secret), {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+    });
+    return bytes.toString();
 }

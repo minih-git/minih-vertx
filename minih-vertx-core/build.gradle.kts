@@ -23,6 +23,8 @@ dependencies {
     api(libs.logback)
     api(libs.logging)
 
-    api(libs.smsapi)
+    implementation(libs.smsapi) {
+        exclude(group = "pull-parser")
+    }
 
 }

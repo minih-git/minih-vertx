@@ -7,11 +7,14 @@ import cn.minih.core.constants.SMS_REDIS_KEY_PREFIX
 import cn.minih.core.repository.RedisManager
 import cn.minih.core.utils.Assert
 import cn.minih.core.utils.covertTo
+import cn.minih.core.utils.decrypt
+import cn.minih.core.utils.getConfig
 import cn.minih.system.data.user.SysUser
 import cn.minih.system.data.user.UserExtra
 import cn.minih.system.service.user.UserExtraRepository
 import cn.minih.system.service.user.UserRepository
 import io.vertx.kotlin.coroutines.await
+import org.mindrot.jbcrypt.BCrypt
 
 /**
  * @author hubin
@@ -34,7 +37,11 @@ class AuthServiceImpl private constructor() : AuthService {
         var user: SysUser? = null
         if (username is String && username.isNotBlank()) {
             Assert.notBlank(password) { AuthLoginException("password不能为空!") }
+            password = decrypt(password.toString(), getConfig().aesSecret)
             user = UserRepository.instance.getUserByUsername(username.toString())?.await()?.covertTo(SysUser::class)
+            Assert.isTrue(
+                BCrypt.checkpw(password.toString(), user!!.password)
+            ) { AuthLoginException("密码错误!") }
         }
         if (mobile is String && mobile.isNotBlank()) {
             Assert.notBlank(code) { AuthLoginException("短信验证码不能为空!") }
@@ -46,12 +53,10 @@ class AuthServiceImpl private constructor() : AuthService {
             Assert.notNull(userExtra) { throw AuthLoginException("未找到用户,$mobile") }
             userExtra?.let {
                 user = UserRepository.instance.findOne("_id" to userExtra.id)?.await()?.covertTo(SysUser::class)
-                password = user?.password
             }
         }
         user?.let {
             Assert.notNull(user) { throw AuthLoginException("未找到用户,$username") }
-            Assert.isTrue(user!!.password == password) { AuthLoginException("密码错误!") }
             Assert.isTrue(user!!.state == 1) { AuthLoginException("账号已被永久封禁!") }
             return AuthLoginModel(user!!.username)
         }
