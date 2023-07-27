@@ -93,11 +93,42 @@ object RepositoryManager {
         }
     }
 
+    inline fun <reified T : Any> update(wrapper: QueryWrapper<T>, entity: T) {
+        val tuple = Tuple.tuple()
+        wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
+
+        getPool().connection.compose { conn ->
+            conn.query(generateQuerySql<T>(wrapper)).execute().onComplete {
+                conn.close()
+            }
+        }
+    }
+
+
     inline fun <reified T : Any> generateQuerySql(wrapper: QueryWrapper<T>): String {
         val tableName = T::class.findAnnotation<TableName>()?.value
-        var sql = """
-                select * from $tableName  where 1 = 1 
+        return """
+                select * from $tableName  ${generateConditionSql(wrapper)}
             """.trimIndent()
+    }
+
+    inline fun <reified T : Any> generateUpdateSql(wrapper: QueryWrapper<T>, entity: T): String {
+        val tableName = T::class.findAnnotation<TableName>()?.value
+        var sql = """
+                update $tableName  set 
+            """.trimIndent()
+        val fields = T::class.memberProperties
+        fields.forEach {
+            it.isAccessible = true
+
+            sql = sql.plus(it.name).plus(" = ").plus("${it.get(entity)},")
+        }
+
+        return sql
+    }
+
+    inline fun <reified T : Any> generateConditionSql(wrapper: QueryWrapper<T>): String {
+        var sql = ""
         wrapper.condition.forEach {
             sql = sql.plus(" and  ${CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.key)} ").plus(
                 when (it.type) {
@@ -116,9 +147,7 @@ object RepositoryManager {
                 }
             )
         }
-        log.info("sql: $sql")
-
-        return sql
+        return sql.replaceFirst("and", "where")
     }
 
     inline fun <reified T : Any> generateInsertSql(entity: T): String {
