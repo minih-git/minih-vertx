@@ -29,6 +29,5 @@ data class UserExpand(
     var role: List<String>?,
     var mobile: String?,
     var realName: String?,
-    var idType: String?,
     var idNo: String?,
 )

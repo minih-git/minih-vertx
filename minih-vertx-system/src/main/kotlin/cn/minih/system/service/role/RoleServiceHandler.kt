@@ -2,8 +2,8 @@ package cn.minih.system.service.role
 
 import cn.minih.auth.annotation.AuthCheckRole
 import cn.minih.auth.constants.CONTEXT_SYSTEM_ADMIN_ROLE_TAG
-import cn.minih.core.repository.QueryWrapper
 import cn.minih.core.repository.RepositoryManager
+import cn.minih.core.repository.conditions.QueryWrapper
 import cn.minih.core.utils.*
 import cn.minih.system.data.role.RoleCondition
 import cn.minih.system.data.role.SysRole
@@ -64,33 +64,33 @@ object RoleServiceHandler {
                 errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_ILLEGAL_ARGUMENT
             )
         }
-//        val sysRole = RoleRepository.instance.findOne("_id" to role.id)?.await()?.covertTo(SysRole::class)
-//        Assert.notNull(sysRole) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
-//        var update = false
-//        if (sysRole != null) {
-//            role.name.notBlankAndExec { update = true;sysRole.name = it }
-//            role.state.notBlankAndExec { update = true;sysRole.state = it }
-//            role.resources.notBlankAndExec { update = true;sysRole.resources = it }
-//            if (update) {
-//                RoleRepository.instance.update("_id" to sysRole.id, data = sysRole).await()
-//            }
-//        }
+        val sysRole = RepositoryManager.findOne(QueryWrapper<SysRole>().eq(SysRole::id, role.id)).await()
+        Assert.notNull(sysRole) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
+        var update = false
+        if (sysRole != null) {
+            role.name.notBlankAndExec { update = true;sysRole.name = it }
+            role.state.notBlankAndExec { update = true;sysRole.state = it }
+            role.resources.notBlankAndExec { update = true;sysRole.resources = it }
+            if (update) {
+                RepositoryManager.update(sysRole).await()
+            }
+        }
     }
 
-    suspend fun checkRoleTag(roleTag: String?) {
+    suspend fun checkRoleTag(roleTag: String) {
         Assert.notBlank(roleTag) {
             SystemException(
                 msg = "角色tag不能为空！",
                 errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_ILLEGAL_ARGUMENT
             )
         }
-//        val sysRole = RoleRepository.instance.findOne("roleTag" to roleTag)?.await()
-//        Assert.isNull(sysRole) {
-//            SystemException(
-//                msg = "角色tag已存在！",
-//                errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_ILLEGAL_ARGUMENT
-//            )
-//        }
+        val sysRole = RepositoryManager.findOne(QueryWrapper<SysRole>().eq(SysRole::roleTag, roleTag)).await()
+        Assert.isNull(sysRole) {
+            SystemException(
+                msg = "角色tag已存在！",
+                errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_ILLEGAL_ARGUMENT
+            )
+        }
     }
 
 

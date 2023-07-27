@@ -1,7 +1,8 @@
 package cn.minih.system.service.user
 
-import cn.minih.core.repository.QueryWrapper
 import cn.minih.core.repository.RepositoryManager
+import cn.minih.core.repository.conditions.QueryWrapper
+import cn.minih.core.repository.conditions.UpdateWrapper
 import cn.minih.system.data.user.SysUser
 import io.vertx.core.Future
 
@@ -32,6 +33,14 @@ class UserRepository private constructor() {
 
     fun insert(sysUser: SysUser) {
         RepositoryManager.insert(sysUser)
+    }
+
+    fun update(sysUser: SysUser) {
+        RepositoryManager.update(sysUser)
+    }
+
+    fun update(wrapper: UpdateWrapper<SysUser>) {
+        RepositoryManager.update(wrapper)
     }
 
 

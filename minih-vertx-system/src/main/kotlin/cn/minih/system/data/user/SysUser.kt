@@ -1,5 +1,6 @@
 package cn.minih.system.data.user
 
+import cn.minih.core.annotation.TableId
 import cn.minih.core.annotation.TableName
 import java.util.*
 
@@ -10,6 +11,7 @@ import java.util.*
  */
 @TableName("sys_user")
 data class SysUser(
+    @TableId
     var id: Long = 0,
     var username: String = "",
     var password: String = "",

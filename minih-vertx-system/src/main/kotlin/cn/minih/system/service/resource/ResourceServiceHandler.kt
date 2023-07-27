@@ -3,8 +3,8 @@ package cn.minih.system.service.resource
 import cn.minih.auth.annotation.AuthCheckRole
 import cn.minih.auth.constants.CONTEXT_SYSTEM_ADMIN_ROLE_TAG
 import cn.minih.auth.logic.AuthUtil
-import cn.minih.core.repository.QueryWrapper
 import cn.minih.core.repository.RepositoryManager
+import cn.minih.core.repository.conditions.QueryWrapper
 import cn.minih.core.utils.*
 import cn.minih.system.data.resource.ResourceCondition
 import cn.minih.system.data.resource.SysResource
@@ -22,7 +22,6 @@ import java.util.*
  * @desc
  */
 object ResourceServiceHandler {
-
 
     suspend fun queryResources(page: Page<SysResource>, condition: ResourceCondition): Page<SysResource> {
         val queryOption = QueryWrapper<SysResource>()
@@ -57,7 +56,7 @@ object ResourceServiceHandler {
     }
 
     @AuthCheckRole(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)
-    suspend fun addResource(resource: SysResource) {
+    fun addResource(resource: SysResource) {
         Assert.notBlank(resource.name) {
             SystemException(
                 msg = "资源名称不能为空！",
@@ -65,7 +64,7 @@ object ResourceServiceHandler {
             )
         }
         val sysResource = resource.toJsonObject().covertTo(SysResource::class)
-        sysResource.id = SnowFlake.nextId().toString()
+        sysResource.id = SnowFlake.nextId()
         sysResource.createTime = Date().time
         RepositoryManager.insert(sysResource)
     }
@@ -78,21 +77,20 @@ object ResourceServiceHandler {
                 errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_ILLEGAL_ARGUMENT
             )
         }
-//        val sysResource = ResourceRepository.instance.findOne("_id" to resource.id)?.await()
-//            ?.covertTo(SysResource::class)
-//        Assert.notNull(sysResource) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
-//        var update = false
-//        if (sysResource != null) {
-//            resource.name.notBlankAndExec { update = true;sysResource.name = it }
-//            resource.state.notBlankAndExec { update = true;sysResource.state = it }
-//            resource.permissionTag.notBlankAndExec { update = true;sysResource.permissionTag = it }
-//            resource.path.notBlankAndExec { update = true;sysResource.path = it }
-//            resource.icon.notBlankAndExec { update = true;sysResource.icon = it }
-//            if (update) {
-//                ResourceRepository.instance.update("_id" to sysResource.id, data = sysResource).await()
-//            }
-//        }
+        val sysResource =
+            RepositoryManager.findOne(QueryWrapper<SysResource>().eq(SysResource::id, resource.id)).await()
+        Assert.notNull(sysResource) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
+        var update = false
+        if (sysResource != null) {
+            resource.name.notBlankAndExec { update = true;sysResource.name = it }
+            resource.state.notBlankAndExec { update = true;sysResource.state = it }
+            resource.permissionTag.notBlankAndExec { update = true;sysResource.permissionTag = it }
+            resource.path.notBlankAndExec { update = true;sysResource.path = it }
+            resource.icon.notBlankAndExec { update = true;sysResource.icon = it }
+            if (update) {
+                RepositoryManager.update(sysResource)
+            }
+        }
     }
-
 
 }

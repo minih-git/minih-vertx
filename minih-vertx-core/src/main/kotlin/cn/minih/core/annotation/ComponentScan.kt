@@ -5,4 +5,6 @@ package cn.minih.core.annotation
  * @date 2023/7/18
  * @desc
  */
-annotation class ComponentScan(val basePacakge: String = "")
+@Target(AnnotationTarget.TYPE)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ComponentScan(val basePackage: String = "")

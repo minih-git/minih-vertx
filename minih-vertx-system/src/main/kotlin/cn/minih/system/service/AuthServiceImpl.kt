@@ -4,8 +4,8 @@ import cn.minih.auth.data.AuthLoginModel
 import cn.minih.auth.exception.AuthLoginException
 import cn.minih.auth.logic.AuthService
 import cn.minih.core.constants.SMS_REDIS_KEY_PREFIX
-import cn.minih.core.repository.QueryWrapper
 import cn.minih.core.repository.RedisManager
+import cn.minih.core.repository.conditions.QueryWrapper
 import cn.minih.core.utils.Assert
 import cn.minih.core.utils.decrypt
 import cn.minih.core.utils.getConfig

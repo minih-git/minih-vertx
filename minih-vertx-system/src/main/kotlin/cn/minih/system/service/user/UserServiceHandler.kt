@@ -4,7 +4,8 @@ import cn.minih.auth.annotation.AuthCheckRole
 import cn.minih.auth.constants.CONTEXT_SYSTEM_ADMIN_ROLE_TAG
 import cn.minih.auth.logic.AuthLogic
 import cn.minih.auth.logic.AuthUtil
-import cn.minih.core.repository.QueryWrapper
+import cn.minih.core.repository.conditions.QueryWrapper
+import cn.minih.core.repository.conditions.UpdateWrapper
 import cn.minih.core.utils.*
 import cn.minih.system.data.user.SysUser
 import cn.minih.system.data.user.UserExpand
@@ -52,7 +53,7 @@ object UserServiceHandler {
             val online = AuthUtil.getOnline(it.username)
             UserInfo(sysUser = it, online)
         }
-        return Page(userInfo.last().sysUser.createTime.toLong(), userInfo)
+        return Page(userInfo.last().sysUser.createTime, userInfo)
     }
 
     @AuthCheckRole(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)
@@ -73,49 +74,43 @@ object UserServiceHandler {
     @AuthCheckRole(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)
     suspend fun editUser(user: UserExpand) {
         validateUserParams(user)
-//        val sysUser = UserRepository.instance.findOne("username" to user.username)?.await()?.covertTo(SysUser::class)
-//        Assert.notNull(sysUser) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
-//        var userExtra = UserExtraRepository.instance.findOne("_id" to sysUser?.id)?.await()?.covertTo(UserExtra::class)
-//        if (sysUser != null) {
-//            var update = false
-//            if (userExtra == null || userExtra.id.isBlank()) {
-//                userExtra = UserExtra(id = sysUser.id)
-//            }
-//            user.password.notBlankAndExec { update = true;sysUser.password = BCrypt.hashpw(it, BCrypt.gensalt()) }
-//            user.avatar.notBlankAndExec { update = true;sysUser.avatar = it }
-//            user.name.notBlankAndExec { update = true;sysUser.name = it }
-//            user.mobile.notBlankAndExec { update = true;userExtra.mobile = it }
-//            user.realName.notBlankAndExec { update = true;userExtra.realName = it }
-//            user.idType.notBlankAndExec { update = true;userExtra.idType = it }
-//            user.idNo.notBlankAndExec { update = true; userExtra.idNo = it }
-//            user.state.notBlankAndExec { update = true;sysUser.state = it }
-//            user.role.notBlankAndExec { update = true;sysUser.role = it }
-//            if (update) {
-//                UserRepository.instance.update("_id" to sysUser.id, data = sysUser).await()
-//                UserExtraRepository.instance.update("_id" to sysUser.id, data = userExtra).await()
-//            }
+        val sysUser = UserRepository.instance.getUserByUsername(user.username!!).await()
+        Assert.notNull(sysUser) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
+        if (sysUser != null) {
+            var update = false
+            user.password.notBlankAndExec { update = true;sysUser.password = BCrypt.hashpw(it, BCrypt.gensalt()) }
+            user.avatar.notBlankAndExec { update = true;sysUser.avatar = it }
+            user.name.notBlankAndExec { update = true;sysUser.name = it }
+            user.mobile.notBlankAndExec { update = true;sysUser.mobile = it }
+            user.idNo.notBlankAndExec { update = true; sysUser.idNo = it }
+            user.state.notBlankAndExec { update = true;sysUser.state = it }
+            user.role.notBlankAndExec { update = true;sysUser.role = it }
+            if (update) {
+                UserRepository.instance.update(sysUser)
+            }
+        }
     }
 
 
     @AuthCheckRole(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)
     suspend fun lock(username: String) {
-//        val sysUser = UserRepository.instance.findOne("username" to username)?.await()?.covertTo(SysUser::class)
-//        Assert.notNull(sysUser) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
-//        sysUser?.let {
-//            sysUser.state = 0
-//            UserRepository.instance.update("_id" to sysUser.id, data = sysUser).await()
-//        }
+        val sysUser = UserRepository.instance.getUserByUsername(username).await()
+        Assert.notNull(sysUser) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
+        sysUser?.let {
+            sysUser.state = 0
+            UserRepository.instance.update(UpdateWrapper<SysUser>().eq(SysUser::id, sysUser.id).set(SysUser::state, 0))
+        }
         AuthLogic.kickOut(username)
     }
 
     @AuthCheckRole(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)
     suspend fun unlock(username: String) {
-//        val sysUser = UserRepository.instance.findOne("username" to username)?.await()?.covertTo(SysUser::class)
-//        Assert.notNull(sysUser) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
-//        sysUser?.let {
-//            sysUser.state = 1
-//            UserRepository.instance.update("_id" to sysUser.id, data = sysUser).await()
-//        }
+        val sysUser = UserRepository.instance.getUserByUsername(username).await()
+        Assert.notNull(sysUser) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
+        sysUser?.let {
+            sysUser.state = 1
+            UserRepository.instance.update(sysUser)
+        }
     }
 
     suspend fun checkUsername(username: String?) {

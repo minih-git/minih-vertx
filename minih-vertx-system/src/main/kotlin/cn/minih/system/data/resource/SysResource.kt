@@ -1,6 +1,7 @@
 package cn.minih.system.data.resource
 
-import com.google.gson.annotations.SerializedName
+import cn.minih.core.annotation.TableId
+import cn.minih.core.annotation.TableName
 import java.util.*
 
 /**
@@ -8,9 +9,10 @@ import java.util.*
  * @date 2023/7/21
  * @desc
  */
+@TableName("sys_resource")
 data class SysResource(
-    @SerializedName("_id", alternate = ["id"])
-    var id: String = "",
+    @TableId
+    var id: Long = 0,
     var name: String = "",
     var state: Int = 1,
     var parentId: String = "",

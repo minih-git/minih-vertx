@@ -40,8 +40,8 @@ object MinihServiceRun {
         val componentsList = getClassesByPath("cn.minih")
         if (clazz.hasAnnotation<ComponentScan>()) {
             val componentScan = clazz.findAnnotation<ComponentScan>()
-            if (componentScan != null && componentScan.basePacakge.isNotBlank()) {
-                componentsList.addAll(getClassesByPath(componentScan.basePacakge))
+            if (componentScan != null && componentScan.basePackage.isNotBlank()) {
+                componentsList.addAll(getClassesByPath(componentScan.basePackage))
             }
         }
         componentsList.forEach {
