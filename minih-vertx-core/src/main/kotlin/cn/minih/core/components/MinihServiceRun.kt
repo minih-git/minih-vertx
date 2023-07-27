@@ -9,6 +9,7 @@ import cn.minih.core.constants.MAX_INSTANCE_COUNT
 import cn.minih.core.constants.SYSTEM_CONFIGURATION_SUBSCRIBE
 import cn.minih.core.handler.BeforeDeployHandler
 import cn.minih.core.handler.EventBusConsumer
+import cn.minih.core.repository.RepositoryManager
 import cn.minih.core.utils.*
 import io.vertx.config.ConfigRetriever
 import io.vertx.config.ConfigRetrieverOptions
@@ -61,7 +62,6 @@ object MinihServiceRun {
             val bean = BeanFactory.instance.getBean(it.beanName) as BeforeDeployHandler
             bean.exec(vertx)
         }
-
         val services = BeanFactory.instance.findBeanDefinitionByAnnotation(MinihServiceVerticle::class)
         val config = initConfig(vertx)
         val options = DeploymentOptions().setConfig(config)
@@ -77,7 +77,7 @@ object MinihServiceRun {
                 GlobalScope.launch(Vertx.currentContext().dispatcher()) { bean.exec(obj.body()) }
             }
         }
-
+        RepositoryManager.initDb(vertx, getConfig().mysql)
         services.forEach {
             val annoOptions =
                 it.annotations.first { an -> an.annotationClass == MinihServiceVerticle::class } as MinihServiceVerticle
@@ -112,7 +112,10 @@ object MinihServiceRun {
         }
         obj.entrySet().forEach {
             val vertxConfig = Vertx.currentContext().config()
-            vertxConfig.put(it.key, it.value)
+            vertxConfig.put(it.key, it.value.toString())
+            if (it.value is com.google.gson.JsonObject) {
+                vertxConfig.put(it.key, it.value.toJsonObject())
+            }
         }
         return obj.toJsonObject()
 

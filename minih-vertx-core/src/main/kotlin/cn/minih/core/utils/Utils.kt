@@ -4,6 +4,7 @@ import cn.minih.core.config.CoreConfig
 import cn.minih.core.constants.PROJECT_NAME
 import cn.minih.core.constants.SMS_REDIS_EXPIRE
 import cn.minih.core.constants.SMS_REDIS_KEY_PREFIX
+import cn.minih.core.exception.MinihException
 import cn.minih.core.repository.RedisManager
 import com.aliyun.auth.credentials.Credential
 import com.aliyun.auth.credentials.provider.StaticCredentialProvider
@@ -36,8 +37,7 @@ val log: KLogger = KotlinLogging.logger {}
 
 fun getConfig(): CoreConfig {
     val sharedData = Vertx.currentContext().config()
-    return sharedData.getJsonObject(PROJECT_NAME)
-        .getJsonObject("core").covertTo(CoreConfig::class)
+    return sharedData.getJsonObject(PROJECT_NAME).getJsonObject("core").covertTo(CoreConfig::class)
 }
 
 suspend fun <T> T?.notBlankAndExec(fn: suspend (T) -> Unit) {
@@ -185,13 +185,13 @@ fun decrypt(strToDecrypt: String, secret: String): String {
         cipher.init(Cipher.DECRYPT_MODE, secretKey)
         return String(cipher.doFinal(Base64.getDecoder().decode(strToDecrypt)))
     } catch (e: Exception) {
-        println("Error while decrypting: $e")
+        log.warn("解密密钥错误,secret:$secret")
+        throw MinihException(e.message)
     }
-    return ""
 }
 
 fun main() {
-    print(decrypt("j2iTIIShca5N3kDFJOT+Vw==","2185c344b99547f82d9948c7b68ee11c"))
+    print(decrypt("j2iTIIShca5N3kDFJOT+Vw==", "2185c344b99547f82d9948c7b68ee11c"))
 }
 
 

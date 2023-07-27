@@ -11,7 +11,7 @@ dependencies {
     api(libs.vertx.kotlin)
     api(libs.vertx.kotlin.coroutines)
 
-    api(libs.vertx.mongo)
+    api(libs.vertx.mysql)
     api(libs.vertx.redis)
 
 
@@ -20,6 +20,7 @@ dependencies {
 
     api(libs.hutool)
     api(libs.gson)
+    api(libs.guava)
     api(libs.logback)
     api(libs.logging)
 

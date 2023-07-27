@@ -4,13 +4,15 @@ import cn.minih.auth.annotation.AuthCheckRole
 import cn.minih.auth.constants.CONTEXT_SYSTEM_ADMIN_ROLE_TAG
 import cn.minih.auth.logic.AuthLogic
 import cn.minih.auth.logic.AuthUtil
-import cn.minih.core.repository.MongoQueryOption
+import cn.minih.core.repository.QueryWrapper
 import cn.minih.core.utils.*
-import cn.minih.system.data.user.*
+import cn.minih.system.data.user.SysUser
+import cn.minih.system.data.user.UserExpand
+import cn.minih.system.data.user.UserInfo
+import cn.minih.system.data.user.UserInfoCondition
 import cn.minih.system.exception.MinihSystemErrorCode
 import cn.minih.system.exception.SystemException
 import cn.minih.system.util.CheckPwdUtils
-import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.kotlin.coroutines.await
 import org.mindrot.jbcrypt.BCrypt
 import java.util.*
@@ -25,39 +27,32 @@ object UserServiceHandler {
 
     suspend fun getUserInfo(): UserInfo {
         val username = AuthUtil.getCurrentLoginId()
-        val sysUser = UserRepository.instance.getUserByUsername(username)?.await()?.covertTo(SysUser::class)
+        val sysUser = UserRepository.instance.getUserByUsername(username).await()
         Assert.notNull(sysUser!!) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
-        val extra = UserExtraRepository.instance.findOne("_id" to sysUser.id)?.await()?.covertTo(UserExtra::class)
-        return UserInfo(sysUser, extra)
+        return UserInfo(sysUser)
     }
 
     suspend fun queryUsers(page: Page<UserInfo>, condition: UserInfoCondition): Page<UserInfo> {
-        val queryOption = MongoQueryOption<SysUser>()
+        val queryOption = QueryWrapper<SysUser>()
         if (condition.username?.isNotBlank() == true) {
-            queryOption.put(SysUser::username, condition.username)
+            queryOption.eq(SysUser::username, condition.username)
         }
         if (condition.name?.isNotBlank() == true) {
-            queryOption.put(SysUser::name, condition.name)
+            queryOption.eq(SysUser::name, condition.name)
         }
         if (condition.state != null) {
-            queryOption.put(SysUser::state, condition.state)
+            queryOption.eq(SysUser::state, condition.state)
         }
-        queryOption.put(SysUser::createTime, jsonObjectOf("\$gt" to page.nextCursor))
-        val sysUsersJson = UserRepository.instance.find(queryOption)?.await()
-        if (sysUsersJson.isNullOrEmpty()) {
+        queryOption.gt(SysUser::createTime, page.nextCursor)
+        val userList = UserRepository.instance.list(queryOption).await()
+        if (userList.isNullOrEmpty()) {
             return Page(0, listOf())
         }
-        val extraQueryOption = MongoQueryOption<UserExtra>()
-        val userInfo = sysUsersJson.map {
-            if (condition.mobile?.isNotBlank() == true) {
-                extraQueryOption.put(UserExtra::mobile, condition.mobile)
-            }
-            extraQueryOption.put("_id", it.getString("_id"))
-            val extra = UserExtraRepository.instance.findOne(extraQueryOption)?.await()
-            val online = AuthUtil.getOnline(it.getString("username"))
-            UserInfo(sysUser = it.covertTo(SysUser::class), extra?.covertTo(UserExtra::class), online)
+        val userInfo = userList.map {
+            val online = AuthUtil.getOnline(it.username)
+            UserInfo(sysUser = it, online)
         }
-        return Page(userInfo.last().sysUser.createTime, userInfo)
+        return Page(userInfo.last().sysUser.createTime.toLong(), userInfo)
     }
 
     @AuthCheckRole(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)
@@ -69,61 +64,58 @@ object UserServiceHandler {
         ) else BCrypt.hashpw(user.password, BCrypt.gensalt())
         val sysId = SnowFlake.nextId()
         val sysUser = user.toJsonObject().covertTo(SysUser::class)
-        val extra = user.toJsonObject().covertTo(UserExtra::class)
-        sysUser.id = sysId.toString()
-        extra.id = sysId.toString()
+        sysUser.id = sysId
         sysUser.createTime = Date().time
         sysUser.state = 1
-        UserRepository.instance.insert(sysUser).await()
-        UserExtraRepository.instance.insert(extra).await()
+        UserRepository.instance.insert(sysUser)
     }
 
     @AuthCheckRole(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)
     suspend fun editUser(user: UserExpand) {
         validateUserParams(user)
-        val sysUser = UserRepository.instance.findOne("username" to user.username)?.await()?.covertTo(SysUser::class)
-        Assert.notNull(sysUser) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
-        var userExtra = UserExtraRepository.instance.findOne("_id" to sysUser?.id)?.await()?.covertTo(UserExtra::class)
-        if (sysUser != null) {
-            var update = false
-            if (userExtra == null || userExtra.id.isBlank()) {
-                userExtra = UserExtra(id = sysUser.id)
-            }
-            user.password.notBlankAndExec { update = true;sysUser.password = BCrypt.hashpw(it, BCrypt.gensalt()) }
-            user.avatar.notBlankAndExec { update = true;sysUser.avatar = it }
-            user.name.notBlankAndExec { update = true;sysUser.name = it }
-            user.mobile.notBlankAndExec { update = true;userExtra.mobile = it }
-            user.realName.notBlankAndExec { update = true;userExtra.realName = it }
-            user.idType.notBlankAndExec { update = true;userExtra.idType = it }
-            user.idNo.notBlankAndExec { update = true; userExtra.idNo = it }
-            user.state.notBlankAndExec { update = true;sysUser.state = it }
-            user.role.notBlankAndExec { update = true;sysUser.role = it }
-            if (update) {
-                UserRepository.instance.update("_id" to sysUser.id, data = sysUser).await()
-                UserExtraRepository.instance.update("_id" to sysUser.id, data = userExtra).await()
-            }
-        }
+//        val sysUser = UserRepository.instance.findOne("username" to user.username)?.await()?.covertTo(SysUser::class)
+//        Assert.notNull(sysUser) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
+//        var userExtra = UserExtraRepository.instance.findOne("_id" to sysUser?.id)?.await()?.covertTo(UserExtra::class)
+//        if (sysUser != null) {
+//            var update = false
+//            if (userExtra == null || userExtra.id.isBlank()) {
+//                userExtra = UserExtra(id = sysUser.id)
+//            }
+//            user.password.notBlankAndExec { update = true;sysUser.password = BCrypt.hashpw(it, BCrypt.gensalt()) }
+//            user.avatar.notBlankAndExec { update = true;sysUser.avatar = it }
+//            user.name.notBlankAndExec { update = true;sysUser.name = it }
+//            user.mobile.notBlankAndExec { update = true;userExtra.mobile = it }
+//            user.realName.notBlankAndExec { update = true;userExtra.realName = it }
+//            user.idType.notBlankAndExec { update = true;userExtra.idType = it }
+//            user.idNo.notBlankAndExec { update = true; userExtra.idNo = it }
+//            user.state.notBlankAndExec { update = true;sysUser.state = it }
+//            user.role.notBlankAndExec { update = true;sysUser.role = it }
+//            if (update) {
+//                UserRepository.instance.update("_id" to sysUser.id, data = sysUser).await()
+//                UserExtraRepository.instance.update("_id" to sysUser.id, data = userExtra).await()
+//            }
     }
+
 
     @AuthCheckRole(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)
     suspend fun lock(username: String) {
-        val sysUser = UserRepository.instance.findOne("username" to username)?.await()?.covertTo(SysUser::class)
-        Assert.notNull(sysUser) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
-        sysUser?.let {
-            sysUser.state = 0
-            UserRepository.instance.update("_id" to sysUser.id, data = sysUser).await()
-        }
+//        val sysUser = UserRepository.instance.findOne("username" to username)?.await()?.covertTo(SysUser::class)
+//        Assert.notNull(sysUser) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
+//        sysUser?.let {
+//            sysUser.state = 0
+//            UserRepository.instance.update("_id" to sysUser.id, data = sysUser).await()
+//        }
         AuthLogic.kickOut(username)
     }
 
     @AuthCheckRole(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)
     suspend fun unlock(username: String) {
-        val sysUser = UserRepository.instance.findOne("username" to username)?.await()?.covertTo(SysUser::class)
-        Assert.notNull(sysUser) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
-        sysUser?.let {
-            sysUser.state = 1
-            UserRepository.instance.update("_id" to sysUser.id, data = sysUser).await()
-        }
+//        val sysUser = UserRepository.instance.findOne("username" to username)?.await()?.covertTo(SysUser::class)
+//        Assert.notNull(sysUser) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
+//        sysUser?.let {
+//            sysUser.state = 1
+//            UserRepository.instance.update("_id" to sysUser.id, data = sysUser).await()
+//        }
     }
 
     suspend fun checkUsername(username: String?) {
@@ -133,7 +125,7 @@ object UserServiceHandler {
                 errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_ILLEGAL_ARGUMENT
             )
         }
-        val sysUser = UserRepository.instance.findOne("username" to username)?.await()
+        val sysUser = UserRepository.instance.getUserByUsername(username!!).await()
         Assert.isNull(sysUser) {
             SystemException(
                 msg = "账号已存在！",
@@ -163,7 +155,7 @@ object UserServiceHandler {
                     errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_ILLEGAL_ARGUMENT
                 )
             }
-            val sysExtra = UserExtraRepository.instance.findOne("mobile" to mobile)?.await()
+            val sysExtra = UserRepository.instance.findOne(QueryWrapper<SysUser>().eq(SysUser::mobile, mobile)).await()
             Assert.isNull(sysExtra) {
                 SystemException(
                     msg = "手机号已存在！",
@@ -198,5 +190,4 @@ object UserServiceHandler {
             checkUsername(user.username)
         }
     }
-
 }

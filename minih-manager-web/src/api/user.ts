@@ -17,12 +17,11 @@ export async function userList(search: string): Promise<Page<UserInfo>> {
                 avatar: it.sysUser.avatar,
                 state: it.sysUser.state,
                 role: it.sysUser.role,
-                mobile: it.userExtra.mobile,
+                mobile: it.sysUser.mobile,
                 createTime: it.sysUser.createTime,
                 lastActive: it.sysUser.lastActive,
                 online: it.online,
-                idType: it.userExtra.idType,
-                idNo: it.userExtra.idNo,
+                idNo: it.sysUser.idNo,
             }
         })
     }

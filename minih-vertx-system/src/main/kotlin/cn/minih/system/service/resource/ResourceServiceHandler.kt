@@ -3,7 +3,8 @@ package cn.minih.system.service.resource
 import cn.minih.auth.annotation.AuthCheckRole
 import cn.minih.auth.constants.CONTEXT_SYSTEM_ADMIN_ROLE_TAG
 import cn.minih.auth.logic.AuthUtil
-import cn.minih.core.repository.MongoQueryOption
+import cn.minih.core.repository.QueryWrapper
+import cn.minih.core.repository.RepositoryManager
 import cn.minih.core.utils.*
 import cn.minih.system.data.resource.ResourceCondition
 import cn.minih.system.data.resource.SysResource
@@ -11,8 +12,6 @@ import cn.minih.system.data.role.SysRole
 import cn.minih.system.exception.MinihSystemErrorCode
 import cn.minih.system.exception.SystemException
 import cn.minih.system.service.AuthServiceImpl
-import cn.minih.system.service.role.RoleRepository
-import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.kotlin.coroutines.await
 import java.util.*
 
@@ -26,39 +25,35 @@ object ResourceServiceHandler {
 
 
     suspend fun queryResources(page: Page<SysResource>, condition: ResourceCondition): Page<SysResource> {
-        val queryOption = MongoQueryOption<SysResource>()
+        val queryOption = QueryWrapper<SysResource>()
         if (condition.name?.isNotBlank() == true) {
-            queryOption.put(SysResource::name, condition.name)
+            queryOption.eq(SysResource::name, condition.name)
         }
         if (condition.state != null) {
-            queryOption.put(SysResource::state, condition.state)
+            queryOption.eq(SysResource::state, condition.state)
         }
-        queryOption.put(SysResource::createTime, jsonObjectOf("\$gt" to page.nextCursor))
+        queryOption.gt(SysResource::createTime, page.nextCursor)
         if (!AuthUtil.currentIsSysAdmin()) {
             val roleTags = AuthServiceImpl.instance.getLoginRole(AuthUtil.getCurrentLoginId())
-            val roleCondition = MongoQueryOption<SysRole>()
-            roleCondition.put(SysRole::roleTag, jsonObjectOf("\$in" to roleTags))
-            val roles = RoleRepository.instance.find(roleCondition)?.await()
+            val roleCondition = QueryWrapper<SysRole>().`in`(SysRole::roleTag, roleTags)
+            val roles = RepositoryManager.list(roleCondition).await()
             if (roles.isNullOrEmpty()) {
                 return Page(0, listOf())
             }
             val reIds = mutableListOf<String>()
-            roles.map { it.covertTo(SysRole::class) }.forEach{
+            roles.forEach {
                 reIds.addAll(it.resources)
             }
             if (reIds.isEmpty()) {
                 return Page(0, listOf())
             }
-            queryOption.put("_id", jsonObjectOf("\$in" to reIds.toList()))
+            queryOption.`in`(SysResource::id, reIds.toList())
         }
-        val sysResource = ResourceRepository.instance.find(queryOption)?.await()
+        val sysResource = RepositoryManager.list(queryOption).await()
         if (sysResource.isNullOrEmpty()) {
             return Page(0, listOf())
         }
-        val resources = sysResource.map {
-            it.covertTo(SysResource::class)
-        }
-        return Page(resources.last().createTime, resources)
+        return Page(sysResource.last().createTime, sysResource)
     }
 
     @AuthCheckRole(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)
@@ -72,7 +67,7 @@ object ResourceServiceHandler {
         val sysResource = resource.toJsonObject().covertTo(SysResource::class)
         sysResource.id = SnowFlake.nextId().toString()
         sysResource.createTime = Date().time
-        ResourceRepository.instance.insert(sysResource).await()
+        RepositoryManager.insert(sysResource)
     }
 
     @AuthCheckRole(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)
@@ -83,20 +78,20 @@ object ResourceServiceHandler {
                 errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_ILLEGAL_ARGUMENT
             )
         }
-        val sysResource = ResourceRepository.instance.findOne("_id" to resource.id)?.await()
-            ?.covertTo(SysResource::class)
-        Assert.notNull(sysResource) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
-        var update = false
-        if (sysResource != null) {
-            resource.name.notBlankAndExec { update = true;sysResource.name = it }
-            resource.state.notBlankAndExec { update = true;sysResource.state = it }
-            resource.permissionTag.notBlankAndExec { update = true;sysResource.permissionTag = it }
-            resource.path.notBlankAndExec { update = true;sysResource.path = it }
-            resource.icon.notBlankAndExec { update = true;sysResource.icon = it }
-            if (update) {
-                ResourceRepository.instance.update("_id" to sysResource.id, data = sysResource).await()
-            }
-        }
+//        val sysResource = ResourceRepository.instance.findOne("_id" to resource.id)?.await()
+//            ?.covertTo(SysResource::class)
+//        Assert.notNull(sysResource) { SystemException(errorCode = MinihSystemErrorCode.ERR_CODE_SYSTEM_DATA_UN_FIND) }
+//        var update = false
+//        if (sysResource != null) {
+//            resource.name.notBlankAndExec { update = true;sysResource.name = it }
+//            resource.state.notBlankAndExec { update = true;sysResource.state = it }
+//            resource.permissionTag.notBlankAndExec { update = true;sysResource.permissionTag = it }
+//            resource.path.notBlankAndExec { update = true;sysResource.path = it }
+//            resource.icon.notBlankAndExec { update = true;sysResource.icon = it }
+//            if (update) {
+//                ResourceRepository.instance.update("_id" to sysResource.id, data = sysResource).await()
+//            }
+//        }
     }
 
 

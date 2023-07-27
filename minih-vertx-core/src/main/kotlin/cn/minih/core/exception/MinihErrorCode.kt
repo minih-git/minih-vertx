@@ -13,4 +13,5 @@ enum class MinihErrorCode(override val code: Int, override val msg: String):IMin
     SUCCESS_CODE_UNDEFINED(0, "成功"),
     ERR_CODE_UNDEFINED(-1, "未指定错误类型"),
     ERR_CODE_ARGUMENT_ERROR(-2, "参数错误"),
+    ERR_CODE_NOT_FOUND_ERROR(-3, "未找到数据"),
 }

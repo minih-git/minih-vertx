@@ -8,11 +8,18 @@
       <jdbc-url>mongodb://dds-wz9019cf0593d9141601-pub.mongodb.rds.aliyuncs.com:3717/admin?replicaSet=dds-wz9019cf0593d914</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="0@minih001.redis.rds.aliyuncs.com" uuid="237268ca-e6fc-4d2c-b021-2deb1fdc5c3a">
+    <data-source source="LOCAL" name="minih_redis" uuid="237268ca-e6fc-4d2c-b021-2deb1fdc5c3a">
       <driver-ref>redis</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>jdbc.RedisDriver</jdbc-driver>
-      <jdbc-url>jdbc:redis://minih001.redis.rds.aliyuncs.com:6379/0</jdbc-url>
+      <jdbc-url>jdbc:redis://db.minih.cn:6379/0</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="tuoling_mysql" uuid="4cbaf2cd-ce16-4a4d-94be-09d672cbdecf">
+      <driver-ref>mysql.8</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://db.minih.cn:3306/tuoling</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

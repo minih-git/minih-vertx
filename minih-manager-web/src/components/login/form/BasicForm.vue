@@ -94,7 +94,12 @@ const onSubmit = async () => {
     localStorage.setItem("config", JSON.stringify(config))
     isLoading.value = false
     await router.push({name: "首页"})
-  } catch (e) {
+  } catch (e: any) {
+    ElMessage({
+      message: "登录失败！" + e.message,
+      type: 'warning',
+      grouping: true
+    })
     isLoading.value = false
   }
 }

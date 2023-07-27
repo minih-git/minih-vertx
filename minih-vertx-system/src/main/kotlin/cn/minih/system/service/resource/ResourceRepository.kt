@@ -1,8 +1,6 @@
 package cn.minih.system.service.resource
 
 import cn.minih.core.annotation.Component
-import cn.minih.core.repository.RepositoryManager
-import cn.minih.system.data.resource.SysResource
 
 /**
  * @author hubin
@@ -10,7 +8,7 @@ import cn.minih.system.data.resource.SysResource
  * @desc
  */
 @Component
-class ResourceRepository private constructor() : RepositoryManager<SysResource>("sysResource") {
+class ResourceRepository private constructor() {
     companion object {
         val instance by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
             ResourceRepository()

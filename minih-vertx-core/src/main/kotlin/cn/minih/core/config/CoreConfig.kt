@@ -5,8 +5,17 @@ package cn.minih.core.config
  * @date 2023/7/25
  * @desc
  */
-class CoreConfig(
+data class DbConfig(
+    val host: String,
+    val db: String,
+    val user: String,
+    val password: String,
+    val pollSize: Int? = 8,
+)
+
+data class CoreConfig(
     val aliyunApiKey: String,
     val aliyunApiSecret: String,
     val aesSecret: String,
+    val mysql: DbConfig
 )

@@ -58,9 +58,8 @@ export const info = async (): Promise<UserInfo> => {
         avatar: res.data["sysUser"]["avatar"],
         state: res.data["sysUser"]["state"],
         role: res.data["sysUser"]["role"],
-        mobile: res.data["userExtra"]["mobile"],
-        idNo: res.data["userExtra"]["idNo"],
-        idType: res.data["userExtra"]["idType"],
+        mobile: res.data["sysUser"]["mobile"],
+        idNo: res.data["sysUser"]["idNo"],
     }
     await store.dispatch("user/setUserInfo", userInfo)
     return userInfo

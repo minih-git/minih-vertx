@@ -1,8 +1,6 @@
 package cn.minih.system.service.role
 
 import cn.minih.core.annotation.Component
-import cn.minih.core.repository.RepositoryManager
-import cn.minih.system.data.role.SysRole
 
 /**
  * @author hubin
@@ -10,10 +8,12 @@ import cn.minih.system.data.role.SysRole
  * @desc
  */
 @Component
-class RoleRepository private constructor() : RepositoryManager<SysRole>("sysRole") {
+class RoleRepository private constructor() {
     companion object {
         val instance by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
             RoleRepository()
         }
     }
+
+
 }

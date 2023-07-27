@@ -7,7 +7,6 @@ package cn.minih.system.data.user
  */
 data class UserInfo(
     val sysUser: SysUser = SysUser(),
-    val userExtra: UserExtra? = UserExtra(),
     var online: Int = 0,
 )
 

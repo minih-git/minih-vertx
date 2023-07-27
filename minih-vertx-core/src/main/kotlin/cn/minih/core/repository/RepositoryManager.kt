@@ -1,72 +1,165 @@
 package cn.minih.core.repository
 
+import cn.minih.core.annotation.TableName
+import cn.minih.core.config.DbConfig
+import cn.minih.core.exception.MinihNotFoundException
+import cn.minih.core.utils.log
+import com.google.common.base.CaseFormat
 import io.vertx.core.Future
 import io.vertx.core.Vertx
-import io.vertx.core.json.JsonObject
-import io.vertx.ext.mongo.FindOptions
-import io.vertx.ext.mongo.MongoClient
-import io.vertx.kotlin.core.json.jsonObjectOf
-import cn.minih.core.utils.toJsonObject
+import io.vertx.mysqlclient.MySQLConnectOptions
+import io.vertx.mysqlclient.MySQLPool
+import io.vertx.sqlclient.PoolOptions
+import io.vertx.sqlclient.Row
+import io.vertx.sqlclient.Tuple
+import kotlin.reflect.KClass
+import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.isAccessible
+
 
 /**
  * @author hubin
  * @date 2023/7/7
  * @desc
  */
-abstract class RepositoryManager<T>(private val tableName: String) {
+object RepositoryManager {
 
 
-    private val client: MongoClient = let {
-        val config = Vertx.currentContext().config().getJsonObject("mongodb")
-        val mongoOptions = jsonObjectOf(
-            "host" to config.getString("host"),
-            "port" to config.getInteger("port", 3717),
-            "username" to config.getString("username"),
-            "password" to config.getString("password"),
-            "authSource" to config.getString("source", "admin"),
-            "socketTimeoutMS" to 500000,
-            "serverSelectionTimeoutMS" to 50000,
-            "maxIdleTimeMS" to 300000,
-            "maxLifeTimeMS" to 3600000,
-            "db_name" to "minih",
-        )
-        MongoClient.createShared(Vertx.currentContext().owner(), mongoOptions)
+    private lateinit var pool: MySQLPool
+
+    fun initDb(vertx: Vertx, config: DbConfig) {
+        val connectOptions = MySQLConnectOptions()
+            .setPort(3306)
+            .setHost("124.71.143.78")
+            .setDatabase(config.db)
+            .setUser(config.user)
+            .setPassword(config.password)
+            .setPipeliningLimit(64)
+        val poolOptions = PoolOptions().setMaxSize(config.pollSize ?: 8)
+        pool = MySQLPool.pool(vertx, connectOptions, poolOptions)
+    }
+
+    fun getPool(): MySQLPool {
+        return this.pool
     }
 
 
-    fun findOne(vararg fields: Pair<String, Any?>): Future<JsonObject>? {
-        return client.findOne(tableName, jsonObjectOf(*fields), jsonObjectOf())
+    inline fun <reified T : Any> findOne(wrapper: QueryWrapper<T>): Future<T?> {
+        val tuple = Tuple.tuple()
+        wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
+        return getPool().connection.compose { conn ->
+            conn.preparedQuery(generateQuerySql(wrapper)).execute(tuple)
+                .compose { rowSet ->
+                    log.info("查询完毕：数据条数：${rowSet.size()}")
+                    if (rowSet.size() == 0) {
+                        throw MinihNotFoundException()
+                    } else {
+                        Future.succeededFuture<T>(covert(rowSet.first()))
+                    }
+                }
+                .onComplete {
+                    conn.close()
+                }
+        }
     }
 
-    fun findOne(queryOption: MongoQueryOption<T>): Future<JsonObject>? {
-        return client.findOne(tableName, queryOption, jsonObjectOf())
+
+    inline fun <reified T : Any> list(wrapper: QueryWrapper<T>): Future<List<T>?> {
+        val tuple = Tuple.tuple()
+        wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
+        return getPool().connection.compose { conn ->
+            conn.preparedQuery(generateQuerySql(wrapper)).execute(tuple).compose { rowSet ->
+                log.info("查询完毕：数据条数：${rowSet.size()}")
+                if (rowSet.size() == 0) {
+                    throw MinihNotFoundException()
+                } else {
+                    Future.succeededFuture<List<T>>(rowSet.map { covert(it) })
+                }
+            }.onComplete {
+                conn.close()
+            }
+        }
     }
 
-    fun find(
-        queryOption: MongoQueryOption<T>,
-        options: FindOptions = FindOptions().setBatchSize(100)
-    ): Future<List<JsonObject>>? {
-        return client.findWithOptions(tableName, queryOption, options)
+
+    inline fun <reified T : Any> insert(entity: T) {
+        getPool().connection.compose { conn ->
+            conn.query(generateInsertSql<T>(entity)).execute().onComplete {
+                conn.close()
+            }
+        }
     }
 
-    fun findOne(
-        vararg queryOption: Pair<String, Any?>,
-        options: FindOptions = FindOptions().setBatchSize(100)
-    ): Future<JsonObject>? {
-        return client.findOne(tableName, jsonObjectOf(*queryOption), jsonObjectOf())
+    inline fun <reified T : Any> generateQuerySql(wrapper: QueryWrapper<T>): String {
+        val tableName = T::class.findAnnotation<TableName>()?.value
+        var sql = """
+                select * from $tableName  where 1 = 1 
+            """.trimIndent()
+        wrapper.condition.forEach {
+            sql = sql.plus(" and  ${CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.key)} ").plus(
+                when (it.type) {
+                    QueryConditionType.EQ -> " = ?"
+                    QueryConditionType.IN -> {
+                        var perch = ""
+                        it.value.forEach { _ -> perch = perch.plus("?,") }
+                        " in (${perch.substring(0, perch.length - 1)})"
+                    }
 
+                    QueryConditionType.BETWEEN -> " between ? an ?"
+                    QueryConditionType.GT -> " > ? "
+                    QueryConditionType.LT -> " < ? "
+                    QueryConditionType.GTE -> " >= ? "
+                    QueryConditionType.LTE -> " =< ? "
+                }
+            )
+        }
+        log.info("sql: $sql")
+
+        return sql
     }
 
-    fun insert(data: T): Future<String> {
-        return client.save(tableName, data?.toJsonObject())
+    inline fun <reified T : Any> generateInsertSql(entity: T): String {
+        val tableName = entity::class.findAnnotation<TableName>()?.value
+        val fields = T::class.memberProperties
+        var sql = """
+                insert into $tableName (
+            """.trimIndent()
+        fields.forEach {
+            sql = sql.plus("${CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.name)},")
+        }
+        sql = sql.substring(0, sql.length - 1).plus(") values (")
+        fields.forEach {
+            it.isAccessible = true
+            sql = sql.plus("${it.get(entity)},")
+        }
+        sql = sql.substring(0, sql.length - 1)
+        return sql
     }
 
-    fun delete(vararg fields: Pair<String, Any?>): Future<JsonObject> {
-        return client.findOneAndDelete(tableName, jsonObjectOf(*fields))
-    }
 
-    fun update(vararg fields: Pair<String, Any?>, data: T): Future<JsonObject> {
-        return client.findOneAndUpdate(tableName, jsonObjectOf(*fields), jsonObjectOf("\$set" to data?.toJsonObject()))
+    inline fun <reified T : Any> covert(row: Row): T {
+        val entity = T::class.createInstance()
+        val fields = entity::class.memberProperties
+        fields.forEach {
+            if (it is KMutableProperty1) {
+                var type = it.returnType.classifier as KClass<*>
+                val fieldName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.name)
+                if (type.simpleName === List::class.simpleName) {
+                    type = String::class
+                }
+                var valueRaw = row.get(type.javaObjectType, fieldName)
+                if (it.returnType.classifier == Collection::class) {
+                    valueRaw = valueRaw.toString().split(",").toList()
+                }
+                valueRaw?.let { value ->
+                    it.setter.call(entity, value)
+                }
+            }
+        }
+        return entity
     }
 
 

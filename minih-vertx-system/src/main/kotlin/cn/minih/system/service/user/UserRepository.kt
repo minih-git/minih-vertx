@@ -1,17 +1,16 @@
 package cn.minih.system.service.user
 
-import cn.minih.core.annotation.Component
+import cn.minih.core.repository.QueryWrapper
 import cn.minih.core.repository.RepositoryManager
 import cn.minih.system.data.user.SysUser
 import io.vertx.core.Future
-import io.vertx.core.json.JsonObject
 
 /**
  * @author hubin
  * @date 2023/7/7
  * @desc
  */
-class UserRepository private constructor(): RepositoryManager<SysUser>("sysUser") {
+class UserRepository private constructor() {
 
     companion object {
         val instance by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
@@ -19,7 +18,21 @@ class UserRepository private constructor(): RepositoryManager<SysUser>("sysUser"
         }
     }
 
-    fun getUserByUsername(username: String): Future<JsonObject>? {
-        return findOne("username" to username)
+    fun getUserByUsername(username: String): Future<SysUser?> {
+        return RepositoryManager.findOne(QueryWrapper<SysUser>().eq(SysUser::username, username))
     }
+
+    fun findOne(queryWrapper: QueryWrapper<SysUser>): Future<SysUser?> {
+        return RepositoryManager.findOne(queryWrapper)
+    }
+
+    fun list(queryWrapper: QueryWrapper<SysUser>): Future<List<SysUser>?> {
+        return RepositoryManager.list(queryWrapper)
+    }
+
+    fun insert(sysUser: SysUser) {
+        RepositoryManager.insert(sysUser)
+    }
+
+
 }
