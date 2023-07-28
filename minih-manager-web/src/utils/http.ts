@@ -90,7 +90,6 @@ export const request = async (options: RequestOptions): Promise<BaseData> => {
         let resultJson = await res.json()
         if (res.status == 200) {
             if (resultJson.code == 0) {
-
                 resultData.code = resultJson.code
                 resultData.msg = resultJson.msg
                 if (resultJson.data) {
@@ -108,6 +107,9 @@ export const request = async (options: RequestOptions): Promise<BaseData> => {
 
                 }
                 return resultData
+            }
+            if (resultJson.code == -4) {
+                await store.dispatch("system/getOrLoadSecret", true)
             }
             let errorMsg = resultJson.msg
             if (resultJson.data) {

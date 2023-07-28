@@ -26,14 +26,6 @@
     <el-form-item label="手机号" prop="mobile">
       <el-input v-model.trim="formData.mobile"/>
     </el-form-item>
-    <el-form-item label="证件类型" prop="idType">
-      <el-radio-group v-model="formData.idType">
-        <el-radio label="01" size="large">身份证</el-radio>
-      </el-radio-group>
-    </el-form-item>
-    <el-form-item label="证件号码" prop="idNo">
-      <el-input v-model.trim="formData.idNo"/>
-    </el-form-item>
     <el-form-item label="角色" prop="role">
       <el-select
           v-model="formData.role"
@@ -65,7 +57,7 @@ import {reactive, ref, watch} from "vue";
 import {ElMessage, FormInstance, FormRules, UploadProps} from "element-plus";
 import {addUser, checkMobile, checkPassword, checkUsername, editUser} from "../../api";
 import {RoleInfo} from "../../store/module/role";
-import {anyIsEqual, idCheck, MinihError} from "../../utils";
+import {anyIsEqual, MinihError} from "../../utils";
 import {UserInfo} from "../../store/module/user";
 import {useStore} from "../../store";
 
@@ -84,8 +76,6 @@ let formData = ref<UserInfo>({
   state: 1,
   role: ['role_1'],
   mobile: "15999603031",
-  idType: "01",
-  idNo: "430421199502072114",
 })
 formData.value = JSON.parse(JSON.stringify(props.editInfo))
 watch(() => props.editInfo, it => {
@@ -179,18 +169,6 @@ const rules = reactive<FormRules<Partial<UserInfo>>>({
           return
         }
         mobileCheck(rule, value, callback)
-      }, trigger: 'blur'
-    },
-  ],
-  idNo: [
-    {required: true, message: '请输入证件号码', trigger: 'blur'},
-    {
-      validator: (rule: any, value: any, callback: any) => {
-        if (formData.value.idType != "01" || props.editInfo.idNo == value) {
-          callback()
-          return
-        }
-        idCheck(rule, value, callback)
       }, trigger: 'blur'
     },
   ],

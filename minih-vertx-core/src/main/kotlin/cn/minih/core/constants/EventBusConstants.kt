@@ -6,4 +6,4 @@ package cn.minih.core.constants
  * @desc
  */
 const val SYSTEM_CONFIGURATION_SUBSCRIBE = "cn.minih.core.config"
-const val SYSTEM_CONFIGURATION_FRESH = "cn.minih.core.config.fresh"
+const val SYSTEM_WEB_CONFIGURATION_SUBSCRIBE = "cn.minih.core.web.config"

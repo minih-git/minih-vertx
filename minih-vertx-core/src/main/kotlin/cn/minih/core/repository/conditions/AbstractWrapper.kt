@@ -17,16 +17,13 @@ data class QueryCondition(val key: String, val value: List<Any>, val type: Query
 enum class QueryConditionType { EQ, IN, BETWEEN, GT, LT, GTE, LTE }
 abstract class AbstractWrapper<T, R, Children : AbstractWrapper<T, R, Children>> : Wrapper<T>() {
 
-//    @Suppress("ALL", "UNCHECKED_CAST")
-//    private val typedThis: Children = this as Children
-
     fun eq(key: KProperty1<T, Any>, value: Any): Children {
         condition.add(QueryCondition(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, key.name), listOf(value)))
         return this as Children
     }
 
     fun gt(key: KProperty1<T, Any>, value: Any): Children {
-        condition.add(
+        this.condition.add(
             QueryCondition(
                 CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, key.name),
                 listOf(value),

@@ -10,7 +10,7 @@ export async function roleList(search: string = "", nextCursor: number = 0): Pro
         nextCursor: res.data["nextCursor"],
         data: data.map(it => {
             return {
-                id: it._id,
+                id: it.id,
                 name: it.name,
                 state: it.state,
                 roleTag: it.roleTag,

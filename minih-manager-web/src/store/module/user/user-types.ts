@@ -13,7 +13,6 @@ export interface SysUser {
     createTime: number,
     mobile: string
     online: number
-    idNo: string,
 }
 
 

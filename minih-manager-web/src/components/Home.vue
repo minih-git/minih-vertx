@@ -125,6 +125,7 @@ const queryResourceList = async () => {
     })
 }
 queryResourceList()
+console.log(menuGroupChildren)
 
 </script>
 

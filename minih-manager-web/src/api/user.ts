@@ -11,7 +11,7 @@ export async function userList(search: string): Promise<Page<UserInfo>> {
         nextCursor: Number(res.data["nextCursor"]),
         data: data.map(it => {
             return {
-                id: it.sysUser._id,
+                id: it.sysUser.id,
                 name: it.sysUser.name,
                 username: it.sysUser.username,
                 avatar: it.sysUser.avatar,

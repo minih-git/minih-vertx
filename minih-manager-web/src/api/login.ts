@@ -78,16 +78,8 @@ const logoutHandler = async (code: number = 0, message: string = "您已成功�
     ElMessage(msg)
     await router.push({name: '登录'})
 }
-export const authEventBusHandler = () => {
-    // @ts-ignore
-    const eb = new window.EventBus("/ws/authEventbus")
-    eb.onopen = () => {
-        eb.registerHandler('cn.minih.auth.session.offline', async (_, message) => {
-            if (message.body.token == store.state.user.rawToken) {
-                await logoutHandler(message.body.type, message.body.msg)
-            }
-        });
+export const authEventBusHandler = async (_, message) => {
+    if (message.body.token == store.state.user.rawToken) {
+        await logoutHandler(message.body.type, message.body.msg)
     }
-
-
 }

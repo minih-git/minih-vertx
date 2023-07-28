@@ -24,9 +24,6 @@ object RoleServiceHandler {
         if (condition.name?.isNotBlank() == true) {
             queryOption.eq(SysRole::name, condition.name)
         }
-        if (condition.state != null) {
-            queryOption.eq(SysRole::state, condition.state)
-        }
         queryOption.gt(SysRole::createTime, page.nextCursor)
         val roles = RepositoryManager.list(queryOption).await()
         if (roles.isNullOrEmpty()) {
@@ -51,7 +48,7 @@ object RoleServiceHandler {
         }
         checkRoleTag(role.roleTag)
         val sysRole = role.toJsonObject().covertTo(SysRole::class)
-        sysRole.id = SnowFlake.nextId().toString()
+        sysRole.id = SnowFlake.nextId()
         sysRole.createTime = Date().time
         RepositoryManager.insert(sysRole)
     }
@@ -69,7 +66,6 @@ object RoleServiceHandler {
         var update = false
         if (sysRole != null) {
             role.name.notBlankAndExec { update = true;sysRole.name = it }
-            role.state.notBlankAndExec { update = true;sysRole.state = it }
             role.resources.notBlankAndExec { update = true;sysRole.resources = it }
             if (update) {
                 RepositoryManager.update(sysRole).await()

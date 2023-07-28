@@ -7,6 +7,7 @@ import cn.minih.core.beans.BeanDefinitionBuilder
 import cn.minih.core.beans.BeanFactory
 import cn.minih.core.constants.MAX_INSTANCE_COUNT
 import cn.minih.core.constants.SYSTEM_CONFIGURATION_SUBSCRIBE
+import cn.minih.core.constants.SYSTEM_WEB_CONFIGURATION_SUBSCRIBE
 import cn.minih.core.handler.BeforeDeployHandler
 import cn.minih.core.handler.EventBusConsumer
 import cn.minih.core.repository.RepositoryManager
@@ -17,6 +18,7 @@ import io.vertx.config.ConfigStoreOptions
 import io.vertx.core.DeploymentOptions
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
+import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -103,7 +105,9 @@ object MinihServiceRun {
                 )
         )
         val config = retriever.config.await()
-        config.put("minih.core.aesSecret", generateAesSecret())
+        val sec = generateAesSecret()
+        config.put("minih.core.aesSecret", sec)
+        vertx.eventBus().publish(SYSTEM_WEB_CONFIGURATION_SUBSCRIBE, jsonObjectOf("minih.core.aesSecret" to sec))
         val obj = config.covertTo(com.google.gson.JsonObject::class)
         config.forEach {
             if (it.key.contains(".")) {

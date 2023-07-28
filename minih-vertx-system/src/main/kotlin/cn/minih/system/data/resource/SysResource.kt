@@ -14,8 +14,7 @@ data class SysResource(
     @TableId
     var id: Long = 0,
     var name: String = "",
-    var state: Int = 1,
-    var parentId: String = "",
+    var parentId: Long = 0L,
     var permissionTag: List<String> = mutableListOf(),
     var path: String = "",
     var type: String = "",

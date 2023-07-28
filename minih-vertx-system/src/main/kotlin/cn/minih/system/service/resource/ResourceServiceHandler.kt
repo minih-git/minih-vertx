@@ -28,9 +28,6 @@ object ResourceServiceHandler {
         if (condition.name?.isNotBlank() == true) {
             queryOption.eq(SysResource::name, condition.name)
         }
-        if (condition.state != null) {
-            queryOption.eq(SysResource::state, condition.state)
-        }
         queryOption.gt(SysResource::createTime, page.nextCursor)
         if (!AuthUtil.currentIsSysAdmin()) {
             val roleTags = AuthServiceImpl.instance.getLoginRole(AuthUtil.getCurrentLoginId())
@@ -83,7 +80,6 @@ object ResourceServiceHandler {
         var update = false
         if (sysResource != null) {
             resource.name.notBlankAndExec { update = true;sysResource.name = it }
-            resource.state.notBlankAndExec { update = true;sysResource.state = it }
             resource.permissionTag.notBlankAndExec { update = true;sysResource.permissionTag = it }
             resource.path.notBlankAndExec { update = true;sysResource.path = it }
             resource.icon.notBlankAndExec { update = true;sysResource.icon = it }

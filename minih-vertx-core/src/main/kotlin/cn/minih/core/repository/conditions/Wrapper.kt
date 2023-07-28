@@ -7,9 +7,6 @@ package cn.minih.core.repository.conditions
  * @desc
  */
 abstract class Wrapper<T> {
-    val updateItems: MutableList<UpdateItem>
-        get() = mutableListOf()
-    val condition: MutableList<QueryCondition>
-        get() = mutableListOf()
-
+    val updateItems: MutableList<UpdateItem> = mutableListOf()
+    val condition: MutableList<QueryCondition> = mutableListOf()
 }

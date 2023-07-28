@@ -9,7 +9,6 @@ import cn.minih.core.repository.conditions.QueryConditionType
 import cn.minih.core.repository.conditions.UpdateWrapper
 import cn.minih.core.repository.conditions.Wrapper
 import cn.minih.core.utils.SnowFlake
-import cn.minih.core.utils.log
 import com.google.common.base.CaseFormat
 import io.vertx.core.Future
 import io.vertx.core.Vertx
@@ -55,12 +54,9 @@ object RepositoryManager {
     inline fun <reified T : Any> findOne(wrapper: Wrapper<T>): Future<T?> {
         val tuple = Tuple.tuple()
         wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
-        val sql = generateQuerySql(wrapper)
-        log.info("sql: $sql")
         return getPool().connection.compose { conn ->
-            conn.preparedQuery(sql).execute(tuple)
+            conn.preparedQuery(generateQuerySql(wrapper)).execute(tuple)
                 .compose { rowSet ->
-                    log.info("查询完毕：数据条数：${rowSet.size()}")
                     if (rowSet.size() == 0) {
                         throw MinihNotFoundException()
                     } else {
@@ -76,13 +72,10 @@ object RepositoryManager {
     inline fun <reified T : Any> list(wrapper: Wrapper<T>): Future<List<T>?> {
         val tuple = Tuple.tuple()
         wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
-        val sql = generateQuerySql(wrapper)
-        log.info("sql: $sql")
         return getPool().connection.compose { conn ->
-            conn.preparedQuery(sql).execute(tuple).compose { rowSet ->
-                log.info("查询完毕：数据条数：${rowSet.size()}")
+            conn.preparedQuery(generateQuerySql(wrapper)).execute(tuple).compose { rowSet ->
                 if (rowSet.size() == 0) {
-                    throw MinihNotFoundException()
+                    Future.succeededFuture(listOf())
                 } else {
                     Future.succeededFuture<List<T>>(rowSet.map { covert(it) })
                 }
@@ -106,7 +99,7 @@ object RepositoryManager {
             }
         }
         return getPool().connection.compose { conn ->
-            conn.query(generateInsertSql<T>(entity)).execute()
+            conn.preparedQuery(generateInsertSql<T>(entity)).execute(tuple)
                 .compose { Future.succeededFuture(true) }
                 .onComplete { conn.close() }
         }
@@ -123,7 +116,7 @@ object RepositoryManager {
         }
         wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
         getPool().connection.compose { conn ->
-            conn.query(generateQuerySql<T>(wrapper)).execute().onComplete {
+            conn.preparedQuery(generateUpdateSql<T>(wrapper)).execute(tuple).onComplete {
                 conn.close()
             }
         }
@@ -149,7 +142,7 @@ object RepositoryManager {
         }
         tuple.addValue(primaryKey.get(entity))
         return getPool().connection.compose { conn ->
-            conn.query(generateUpdateSql<T>(updateWrapper)).execute()
+            conn.preparedQuery(generateUpdateSql<T>(updateWrapper)).execute(tuple)
                 .compose { Future.succeededFuture(true) }
                 .onComplete {
                     conn.close()
@@ -168,7 +161,6 @@ object RepositoryManager {
             """.trimIndent()
     }
 
-
     inline fun <reified T : Any> generateUpdateSql(wrapper: Wrapper<T>): String {
         var tableName = T::class.findAnnotation<TableName>()?.value
         if (tableName.isNullOrBlank()) {
@@ -180,7 +172,7 @@ object RepositoryManager {
         wrapper.updateItems.forEach {
             sql = sql.plus(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.key)).plus(" = ?,")
         }
-        return sql.substring(0, sql.length - 1)
+        return sql.substring(0, sql.length - 1).plus("  ${generateConditionSql(wrapper)}")
     }
 
     inline fun <reified T : Any> generateConditionSql(wrapper: Wrapper<T>): String {
@@ -224,7 +216,8 @@ object RepositoryManager {
                 sql = sql.plus("?,")
             }
         }
-        return sql.substring(0, sql.length - 1)
+        return sql.substring(0, sql.length - 1).plus(")")
+
     }
 
 
@@ -235,14 +228,18 @@ object RepositoryManager {
             if (it is KMutableProperty1) {
                 var type = it.returnType.classifier as KClass<*>
                 val fieldName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.name)
+                var stringToList = false
                 if (type.simpleName === List::class.simpleName) {
+                    stringToList = true
                     type = String::class
                 }
-                var valueRaw = row.get(type.javaObjectType, fieldName)
-                if (it.returnType.classifier == Collection::class) {
-                    valueRaw = valueRaw.toString().split(",").toList()
-                }
-                valueRaw?.let { value ->
+                val valueRaw = row.get(type.javaObjectType, fieldName)
+
+                valueRaw?.let { v ->
+                    var value = v
+                    if (stringToList) {
+                        value = valueRaw.toString().split(",").toList()
+                    }
                     it.setter.call(entity, value)
                 }
             }
@@ -279,7 +276,6 @@ object RepositoryManager {
 
 
     }
-
 
 
 }
