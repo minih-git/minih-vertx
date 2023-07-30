@@ -1,0 +1,54 @@
+package cn.minih.web.core
+
+import cn.minih.core.boot.MinihVerticle
+import cn.minih.core.utils.getConfig
+import cn.minih.core.utils.notNullAndExec
+import cn.minih.web.config.WebConfig
+import cn.minih.web.handler.RouteFailureHandler
+import io.vertx.ext.bridge.PermittedOptions
+import io.vertx.ext.web.Router
+import io.vertx.ext.web.handler.BodyHandler
+import io.vertx.ext.web.handler.ResponseContentTypeHandler
+import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
+import io.vertx.ext.web.handler.sockjs.SockJSHandler
+import io.vertx.kotlin.coroutines.CoroutineVerticle
+
+/**
+ * web服务启动器
+ * @author hubin
+ * @since 2023-07-30 22:08:04
+ * @desc
+ */
+@Suppress("unused")
+abstract class MinihWebVerticle(private val port: Int = 8080) : MinihVerticle, CoroutineVerticle() {
+    val router: Router
+        get() {
+            return this.routerInstance
+        }
+    private lateinit var routerInstance: Router
+
+    fun initRouter() {
+        this.routerInstance = Router.router(vertx)
+        val sockJSHandler = SockJSHandler.create(vertx)
+        val options = SockJSBridgeOptions()
+        options.addInboundPermitted(PermittedOptions().setAddressRegex("cn.minih.*"))
+        options.addOutboundPermitted(PermittedOptions().setAddressRegex("cn.minih.*"))
+        routerInstance.route("/ws/minihEventbus/*").subRouter(sockJSHandler.bridge(options))
+        var bodyHandler = BodyHandler.create().setDeleteUploadedFilesOnEnd(true)
+        getConfig("web", WebConfig::class).tmpFilePath.notNullAndExec {
+            bodyHandler = bodyHandler.setUploadsDirectory(it).setDeleteUploadedFilesOnEnd(false)
+        }
+        routerInstance.route()
+            .handler(ResponseContentTypeHandler.create())
+            .handler(bodyHandler)
+            .failureHandler(RouteFailureHandler.instance)
+    }
+
+    override suspend fun start() {
+        initRouterHandler()
+        val server = vertx.createHttpServer()
+        server.requestHandler(routerInstance).listen(port)
+    }
+
+    abstract suspend fun initRouterHandler()
+}
