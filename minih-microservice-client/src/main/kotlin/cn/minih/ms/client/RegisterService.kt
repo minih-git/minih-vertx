@@ -4,6 +4,7 @@ import cn.minih.core.annotation.Component
 import cn.minih.core.boot.PostStartingProcess
 import cn.minih.core.exception.MinihException
 import cn.minih.core.utils.Assert
+import cn.minih.core.utils.findFirstNonLoopBackAddress
 import cn.minih.core.utils.getConfig
 import cn.minih.core.utils.log
 import cn.minih.ms.client.constants.MICROSERVICE_ADDRESS
@@ -31,11 +32,10 @@ class RegisterService : PostStartingProcess {
             throw MinihException("请设置根路径！")
         }
         val discovery = ServiceDiscovery.create(
-            vertx,
-            ServiceDiscoveryOptions()
+            vertx, ServiceDiscoveryOptions()
                 .setBackendConfiguration(
                     JsonObject()
-                        .put("connectionString", "redis://:Minih123@db.minih.cn:6379/0")
+                        .put("connectionString", config.connectionString)
                         .put("key", "cn.minih.discovery")
                 )
                 .setAnnounceAddress(MICROSERVICE_ADDRESS)
@@ -43,7 +43,8 @@ class RegisterService : PostStartingProcess {
         )
         val shareData = vertx.sharedData().getAsyncMap<String, Int>("share")
         val port = shareData.await().get("port").await()
-        val record = HttpEndpoint.createRecord(config.serverName, "0.0.0.0", port, config.rootPath)
+        val ip = findFirstNonLoopBackAddress()
+        val record = HttpEndpoint.createRecord(config.serverName, ip?.hostAddress, port, config.rootPath)
         discovery.publish(record) {
             log.info("${config.serverName}  publish success!")
         }

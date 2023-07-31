@@ -14,13 +14,11 @@ import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.core.json.jsonObjectOf
 import java.io.File
 import java.io.IOException
-import java.net.JarURLConnection
-import java.net.URL
+import java.net.*
 import java.util.*
 import java.util.jar.JarFile
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
-import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.full.*
 import kotlin.reflect.jvm.internal.impl.types.SimpleType
@@ -32,6 +30,34 @@ import kotlin.reflect.jvm.internal.impl.types.SimpleType
  * @desc
  */
 val log: KLogger = KotlinLogging.logger {}
+
+
+fun findFirstNonLoopBackAddress(): InetAddress? {
+    //todo  限制特定ip地址
+    var result: InetAddress? = null
+    var lowest = Int.MAX_VALUE
+    val nics = NetworkInterface.getNetworkInterfaces()
+    while (nics.hasMoreElements()
+    ) {
+        val ifc = nics.nextElement()
+        if (ifc.isUp) {
+            if (ifc.index < lowest || result == null) {
+                lowest = ifc.index
+            } else {
+                continue
+            }
+            val addresses = ifc.inetAddresses
+            while (addresses.hasMoreElements()) {
+                val address = addresses.nextElement()
+                if (address is Inet4Address && !address.isLoopbackAddress()) {
+                    result = address
+                }
+            }
+        }
+    }
+    return result
+}
+
 
 fun <T : Any> JsonObject.covertTo(clazz: KClass<T>): T {
     return Gson().fromJson(this.toString(), clazz.java)
@@ -81,7 +107,7 @@ fun <T : Any> fillObject(jsonObject: JsonObject, clazz: KClass<T>): T {
     val fields = clazz.memberProperties
     fields.forEach { it ->
         if (it is KMutableProperty1<*, *>) {
-            var value = jsonObject.getValue(it.name)
+            val value = jsonObject.getValue(it.name)
             value.notNullAndExec { value1 ->
                 val type = it.returnType.classifier as KClass<*>
                 var v = value1
@@ -95,7 +121,7 @@ fun <T : Any> fillObject(jsonObject: JsonObject, clazz: KClass<T>): T {
                     }
                 }
                 if (type.superclasses.contains(Enum::class)) {
-                    val fn = type.functions.filter { it.name == "valueOf" }.first()
+                    val fn = type.functions.first { it.name == "valueOf" }
                     v = fn.call(v)!!
                 }
                 it.setter.call(configPojo, v)
@@ -114,9 +140,6 @@ data class aaa(
     var c: aas = aas.aaa
 )
 
-fun main() {
-    fillObject(jsonObjectOf("c" to "bbb"), aaa::class)
-}
 
 
 fun isBasicType(cs: KType?): Boolean {
@@ -203,31 +226,31 @@ object Utils {
                     }
                     continue
                 }
-            } else if ("jar".equals(fileType)) {
-                var jar: JarFile? = null;
+            } else if ("jar" == fileType) {
+                var jar: JarFile? = null
                 try {
                     jar = (dirOrFile.openConnection() as JarURLConnection)
-                        .getJarFile();
+                        .jarFile
                 } catch (e: IOException) {
-                    log.warn("load classes failed... path -> {}", path, e);
+                    log.warn("load classes failed... path -> {}", path, e)
                 }
 
-                if (jar == null) continue;
-                val itemsForJar = jar.entries();
+                if (jar == null) continue
+                val itemsForJar = jar.entries()
                 while (itemsForJar.hasMoreElements()) {
-                    val jarEntry = itemsForJar.nextElement();
-                    var fileName = jarEntry.getName();
+                    val jarEntry = itemsForJar.nextElement()
+                    var fileName = jarEntry.name
                     //目录
-                    if (fileName.endsWith("/")) continue;
+                    if (fileName.endsWith("/")) continue
                     if (fileName.first() == '/') {
-                        fileName = fileName.substring(1);
+                        fileName = fileName.substring(1)
                     }
                     //jar中文件或目录的路径，不与需要解析的路径匹配
-                    if (!fileName.startsWith(slashPath)) continue;
+                    if (!fileName.startsWith(slashPath)) continue
                     //class文件
-                    if (fileName.endsWith(".class") && !jarEntry.isDirectory()) {
+                    if (fileName.endsWith(".class") && !jarEntry.isDirectory) {
                         //去掉 .class 结尾
-                        val filePath = fileName.substring(0, fileName.length - 6);
+                        val filePath = fileName.substring(0, fileName.length - 6)
                         val loadClass = ClassLoader.getSystemClassLoader().loadClass(filePath.replace('/', '.')).kotlin
                         result.add(loadClass)
                     }

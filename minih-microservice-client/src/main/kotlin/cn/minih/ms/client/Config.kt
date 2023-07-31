@@ -9,5 +9,6 @@ import cn.minih.core.config.IConfig
  */
 class Config(
     var serverName: String = "",
-    var rootPath: String = ""
+    var rootPath: String = "",
+    var connectionString: String = ""
 ) : IConfig
