@@ -5,6 +5,11 @@ plugins {
 
 }
 
+java{
+    withJavadocJar()
+    withSourcesJar()
+}
+
 
 publishing {
     publications {

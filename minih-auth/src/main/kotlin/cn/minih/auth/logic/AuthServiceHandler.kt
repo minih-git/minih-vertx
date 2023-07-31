@@ -3,6 +3,7 @@
 package cn.minih.auth.logic
 
 import cn.hutool.core.text.AntPathMatcher
+import cn.hutool.core.util.ObjectUtil.isBasicType
 import cn.hutool.core.util.URLUtil
 import cn.minih.auth.annotation.AuthCheckRole
 import cn.minih.auth.annotation.CheckRoleType
@@ -119,12 +120,12 @@ private fun generateArgs(argsNeed: List<KParameter>, ctx: RoutingContext): Array
             type = type.classifier?.createType()!!
         }
         val isMarkedNullable = argsType.type.isMarkedNullable
-        val param: Any? = if (AuthLogic.isBasicType(type)) {
+        val param: Any? = if (isBasicType(type)) {
             argsType.name?.let { name -> params[name] }
         } else {
             argsType.name?.let { params.covertTo(argsType.type) }
         }
-        if (AuthLogic.isBasicType(type)) {
+        if (isBasicType(type)) {
             if (!isMarkedNullable && param == null) {
                 throw MinihArgumentErrorException("参数：${argsType.name} 不能为空！")
             }

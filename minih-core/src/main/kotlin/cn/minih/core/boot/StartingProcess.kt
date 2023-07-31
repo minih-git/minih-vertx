@@ -9,7 +9,7 @@ import io.vertx.core.Vertx
  * @desc
  */
 interface PreStartingProcess {
-    fun exec(vertx: Vertx)
+    suspend fun exec(vertx: Vertx)
 }
 
 /**
@@ -19,5 +19,5 @@ interface PreStartingProcess {
  * @desc
  */
 interface PostStartingProcess {
-    fun exec(vertx: Vertx)
+    suspend fun exec(vertx: Vertx)
 }

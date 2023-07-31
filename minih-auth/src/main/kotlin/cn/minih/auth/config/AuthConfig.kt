@@ -11,7 +11,7 @@ import cn.minih.core.constants.PROJECT_NAME
  * @desc
  */
 class AuthConfig(
-    var cache: AuthCacheConfig,
+    var cache: AuthCacheConfig = AuthCacheConfig(),
     var encryptData: Boolean = false,
     var projectName: String = PROJECT_NAME,
     var tokenName: String = DEFAULT_TOKEN_NAME,
@@ -36,7 +36,7 @@ class AuthConfig(
 data class AuthCacheConfig(
     var type: String = "redis",
     var poolSize: Int? = 8,
-    var connectionString: String?
+    var connectionString: String? = ""
 )
 
 enum class LockType(val code: Int) {

@@ -2,9 +2,14 @@ plugins {
     kotlin("jvm") version "1.9.0"
     id("java-library")
     id("maven-publish")
+
 }
 
 
+java{
+    withJavadocJar()
+    withSourcesJar()
+}
 
 publishing {
     publications {
@@ -25,6 +30,9 @@ dependencies {
     api(libs.vertx.config.yaml)
     api(libs.vertx.kotlin.coroutines)
     api(libs.vertx.kotlin)
+    api(libs.vertx.hazelcast)
+
+
     implementation(libs.logging)
     implementation(libs.logback)
     implementation(libs.gson)

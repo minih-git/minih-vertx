@@ -8,6 +8,6 @@ import cn.minih.core.config.IConfig
  * @since 2023-07-30 22:16:45
  * @desc
  */
-class WebConfig(
-    val tmpFilePath: String?
+data class WebConfig(
+    var tmpFilePath: String = "file-uploads"
 ) : IConfig

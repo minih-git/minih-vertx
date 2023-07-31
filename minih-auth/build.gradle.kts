@@ -6,6 +6,10 @@ plugins {
 }
 
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
 publishing {
     publications {
         create<MavenPublication>("minihLibrary") {

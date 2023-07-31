@@ -12,22 +12,28 @@ import cn.minih.core.utils.Utils.getClassesByPath
 import cn.minih.core.utils.covertTo
 import cn.minih.core.utils.log
 import cn.minih.core.utils.toJsonObject
+import com.google.gson.Gson
 import io.vertx.config.ConfigRetriever
 import io.vertx.config.ConfigRetrieverOptions
 import io.vertx.config.ConfigStoreOptions
 import io.vertx.core.DeploymentOptions
 import io.vertx.core.Future
 import io.vertx.core.Vertx
+import io.vertx.core.VertxOptions
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
+import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
+import java.math.RoundingMode
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
+
 
 /**
  * @author hubin
@@ -50,7 +56,8 @@ object MinihBootServiceRun {
                 componentsList.addAll(getClassesByPath(componentScan.basePackage))
             }
         }
-        componentsList.filter { hasComponentsAnnotation(it) }.forEach {
+        val components = componentsList.filter { hasComponentsAnnotation(it) }
+        components.forEach {
             if (it.simpleName != null) {
                 var beanName = it.simpleName!!
                 clazz.findAnnotation<Component>()?.let { con ->
@@ -98,25 +105,29 @@ object MinihBootServiceRun {
         }
     }
 
-    private fun postStartHandling(vertx: Vertx) {
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun preStartHandling(vertx: Vertx) {
         val startingProcess = BeanFactory.instance.findBeanDefinitionByType(PreStartingProcess::class)
         startingProcess.forEach { process ->
             val bean = BeanFactory.instance.getBean(process.beanName) as PreStartingProcess
-            bean.exec(vertx)
+            GlobalScope.launch(vertx.orCreateContext.dispatcher()) { bean.exec(vertx) }
         }
     }
 
-    private fun preStartHandling(vertx: Vertx) {
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun postStartHandling(vertx: Vertx) {
         val startingProcess = BeanFactory.instance.findBeanDefinitionByType(PostStartingProcess::class)
         startingProcess.forEach { process ->
             val bean = BeanFactory.instance.getBean(process.beanName) as PostStartingProcess
-            bean.exec(vertx)
+            GlobalScope.launch(Vertx.currentContext().dispatcher()) { bean.exec(vertx) }
         }
     }
 
 
     suspend fun run(clazz: KClass<*>) {
-        val vertx = Vertx.vertx()
+        val mgr = HazelcastClusterManager()
+        val options = VertxOptions().setClusterManager(mgr)
+        val vertx = Vertx.clusteredVertx(options).await()
         try {
             log.info("服务开始启动...")
             val currentTime = System.currentTimeMillis()
@@ -125,10 +136,15 @@ object MinihBootServiceRun {
             preStartHandling(vertx)
             deployVerticle(vertx).await()
             postStartHandling(vertx)
-            log.info(
-                "服务启动成功，耗时:{}s",
-                String.format("%.2f", ((System.currentTimeMillis() - currentTime) / 1000))
-            )
+            val shareData = vertx.sharedData().getAsyncMap<String, Int>("share")
+            val port = shareData.await().get("port").await()
+            var msg = "服务启动成功,"
+            port?.let {
+                msg = msg.plus("端口:${it},")
+            }
+            var bd = BigDecimal((System.currentTimeMillis() - currentTime) / 1000.00)
+            bd = bd.setScale(2, RoundingMode.HALF_UP);
+            log.info(msg.plus("耗时: {}s"), bd.toString())
         } catch (e: Exception) {
             successDeploy.forEach {
                 vertx.undeploy(it)
@@ -138,8 +154,14 @@ object MinihBootServiceRun {
 
     }
 
-    fun setSystemConfig(fn: () -> List<ConfigStoreOptions>) {
+    fun setSystemConfigs(fn: () -> List<ConfigStoreOptions>): MinihBootServiceRun {
         systemConfigs.addAll(fn())
+        return this
+    }
+
+    fun setSystemConfig(fn: () -> ConfigStoreOptions): MinihBootServiceRun {
+        systemConfigs.add(fn())
+        return this
     }
 
     private suspend fun initConfig(vertx: Vertx): JsonObject {
@@ -161,15 +183,14 @@ object MinihBootServiceRun {
                 updateJson(obj, it.key.split("."), it.value.toString())
             }
         }
+        val vertxConfig = vertx.orCreateContext.config()
         obj.entrySet().forEach {
-            val vertxConfig = Vertx.currentContext().config()
             vertxConfig.put(it.key, it.value.toString())
             if (it.value is com.google.gson.JsonObject) {
                 vertxConfig.put(it.key, it.value.toJsonObject())
             }
         }
         return obj.toJsonObject()
-
     }
 
     private fun updateJson(jsonObj: com.google.gson.JsonObject, keys: List<String>, newValue: String) {
@@ -178,7 +199,7 @@ object MinihBootServiceRun {
             jsonObj.addProperty(key, newValue)
         } else {
             val nextObj = jsonObj.getAsJsonObject(key) ?: com.google.gson.JsonObject().also { jsonObj.add(key, it) }
-            updateJson(nextObj, keys.drop(1), newValue)
+            updateJson(Gson().toJsonTree(nextObj).asJsonObject, keys.drop(1), newValue)
         }
     }
 

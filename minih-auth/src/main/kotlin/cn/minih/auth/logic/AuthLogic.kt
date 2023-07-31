@@ -1,5 +1,6 @@
 package cn.minih.auth.logic
 
+import cn.hutool.core.util.ObjectUtil.isBasicType
 import cn.minih.auth.cache.MinihAuthRedisManager
 import cn.minih.auth.config.AuthConfig
 import cn.minih.auth.constants.*
@@ -14,9 +15,7 @@ import io.vertx.core.Vertx
 import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.kotlin.coroutines.await
 import java.util.*
-import kotlin.reflect.KType
 import kotlin.reflect.full.createType
-import kotlin.reflect.jvm.internal.impl.types.SimpleType
 
 /**
  * @author hubin
@@ -209,13 +208,7 @@ object AuthLogic {
         }
     }
 
-    fun isBasicType(cs: KType?): Boolean {
-        return cs is SimpleType || isWrapper(cs) || cs == String::class.createType()
-    }
 
-    private fun isWrapper(cs: KType?): Boolean {
-        return cs == Int::class.createType() || cs == Short::class.createType() || cs == Long::class.createType() || cs == Byte::class.createType() || cs == Float::class.createType() || cs == Double::class.createType() || cs == Boolean::class.createType() || cs == Char::class.createType()
-    }
 
     private suspend fun getTokenValueByLoginId(id: String, device: String): String? {
         val session = getSessionByLoginId(id)
