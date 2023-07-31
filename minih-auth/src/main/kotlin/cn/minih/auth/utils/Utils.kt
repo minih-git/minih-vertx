@@ -4,9 +4,9 @@ package cn.minih.auth.utils
 
 import cn.minih.auth.annotation.CheckRoleType
 import cn.minih.auth.cache.MinihAuthRedisManager
+import cn.minih.auth.constants.AES_SECRET_REDIS_KEY_PREFIX
 import cn.minih.auth.constants.CONTEXT_LOGIN_ID
 import cn.minih.auth.logic.AuthServiceHandler
-import cn.minih.core.constants.AES_SECRET_REDIS_KEY_PREFIX
 import cn.minih.core.exception.MinihDataDecryptionException
 import cn.minih.core.utils.log
 import com.google.gson.Gson
