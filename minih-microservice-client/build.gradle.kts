@@ -26,8 +26,8 @@ publishing {
 dependencies {
 
     api(libs.vertx.discovery)
-    api(libs.vertx.discovery.bridge)
-    api(libs.vertx.discovery.backend)
+    api(libs.vertx.consul)
+//    api(libs.vertx.discovery.backend)
     api(libs.vertx.web.client)
 
     implementation(libs.logging)

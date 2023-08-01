@@ -2,17 +2,12 @@ package cn.minih.ms.client
 
 import cn.minih.core.annotation.Component
 import cn.minih.core.boot.PostStartingProcess
-import cn.minih.core.exception.MinihException
-import cn.minih.core.utils.Assert
+import cn.minih.core.utils.SnowFlake
 import cn.minih.core.utils.findFirstNonLoopBackAddress
-import cn.minih.core.utils.getConfig
 import cn.minih.core.utils.log
-import cn.minih.ms.client.constants.MICROSERVICE_ADDRESS
 import io.vertx.core.Vertx
-import io.vertx.core.json.JsonObject
+import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.kotlin.coroutines.await
-import io.vertx.servicediscovery.ServiceDiscovery
-import io.vertx.servicediscovery.ServiceDiscoveryOptions
 import io.vertx.servicediscovery.types.HttpEndpoint
 
 
@@ -24,29 +19,17 @@ import io.vertx.servicediscovery.types.HttpEndpoint
 @Component
 class RegisterService : PostStartingProcess {
     override suspend fun exec(vertx: Vertx) {
-        val config = getConfig("ms", Config::class, vertx)
-        Assert.notBlank(config.serverName) {
-            throw MinihException("请设置服务名称！")
-        }
-        Assert.notBlank(config.rootPath) {
-            throw MinihException("请设置根路径！")
-        }
-        val discovery = ServiceDiscovery.create(
-            vertx, ServiceDiscoveryOptions()
-                .setBackendConfiguration(
-                    JsonObject()
-                        .put("connectionString", config.connectionString)
-                        .put("key", "cn.minih.discovery")
-                )
-                .setAnnounceAddress(MICROSERVICE_ADDRESS)
-                .setName("minih-ms")
-        )
-        val shareData = vertx.sharedData().getAsyncMap<String, Int>("share")
-        val port = shareData.await().get("port").await()
+        val ctx = MsClientContext.instance.initContext(vertx)
+        val shareData = vertx.sharedData().getAsyncMap<String, Any>("share").await()
+        val port = shareData.get("port").await()
         val ip = findFirstNonLoopBackAddress()
-        val record = HttpEndpoint.createRecord(config.serverName, ip?.hostAddress, port, config.rootPath)
-        discovery.publish(record) {
-            log.info("${config.serverName}  publish success!")
+        val record =
+            HttpEndpoint.createRecord(ctx.config.serverName, ip?.hostAddress ?: "", port as Int, ctx.config.rootPath)
+        val severId = SnowFlake.nextId().toString()
+        shareData.put("serverId", severId).await()
+        record.setMetadata(jsonObjectOf("serverId" to severId))
+        ctx.discovery.publish(record) {
+            log.info("${ctx.config.serverName}  服务注册成功!")
         }
     }
 

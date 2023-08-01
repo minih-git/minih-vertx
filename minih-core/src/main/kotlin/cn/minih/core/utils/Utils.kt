@@ -19,6 +19,7 @@ import java.util.*
 import java.util.jar.JarFile
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KProperty
 import kotlin.reflect.KType
 import kotlin.reflect.full.*
 import kotlin.reflect.jvm.internal.impl.types.SimpleType
@@ -68,6 +69,9 @@ fun JsonObject.covertTo(kType: KType): Any {
 }
 
 fun Any.toJsonObject(): JsonObject {
+    if (this is JsonObject) {
+        return this
+    }
     return JsonObject(Gson().toJson(this))
 }
 
@@ -89,7 +93,7 @@ fun <T : IConfig> getConfig(
     vertx: Vertx = Vertx.currentContext().owner()
 ): T {
     val configRaw = vertx.orCreateContext.config()
-    val configObj = configRaw.getJsonObject(PROJECT_NAME)
+    val configObj = configRaw.getJsonObject(PROJECT_NAME) ?: jsonObjectOf()
     val config = configObj.getJsonObject(configName) ?: jsonObjectOf()
     return fillObject(config, configClass)
 }
@@ -98,7 +102,7 @@ fun <T : Any> fillObject(jsonObject: JsonObject, clazz: KClass<T>): T {
     var configPojo = "{}".jsonConvertData(clazz)
     try {
         val cons = clazz.primaryConstructor!!
-        val values = cons.parameters.filterNot { it.isOptional }.associate { it to null }
+        val values = cons.parameters.filterNot { it.isOptional }.associateWith { null }
         configPojo = cons.callBy(values)
     } catch (e: Exception) {
         e.printStackTrace()
@@ -110,24 +114,16 @@ fun <T : Any> fillObject(jsonObject: JsonObject, clazz: KClass<T>): T {
             val value = jsonObject.getValue(it.name)
             value.notNullAndExec { value1 ->
                 val type = it.returnType.classifier as KClass<*>
-                var v = value1
-                if (type.simpleName === List::class.simpleName) {
-                    val valueTmp = jsonObject.getJsonArray(it.name, JsonArray()).toList()
-                    val first = valueTmp.first()
-                    v = if (isBasicType(first::class.createType())) {
-                        valueTmp
-                    } else {
-                        valueTmp.map { vt -> fillObject(vt.toJsonObject(), first::class) }
-                    }
-                }
-                if (type.superclasses.contains(Enum::class)) {
-                    val fn = type.functions.first { it.name == "valueOf" }
-                    v = fn.call(v)!!
+                val v = when {
+                    type.simpleName === List::class.simpleName -> fillObjectHandleList(jsonObject, it)
+                    type.superclasses.contains(Enum::class) -> type.functions.first { it.name == "valueOf" }
+                        .call(value1)!!
+
+                    !isBasicType(it.returnType) -> fillObject(value1.toJsonObject(), type)
+                    else -> value1
                 }
                 it.setter.call(configPojo, v)
-
             }
-
         } else {
             log.warn("${clazz.simpleName}.${it.name} 无法初始化！请将字段设置为可变类型！")
         }
@@ -135,15 +131,31 @@ fun <T : Any> fillObject(jsonObject: JsonObject, clazz: KClass<T>): T {
     return configPojo
 }
 
-enum class aas { aaa, bbb }
-data class aaa(
-    var c: aas = aas.aaa
+fun fillObjectHandleList(jsonObject: JsonObject, it: KProperty<*>): Any {
+    val valueTmp = jsonObject.getJsonArray(it.name, JsonArray()).toList()
+    val first = valueTmp.first()
+    return if (isBasicType(first::class.createType())) {
+        valueTmp
+    } else {
+        val childType = it.returnType.arguments.first().type?.classifier as KClass<*>
+
+        valueTmp.map { vt -> fillObject(vt.toJsonObject(), childType) }
+    }
+}
+
+data class AuthCacheConfig(var a: String = "1", var b: String = "2")
+data class AuthConfig(
+    var cache: AuthCacheConfig = AuthCacheConfig(),
 )
 
 
-
 fun isBasicType(cs: KType?): Boolean {
-    return cs is SimpleType || isWrapper(cs) || cs == String::class.createType()
+    if (cs == null) return false
+    var cst = cs
+    if (cs.isMarkedNullable) {
+        cst = cs.classifier?.createType()!!
+    }
+    return cst is SimpleType || isWrapper(cst) || cst == String::class.createType()
 }
 
 private fun isWrapper(cs: KType?): Boolean {

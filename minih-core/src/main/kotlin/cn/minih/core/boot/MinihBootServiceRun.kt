@@ -16,10 +16,7 @@ import com.google.gson.Gson
 import io.vertx.config.ConfigRetriever
 import io.vertx.config.ConfigRetrieverOptions
 import io.vertx.config.ConfigStoreOptions
-import io.vertx.core.DeploymentOptions
-import io.vertx.core.Future
-import io.vertx.core.Vertx
-import io.vertx.core.VertxOptions
+import io.vertx.core.*
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
@@ -123,6 +120,23 @@ object MinihBootServiceRun {
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun registerCloseHandling(vertx: Vertx): Future<Boolean> {
+        log.info("开始执行关闭程序...")
+        val stopProcess = BeanFactory.instance.findBeanDefinitionByType(PreStopProcess::class)
+        return Future.all(stopProcess.map { process ->
+            val bean = BeanFactory.instance.getBean(process.beanName) as PreStopProcess
+            val future: Promise<Boolean> = Promise.promise()
+            GlobalScope.launch(vertx.orCreateContext.dispatcher()) {
+                bean.exec(vertx)
+            }.invokeOnCompletion {
+                log.info("${process.beanName} 完成...")
+                future.complete()
+            }
+            future.future()
+        }).compose { vertx.close();Future.succeededFuture() }
+    }
+
 
     suspend fun run(clazz: KClass<*>) {
         val mgr = HazelcastClusterManager()
@@ -136,6 +150,11 @@ object MinihBootServiceRun {
             preStartHandling(vertx)
             deployVerticle(vertx).await()
             postStartHandling(vertx)
+            Runtime.getRuntime().addShutdownHook(Thread() {
+                val a = registerCloseHandling(vertx)
+                @Suppress("ControlFlowWithEmptyBody")
+                while (!a.isComplete) { }
+            })
             val shareData = vertx.sharedData().getAsyncMap<String, Int>("share")
             val port = shareData.await().get("port").await()
             var msg = "服务启动成功,"
@@ -143,12 +162,13 @@ object MinihBootServiceRun {
                 msg = msg.plus("端口:${it},")
             }
             var bd = BigDecimal((System.currentTimeMillis() - currentTime) / 1000.00)
-            bd = bd.setScale(2, RoundingMode.HALF_UP);
+            bd = bd.setScale(2, RoundingMode.HALF_UP)
             log.info(msg.plus("耗时: {}s"), bd.toString())
         } catch (e: Exception) {
             successDeploy.forEach {
                 vertx.undeploy(it)
             }
+            registerCloseHandling(vertx)
             log.warn("部署服务出现错误,{}", e.message, e)
         }
 
@@ -203,7 +223,6 @@ object MinihBootServiceRun {
         }
     }
 
-
     private fun hasComponentsAnnotation(clazz: KClass<*>): Boolean {
         try {
             return clazz.hasAnnotation<Component>() || clazz.hasAnnotation<MinihServiceVerticle>()
@@ -211,5 +230,6 @@ object MinihBootServiceRun {
         }
         return false
     }
+
 
 }

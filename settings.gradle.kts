@@ -19,8 +19,9 @@ dependencyResolutionManagement {
             library("vertx-discovery", "io.vertx", "vertx-service-discovery").versionRef("vertx")
             library("vertx-web-client", "io.vertx", "vertx-web-client").versionRef("vertx")
             library("vertx-hazelcast", "io.vertx", "vertx-hazelcast").versionRef("vertx")
+            library("vertx-consul", "io.vertx", "vertx-consul-client").versionRef("vertx")
             library("vertx-discovery-bridge", "io.vertx", "vertx-service-discovery-bridge-consul").versionRef("vertx")
-            library("vertx-discovery-backend", "io.vertx", "vertx-service-discovery-backend-redis").versionRef("vertx")
+            library("vertx-discovery-backend", "io.vertx", "vertx-service-discovery-backend-consul").versionRef("vertx")
 
             library("logging", "io.github.oshai:kotlin-logging-jvm:4.0.0")
             library("logback", "ch.qos.logback:logback-classic:1.4.8")

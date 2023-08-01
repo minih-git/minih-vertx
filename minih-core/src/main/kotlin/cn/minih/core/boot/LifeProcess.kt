@@ -21,3 +21,13 @@ interface PreStartingProcess {
 interface PostStartingProcess {
     suspend fun exec(vertx: Vertx)
 }
+
+/**
+ * 停止前执行操作
+ * @author hubin
+ * @since 2023-07-30 21:18:12
+ * @desc
+ */
+interface PreStopProcess {
+    suspend fun exec(vertx: Vertx)
+}

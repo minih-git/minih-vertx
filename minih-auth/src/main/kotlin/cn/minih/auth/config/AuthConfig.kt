@@ -10,7 +10,7 @@ import cn.minih.core.constants.PROJECT_NAME
  * @since 2023-07-30 22:37:51
  * @desc
  */
-class AuthConfig(
+data class AuthConfig(
     var cache: AuthCacheConfig = AuthCacheConfig(),
     var encryptData: Boolean = false,
     var projectName: String = PROJECT_NAME,

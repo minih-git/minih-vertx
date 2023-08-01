@@ -10,5 +10,7 @@ import cn.minih.core.config.IConfig
 class Config(
     var serverName: String = "",
     var rootPath: String = "",
-    var connectionString: String = ""
+    var consulHost: String = "",
+    var consulPort: Int = 8500,
+    var dcName: String = "dc1"
 ) : IConfig

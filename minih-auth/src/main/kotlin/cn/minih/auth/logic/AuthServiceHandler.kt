@@ -115,10 +115,7 @@ private fun generateArgs(argsNeed: List<KParameter>, ctx: RoutingContext): Array
     val args = mutableListOf<Any?>()
     val params = getRequestBody(ctx)
     argsNeed.forEach { argsType ->
-        var type = argsType.type
-        if (type.isMarkedNullable) {
-            type = type.classifier?.createType()!!
-        }
+        val type = argsType.type
         val isMarkedNullable = argsType.type.isMarkedNullable
         val param: Any? = if (isBasicType(type)) {
             argsType.name?.let { name -> params[name] }
