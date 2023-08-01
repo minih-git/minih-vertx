@@ -1,0 +1,21 @@
+<configuration>
+    <property name="log.path" value="/tmp/projects/logs/"/>
+
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d %p [%thread] (%file:%line\)- %m%n</pattern>
+            <!-- 控制台也要使用UTF-8，不要使用GBK，否则会中文乱码 -->
+            <charset>UTF-8</charset>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter"><!-- 只打印INFO以上日志 -->
+            <level>INFO</level>
+        </filter>
+    </appender>
+
+
+    <root>
+        <appender-ref ref="console"/>
+    </root>
+
+</configuration>
