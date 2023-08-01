@@ -14,7 +14,6 @@ import cn.minih.auth.data.TokenInfo
 import cn.minih.auth.exception.AuthLoginException
 import cn.minih.auth.exception.MinihAuthException
 import cn.minih.auth.service.AuthService
-import cn.minih.auth.service.DefaultAuthServiceImpl
 import cn.minih.auth.utils.*
 import cn.minih.core.exception.MinihArgumentErrorException
 import cn.minih.core.exception.MinihException
@@ -158,16 +157,12 @@ private suspend fun authCheckRole(fn: KFunction<Any?>, ctx: RoutingContext) {
  * @desc
  */
 class AuthServiceHandler private constructor() : Handler<RoutingContext> {
-    private var authService: AuthService
+    private lateinit var authService: AuthService
 
     companion object {
         val instance by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
             AuthServiceHandler()
         }
-    }
-
-    init {
-        this.authService = DefaultAuthServiceImpl.instance
     }
 
     fun setAuthService(authService: AuthService) {

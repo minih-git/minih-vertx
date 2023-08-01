@@ -1,6 +1,5 @@
 package cn.minih.auth.logic
 
-import cn.hutool.core.util.ObjectUtil.isBasicType
 import cn.minih.auth.cache.MinihAuthRedisManager
 import cn.minih.auth.config.AuthConfig
 import cn.minih.auth.constants.*

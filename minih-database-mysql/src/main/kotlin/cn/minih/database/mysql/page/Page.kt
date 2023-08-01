@@ -10,6 +10,6 @@ package cn.minih.database.mysql.page
 @Suppress("unused")
 data class Page<T>(
     val nextCursor: Long,
-    val data: List<T>?,
+    var data: List<T>?,
     val pageSize:Int = 10,
 )
