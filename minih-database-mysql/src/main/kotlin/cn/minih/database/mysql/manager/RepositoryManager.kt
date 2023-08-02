@@ -13,8 +13,10 @@ import cn.minih.database.mysql.operation.QueryConditionType
 import cn.minih.database.mysql.operation.QueryWrapper
 import cn.minih.database.mysql.operation.UpdateWrapper
 import cn.minih.database.mysql.operation.Wrapper
+import cn.minih.database.mysql.page.Page
 import com.google.common.base.CaseFormat
 import io.vertx.core.Future
+import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.mysqlclient.MySQLConnectOptions
 import io.vertx.mysqlclient.MySQLPool
@@ -53,7 +55,7 @@ object RepositoryManager {
         val poolOptions = PoolOptions()
             .setPoolCleanerPeriod(240)
             .setMaxLifetime(240)
-            .setShared(true).setMaxSize(config.pollSize ?: 20)
+            .setShared(true).setMaxSize(config.pollSize)
         pool = MySQLPool.pool(vertx, connectOptions, poolOptions)
     }
 
@@ -78,7 +80,10 @@ object RepositoryManager {
                         Future.succeededFuture(covert(rowSet.first()))
                     }
                 }
-                .onFailure { log.warn(it.message) }.onComplete { conn.close() }
+                .onFailure {
+                    printWarningLog(sql, tuple, it.message)
+                    Future.succeededFuture(null)
+                }.onComplete { conn.close() }
         }
     }
 
@@ -103,22 +108,42 @@ object RepositoryManager {
         val tuple = Tuple.tuple()
         wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
         val sql = generateQuerySql(wrapper)
-        return getPool().connection.compose { conn ->
+        return list(sql, tuple)
+    }
+
+    inline fun <reified T : Any> page(page: Page<T>, wrapper: Wrapper<T>): Future<Page<T>> {
+        val tuple = Tuple.tuple()
+        wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
+        val sql = generateQuerySql(wrapper).plus("limit ${page.pageSize}")
+        val future: Promise<Page<T>> = Promise.promise()
+        list<T>(sql, tuple).onComplete { page.data = it.result();future.complete(page) }
+        return future.future()
+    }
+
+    inline fun <reified T : Any> list(sql: String, tuple: Tuple): Future<List<T>> {
+        val future: Promise<List<T>> = Promise.promise()
+        getPool().connection.compose { conn ->
             conn.preparedQuery(sql).execute(tuple)
-                .compose { rowSet ->
-                    if (rowSet.size() == 0) {
+                .onComplete { rowSet ->
+                    val resultRaw = rowSet.result()
+                    if (resultRaw.size() == 0) {
                         printLog(sql, tuple, listOf<T>())
-                        Future.succeededFuture(listOf())
+                        future.complete(listOf())
                     } else {
-                        val result: List<T> = rowSet.map { covert(it) }
+                        val result: List<T> = resultRaw.map { covert(it) }
                         printLog(sql, tuple, result)
-                        Future.succeededFuture(result)
+                        future.complete(result)
                     }
-                }.onFailure { log.warn(it.message) }.onComplete { conn.close() }
+                }.onFailure {
+                    printWarningLog(sql, tuple, it.message)
+                    future.complete(listOf())
+                }.onComplete { conn.close() }
         }
+        return future.future()
     }
 
     inline fun <reified T : Any> insert(entity: T): Future<T> {
+        val future: Promise<T> = Promise.promise()
         val tuple = Tuple.tuple()
         insertPrimaryKey(entity)
         val fields = T::class.memberProperties
@@ -132,17 +157,22 @@ object RepositoryManager {
             }
         }
         val sql = generateInsertSql<T>(entity)
-        return getPool().connection.compose { conn ->
+        getPool().connection.compose { conn ->
             conn.preparedQuery(sql).execute(tuple)
-                .compose {
+                .onComplete {
                     printLog(sql, tuple, true)
-                    Future.succeededFuture(entity)
+                    future.complete(entity)
                 }
-                .onFailure { log.warn(it.message) }.onComplete { conn.close() }
+                .onFailure {
+                    printWarningLog(sql, tuple, it.message)
+                    future.complete(null)
+                }.onComplete { conn.close() }
         }
+        return future.future()
     }
 
     inline fun <reified T : Any> insertBatch(entities: List<T>): Future<Boolean> {
+        val future: Promise<Boolean> = Promise.promise()
         val batchTuple = entities.map { entity ->
             val tuple = Tuple.tuple()
             insertPrimaryKey(entity)
@@ -160,17 +190,22 @@ object RepositoryManager {
         }
         val sql = generateInsertSql<T>(entities.first())
 
-        return getPool().connection.compose { conn ->
+        getPool().connection.compose { conn ->
             conn.preparedQuery(sql).executeBatch(batchTuple)
-                .compose {
+                .onComplete {
                     printLog(sql, batchTuple, true)
-                    Future.succeededFuture(true)
+                    future.complete(true)
                 }
-                .onFailure { log.warn(it.message) }.onComplete { conn.close() }
+                .onFailure {
+                    printWarningLog(sql, batchTuple, it.message)
+                    future.complete(false)
+                }.onComplete { conn.close() }
         }
+        return future.future()
     }
 
     inline fun <reified T : Any> update(wrapper: Wrapper<T>): Future<Boolean> {
+        val future: Promise<Boolean> = Promise.promise()
         val tuple = Tuple.tuple()
         wrapper.updateItems.forEach {
             var value = it.value
@@ -181,15 +216,19 @@ object RepositoryManager {
         }
         val sql = generateUpdateSql<T>(wrapper)
         wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
-        return getPool().connection.compose { conn ->
+        getPool().connection.compose { conn ->
             conn.preparedQuery(generateUpdateSql<T>(wrapper))
                 .execute(tuple)
-                .compose {
+                .onComplete {
                     printLog(sql, tuple, true)
-                    Future.succeededFuture(true)
+                    future.complete(true)
                 }
-                .onFailure { log.warn(it.message) }.onComplete { conn.close() }
+                .onFailure {
+                    printWarningLog(sql, tuple, it.message)
+                    future.complete(false)
+                }.onComplete { conn.close() }
         }
+        return future.future()
     }
 
     inline fun <reified T : Any> update(entity: T): Future<Boolean> {
@@ -232,13 +271,12 @@ object RepositoryManager {
         if (tableName.isNullOrBlank()) {
             tableName = T::class.simpleName?.let { CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it) }
         }
-        var sql = """
+        val sql = """
                 update $tableName  set 
-            """.trimIndent()
-        wrapper.updateItems.forEach {
-            sql = sql.plus(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.key)).plus(" = ?,")
-        }
-        return sql.substring(0, sql.length - 1).plus("  ${generateConditionSql(wrapper)}")
+            """.trimIndent().plus(wrapper.updateItems.joinToString(", ") {
+            "${CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.key)} = ? "
+        })
+        return sql.plus("  ${generateConditionSql(wrapper)}")
     }
 
     inline fun <reified T : Any> generateConditionSql(wrapper: Wrapper<T>): String {
@@ -248,9 +286,11 @@ object RepositoryManager {
                 when (it.type) {
                     QueryConditionType.EQ -> " = ?"
                     QueryConditionType.IN -> {
-                        var perch = ""
-                        it.value.forEach { _ -> perch = perch.plus("?,") }
-                        " in (${perch.substring(0, perch.length - 1)})"
+                        val perch = when {
+                            it.value.isEmpty() -> "?"
+                            else -> it.value.joinToString(",") { _ -> "?" }
+                        }
+                        " in (${perch})"
                     }
 
                     QueryConditionType.BETWEEN -> " between ? an ?"
@@ -270,19 +310,13 @@ object RepositoryManager {
             tableName = T::class.simpleName?.let { CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it) }
         }
         val fields = T::class.memberProperties
-        var sql = """
+        val sql = """
                 insert into $tableName (
             """.trimIndent()
-        fields.forEach {
-            sql = sql.plus("${CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.name)},")
-        }
-        sql = sql.substring(0, sql.length - 1).plus(") values (")
-        fields.forEach {
-            if (it is KMutableProperty1) {
-                sql = sql.plus("?,")
-            }
-        }
-        return sql.substring(0, sql.length - 1).plus(")")
+            .plus(fields.joinToString(", ") { CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.name) })
+            .plus(") values (")
+            .plus(fields.filter { it is KMutableProperty1<*, *> }.joinToString(", ") { "?" })
+        return sql.plus(")")
 
     }
 
@@ -340,23 +374,43 @@ object RepositoryManager {
     }
 
     fun printLog(sql: String, tuple: Tuple, resultRaw: Any?) {
-        log.debug("====>sql:${sql}")
-        log.debug("====>参数:${tuple.deepToString()}")
+        log.info("====>sql:${sql}")
+        log.info("====>参数:${tuple.deepToString()}")
         var result = resultRaw
         if (resultRaw is List<*>) {
             result = resultRaw.map { it?.toJsonObject() }
         }
-        log.debug("====>结果:${result}")
+        log.info("====>结果:${result}")
     }
 
     fun printLog(sql: String, tuples: List<Tuple>, resultRaw: Any?) {
-        log.debug("====>sql:${sql}")
-        log.debug("====>参数:${tuples.map { it.deepToString() }}")
+        log.info("====>sql:${sql}")
+        log.info("====>参数:${tuples.map { it.deepToString() }}")
         var result = resultRaw
         if (resultRaw is List<*>) {
             result = resultRaw.map { it?.toJsonObject() }
         }
-        log.debug("====>结果:${result}")
+        log.info("====>结果:${result}")
+    }
+
+    fun printWarningLog(sql: String, tuple: Tuple, resultRaw: Any?) {
+        log.warn("====>sql:${sql}")
+        log.warn("====>参数:${tuple.deepToString()}")
+        var result = resultRaw
+        if (resultRaw is List<*>) {
+            result = resultRaw.map { it?.toJsonObject() }
+        }
+        log.warn("====>结果:${result}")
+    }
+
+    fun printWarningLog(sql: String, tuples: List<Tuple>, resultRaw: Any?) {
+        log.warn("====>sql:${sql}")
+        log.warn("====>参数:${tuples.map { it.deepToString() }}")
+        var result = resultRaw
+        if (resultRaw is List<*>) {
+            result = resultRaw.map { it?.toJsonObject() }
+        }
+        log.warn("====>结果:${result}")
     }
 
 

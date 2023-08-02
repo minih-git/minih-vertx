@@ -7,18 +7,13 @@ import cn.minih.core.utils.Assert
 import io.vertx.kotlin.coroutines.await
 
 /**
+ * 权限服务
  * @author hubin
- * @date 2023/7/10
+ * @since 2023-08-01 23:58:25
  * @desc
  */
-class DefaultAuthServiceImpl private constructor() : AuthService {
-
-    companion object {
-        val instance by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-            DefaultAuthServiceImpl()
-        }
-    }
-
+@Suppress("unused")
+abstract class AbstractAuthService : AuthService {
     override suspend fun login(params: MutableMap<String, Any>): AuthLoginModel {
         val username = params["username"]
         val password = params["password"]
@@ -30,7 +25,14 @@ class DefaultAuthServiceImpl private constructor() : AuthService {
         return AuthLoginModel("admin")
     }
 
+
     override suspend fun setLoginRole(loginId: String) {
+        val roles = getUserRoles(loginId)
+        val redisAPI = MinihAuthRedisManager.instance.getReidApi()
+        redisAPI.del(listOf("${getLoginRoleKey()}:$loginId"))
+        val args = mutableListOf("${getLoginRoleKey()}:$loginId")
+        args.addAll(roles)
+        redisAPI.sadd(args)
     }
 
     override suspend fun getLoginRole(loginId: String): List<String> {
@@ -38,5 +40,7 @@ class DefaultAuthServiceImpl private constructor() : AuthService {
         return redisAPI.smembers("${getLoginRoleKey()}:$loginId").await().map { it.toString() }
     }
 
+
+    abstract suspend fun getUserRoles(loginId: String): List<String>
 
 }

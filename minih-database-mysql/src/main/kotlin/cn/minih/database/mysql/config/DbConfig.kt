@@ -9,9 +9,9 @@ import cn.minih.core.config.IConfig
  * @desc
  */
 data class DbConfig(
-    val host: String,
-    val db: String,
-    val user: String,
-    val password: String,
-    val pollSize: Int?,
+    var host: String = "",
+    var db: String = "",
+    var user: String = "",
+    var password: String = "",
+    var pollSize: Int = 20,
 ) : IConfig
