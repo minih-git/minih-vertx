@@ -64,7 +64,6 @@ class SnowFlake(wid: String) {
 
     @Synchronized
     fun nextId(): Long {
-        println(this.workerId)
         var timestamp: Long = System.currentTimeMillis()
         if (timestamp < lastTimestamp) {
             log.error { "系统时间不正确" }
