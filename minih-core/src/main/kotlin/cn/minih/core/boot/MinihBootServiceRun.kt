@@ -138,10 +138,15 @@ object MinihBootServiceRun {
     }
 
 
-    suspend fun run(clazz: KClass<*>) {
-        val mgr = HazelcastClusterManager()
-        val options = VertxOptions().setClusterManager(mgr)
-        val vertx = Vertx.clusteredVertx(options).await()
+    suspend fun run(clazz: KClass<*>, vararg args: String) {
+        val vertx = when (args[0]) {
+            "-standalone" -> Vertx.vertx()
+            else -> {
+                val mgr = HazelcastClusterManager()
+                val options = VertxOptions().setClusterManager(mgr)
+                Vertx.clusteredVertx(options).await()
+            }
+        }
         try {
             log.info("服务开始启动...")
             val currentTime = System.currentTimeMillis()
@@ -153,7 +158,8 @@ object MinihBootServiceRun {
             Runtime.getRuntime().addShutdownHook(Thread() {
                 val a = registerCloseHandling(vertx)
                 @Suppress("ControlFlowWithEmptyBody")
-                while (!a.isComplete) { }
+                while (!a.isComplete) {
+                }
             })
             val shareData = vertx.sharedData().getAsyncMap<String, Int>("share")
             val port = shareData.await().get("port").await()

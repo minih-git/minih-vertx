@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package cn.minih.web.core
 
 import cn.minih.core.boot.MinihVerticle
@@ -43,7 +45,6 @@ abstract class MinihWebVerticle(private val port: Int = 8080) : MinihVerticle, C
         val options = SockJSBridgeOptions()
         options.addInboundPermitted(PermittedOptions().setAddressRegex("cn.minih.*"))
         options.addOutboundPermitted(PermittedOptions().setAddressRegex("cn.minih.*"))
-        routerInstance.route("/ws/minihEventbus/*").subRouter(sockJSHandler.bridge(options))
         var bodyHandler = BodyHandler.create().setDeleteUploadedFilesOnEnd(true)
         getConfig("web", WebConfig::class).tmpFilePath.notNullAndExec {
             bodyHandler = bodyHandler.setUploadsDirectory(it).setDeleteUploadedFilesOnEnd(false)
@@ -52,6 +53,7 @@ abstract class MinihWebVerticle(private val port: Int = 8080) : MinihVerticle, C
             .handler(ResponseContentTypeHandler.create())
             .handler(bodyHandler)
             .failureHandler(RouteFailureHandler.instance)
+        routerInstance.route("/ws/minihEventbus/*").subRouter(sockJSHandler.bridge(options))
     }
 
     override suspend fun start() {

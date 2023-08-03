@@ -99,11 +99,11 @@ fun <T : IConfig> getConfig(
 }
 
 fun <T : Any> fillObject(jsonObject: JsonObject, clazz: KClass<T>): T {
-    var configPojo = "{}".jsonConvertData(clazz)
+    var pojo = "{}".jsonConvertData(clazz)
     try {
         val cons = clazz.primaryConstructor!!
         val values = cons.parameters.filterNot { it.isOptional }.associateWith { null }
-        configPojo = cons.callBy(values)
+        pojo = cons.callBy(values)
     } catch (e: Exception) {
         e.printStackTrace()
         log.warn("创建${clazz.simpleName}对象失败，未设置的默认数据将被覆盖为null，请给所有字段赋予默认值,或提供无参数构造方法！")
@@ -112,41 +112,39 @@ fun <T : Any> fillObject(jsonObject: JsonObject, clazz: KClass<T>): T {
     fields.forEach { it ->
         if (it is KMutableProperty1<*, *>) {
             val value = jsonObject.getValue(it.name)
-            value.notNullAndExec { value1 ->
-                val type = it.returnType.classifier as KClass<*>
-                val v = when {
-                    type.simpleName === List::class.simpleName -> fillObjectHandleList(jsonObject, it)
-                    type.superclasses.contains(Enum::class) -> type.functions.first { it.name == "valueOf" }
-                        .call(value1)!!
-
-                    !isBasicType(it.returnType) -> fillObject(value1.toJsonObject(), type)
-                    else -> value1
-                }
-                it.setter.call(configPojo, v)
-            }
+            value.notNullAndExec { value1 -> setField(it, pojo, value1) }
         } else {
             log.warn("${clazz.simpleName}.${it.name} 无法初始化！请将字段设置为可变类型！")
         }
     }
-    return configPojo
+    return pojo
 }
 
-fun fillObjectHandleList(jsonObject: JsonObject, it: KProperty<*>): Any {
-    val valueTmp = jsonObject.getJsonArray(it.name, JsonArray()).toList()
-    val first = valueTmp.first()
-    return if (isBasicType(first::class.createType())) {
-        valueTmp
-    } else {
-        val childType = it.returnType.arguments.first().type?.classifier as KClass<*>
-
-        valueTmp.map { vt -> fillObject(vt.toJsonObject(), childType) }
+private fun setField(filed: KMutableProperty1<*, *>, pojo: Any, value: Any) {
+    val type = filed.returnType.classifier as KClass<*>
+    var valueTmp = value
+    if (value is JsonArray) valueTmp = value.toList()
+    val v = when {
+        type.simpleName === List::class.simpleName -> fillObjectHandleList(valueTmp, filed)
+        type.superclasses.contains(Enum::class) -> type.functions.first { it.name == "valueOf" }.call(valueTmp)!!
+        !isBasicType(filed.returnType) -> fillObject(valueTmp.toJsonObject(), type)
+        else -> valueTmp
     }
+    filed.setter.call(pojo, v)
 }
 
-data class AuthCacheConfig(var a: String = "1", var b: String = "2")
-data class AuthConfig(
-    var cache: AuthCacheConfig = AuthCacheConfig(),
-)
+fun fillObjectHandleList(value: Any, it: KProperty<*>): Any {
+    if (value is List<*> && value.isNotEmpty()) {
+        val first = value.first() ?: return value
+        return if (isBasicType(first::class.createType())) {
+            value
+        } else {
+            val childType = it.returnType.arguments.first().type?.classifier as KClass<*>
+            value.map { vt -> vt?.let { fillObject(vt.toJsonObject(), childType) } }
+        }
+    }
+    return value
+}
 
 
 fun isBasicType(cs: KType?): Boolean {
@@ -199,6 +197,20 @@ fun <T> T?.notNullAndExec(fn: (T) -> Unit) {
     }
 }
 
+fun <T : Any> T.updateData(source: Any, ignoredNull: Boolean = true): T {
+    val targetClazz = this::class.createType().classifier as KClass<*>
+    val targetFields = targetClazz.memberProperties
+    val sourceData = source.toJsonObject()
+    targetFields.forEach {
+        if (it is KMutableProperty1<*, *>) {
+            val value = sourceData.getValue(it.name)
+            if (value != null || !ignoredNull) {
+                setField(it, this, value)
+            }
+        }
+    }
+    return this
+}
 
 object Utils {
 
@@ -263,7 +275,8 @@ object Utils {
                     if (fileName.endsWith(".class") && !jarEntry.isDirectory) {
                         //去掉 .class 结尾
                         val filePath = fileName.substring(0, fileName.length - 6)
-                        val loadClass = ClassLoader.getSystemClassLoader().loadClass(filePath.replace('/', '.')).kotlin
+                        val loadClass =
+                            ClassLoader.getSystemClassLoader().loadClass(filePath.replace('/', '.')).kotlin
                         result.add(loadClass)
                     }
                 }

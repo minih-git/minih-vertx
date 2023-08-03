@@ -13,6 +13,7 @@ import cn.minih.auth.constants.*
 import cn.minih.auth.data.TokenInfo
 import cn.minih.auth.exception.AuthLoginException
 import cn.minih.auth.exception.MinihAuthException
+import cn.minih.auth.service.AbstractAuthService
 import cn.minih.auth.service.AuthService
 import cn.minih.auth.utils.*
 import cn.minih.core.exception.MinihArgumentErrorException
@@ -119,6 +120,7 @@ private fun generateArgs(argsNeed: List<KParameter>, ctx: RoutingContext): Array
         val param: Any? = if (isBasicType(type)) {
             argsType.name?.let { name -> params[name] }
         } else {
+
             argsType.name?.let { params.covertTo(argsType.type) }
         }
         if (isBasicType(type)) {
@@ -151,18 +153,29 @@ private suspend fun authCheckRole(fn: KFunction<Any?>, ctx: RoutingContext) {
     }
 }
 
+class DefaultAuthService : AbstractAuthService() {
+    override suspend fun getUserRoles(loginId: String): List<String> {
+        return emptyList()
+    }
+
+}
+
 /**
  * @author hubin
  * @date 2023/7/7
  * @desc
  */
 class AuthServiceHandler private constructor() : Handler<RoutingContext> {
-    private lateinit var authService: AuthService
+    private var authService: AuthService
 
     companion object {
         val instance by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
             AuthServiceHandler()
         }
+    }
+
+    init {
+        authService = DefaultAuthService()
     }
 
     fun setAuthService(authService: AuthService) {

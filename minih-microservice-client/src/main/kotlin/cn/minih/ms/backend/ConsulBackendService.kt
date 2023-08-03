@@ -41,7 +41,7 @@ class ConsulBackendService : ServiceDiscoveryBackend {
         val registration: Promise<Void> = Promise.promise()
         client.registerService(serviceOptions).onComplete(registration)
         registration.future().map(record).onComplete(resultHandler)
-        Timer().scheduleAtFixedRate(0, 3000) {
+        Timer().scheduleAtFixedRate(0, 10000) {
             client.passCheck(serviceOptions.checkOptions.id)
         }
     }
@@ -126,7 +126,7 @@ class ConsulBackendService : ServiceDiscoveryBackend {
                         jsonObjectOf(
                             "id" to SnowFlake.nextId().toString(),
                             "name" to "${record.name}  health check",
-                            "ttl" to "5s"
+                            "ttl" to "15s"
                         )
                     )
                 )
