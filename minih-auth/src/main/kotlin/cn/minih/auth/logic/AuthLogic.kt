@@ -32,7 +32,7 @@ object AuthLogic {
             TOKEN_STYLE_RANDOM_64 -> getRandomString(64)
             TOKEN_STYLE_RANDOM_128 -> getRandomString(128)
             TOKEN_STYLE_TIK -> "${getRandomString(2)}_${getRandomString(14)}_${getRandomString(16)}__"
-            TOKEN_STYLE_SNOWFLAKE -> SnowFlake.nextId().toString()
+            TOKEN_STYLE_SNOWFLAKE -> SnowFlakeContext.instance.currentContext().nextId().toString()
             else -> UUID.randomUUID().toString()
         }
         return token

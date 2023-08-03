@@ -2,7 +2,7 @@ package cn.minih.ms.backend
 
 import cn.minih.core.exception.MinihException
 import cn.minih.core.utils.Assert
-import cn.minih.core.utils.SnowFlake
+import cn.minih.core.utils.SnowFlakeContext
 import io.vertx.core.*
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
@@ -124,7 +124,7 @@ class ConsulBackendService : ServiceDiscoveryBackend {
                 serviceOptions.setCheckOptions(
                     CheckOptions(
                         jsonObjectOf(
-                            "id" to SnowFlake.nextId().toString(),
+                            "id" to SnowFlakeContext.instance.currentContext().nextId().toString(),
                             "name" to "${record.name}  health check",
                             "ttl" to "15s"
                         )

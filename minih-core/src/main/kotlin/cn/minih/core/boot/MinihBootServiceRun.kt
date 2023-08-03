@@ -83,6 +83,7 @@ object MinihBootServiceRun {
                 vertx.deployVerticle(it.clazz.createType().toString(), options.setInstances(instance)).compose { re ->
                     successDeploy.add(re)
                     log.info("[${it.beanName}]服务部署成功,实例数量：$instance")
+                    postDeployHandling(vertx, re)
                     Future.succeededFuture(true)
                 }
             }
@@ -116,7 +117,16 @@ object MinihBootServiceRun {
         val startingProcess = BeanFactory.instance.findBeanDefinitionByType(PostStartingProcess::class)
         startingProcess.forEach { process ->
             val bean = BeanFactory.instance.getBean(process.beanName) as PostStartingProcess
-            GlobalScope.launch(Vertx.currentContext().dispatcher()) { bean.exec(vertx) }
+            GlobalScope.launch(vertx.orCreateContext.dispatcher()) { bean.exec(vertx) }
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun postDeployHandling(vertx: Vertx, deployId: String) {
+        val startingProcess = BeanFactory.instance.findBeanDefinitionByType(PostDeployingProcess::class)
+        startingProcess.forEach { process ->
+            val bean = BeanFactory.instance.getBean(process.beanName) as PostDeployingProcess
+            GlobalScope.launch(vertx.orCreateContext.dispatcher()) { bean.exec(vertx, deployId) }
         }
     }
 

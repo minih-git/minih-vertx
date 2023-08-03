@@ -2,7 +2,7 @@ package cn.minih.database.mysql.manager
 
 import cn.minih.core.exception.MinihArgumentErrorException
 import cn.minih.core.utils.Assert
-import cn.minih.core.utils.SnowFlake
+import cn.minih.core.utils.SnowFlakeContext
 import cn.minih.core.utils.log
 import cn.minih.core.utils.toJsonObject
 import cn.minih.database.mysql.annotation.TableId
@@ -364,7 +364,7 @@ object RepositoryManager {
                             filed.setter.call(
                                 entity, when (tableId.value) {
                                     TableIdType.INPUT -> System.currentTimeMillis()
-                                    TableIdType.SNOWFLAKE -> SnowFlake.nextId()
+                                    TableIdType.SNOWFLAKE -> SnowFlakeContext.instance.currentContext().nextId()
                                     TableIdType.UUID -> UUID.randomUUID().toString()
                                     else -> ""
                                 }

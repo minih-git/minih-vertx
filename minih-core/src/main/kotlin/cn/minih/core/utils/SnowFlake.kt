@@ -1,6 +1,20 @@
+@file:Suppress("unused")
+
 package cn.minih.core.utils
 
+import cn.minih.core.annotation.Component
+import cn.minih.core.boot.PostDeployingProcess
+import io.vertx.core.Vertx
 import java.net.InetAddress
+
+private const val sp = 1585644268888L
+private const val workerIdBits = 5L
+private const val datacenterIdBits = 5L
+private const val sequenceBits = 12L
+private const val workerIdShift = sequenceBits
+private const val datacenterIdShift = sequenceBits + workerIdBits
+private const val timestampLeftShift = sequenceBits + workerIdBits + datacenterIdBits
+private const val sequenceMask = -1L xor (-1L shl sequenceBits.toInt())
 
 /**
  * 雪花算法实现
@@ -9,23 +23,48 @@ import java.net.InetAddress
  * @desc
  */
 @Suppress("unused")
-object SnowFlake {
-    private val workerId = getWorkId(InetAddress.getLocalHost().hostAddress)
+@Component
+class InitSnowFlake : PostDeployingProcess {
+    override suspend fun exec(vertx: Vertx, deployId: String) {
+        SnowFlakeContext.instance.putContext(deployId, SnowFlake(deployId))
+
+    }
+}
+
+class SnowFlakeContext {
+    companion object {
+        val instance by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { SnowFlakeContext() }
+    }
+
+    private val context = mutableMapOf<String, SnowFlake>()
+
+    fun putContext(dId: String, sk: SnowFlake) {
+        println(dId)
+        context[dId] = sk
+    }
+
+    fun currentContext(): SnowFlake {
+        return context[Vertx.currentContext().deploymentID()] ?: SnowFlake("1")
+    }
+
+
+}
+
+
+class SnowFlake(wid: String) {
+    private val workerId: Long
     private val datacenterId = getCenterId(InetAddress.getLocalHost().hostAddress)
     private var sequence = 0
-    private const val sp = 1585644268888L
-    private const val workerIdBits = 5L
-    private const val datacenterIdBits = 5L
-    private const val sequenceBits = 12L
-    private const val workerIdShift = sequenceBits
-    private const val datacenterIdShift = sequenceBits + workerIdBits
-    private const val timestampLeftShift = sequenceBits + workerIdBits + datacenterIdBits
-    private const val sequenceMask = -1L xor (-1L shl sequenceBits.toInt())
+
     private var lastTimestamp = -1L
 
+    init {
+        workerId = getWorkId(wid)
+    }
 
     @Synchronized
     fun nextId(): Long {
+        println(this.workerId)
         var timestamp: Long = System.currentTimeMillis()
         if (timestamp < lastTimestamp) {
             log.error { "系统时间不正确" }
@@ -64,11 +103,8 @@ object SnowFlake {
 
     }
 
-    private fun getWorkId(ip: String): Long {
-        val s: List<String> = ip.split(".")
-        return ((s[0].toLong() shl 24)
-                + (s[1].toLong() shl 16) +
-                (s[2].toLong() shl 8)
-                + s[3].toLong())
+    private fun getWorkId(deployId: String): Long {
+        return (deployId.hashCode() and Int.MAX_VALUE).toLong() shl 31
     }
+
 }

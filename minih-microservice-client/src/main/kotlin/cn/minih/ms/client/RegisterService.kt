@@ -2,7 +2,7 @@ package cn.minih.ms.client
 
 import cn.minih.core.annotation.Component
 import cn.minih.core.boot.PostStartingProcess
-import cn.minih.core.utils.SnowFlake
+import cn.minih.core.utils.SnowFlakeContext
 import cn.minih.core.utils.findFirstNonLoopBackAddress
 import cn.minih.core.utils.log
 import io.vertx.core.Vertx
@@ -25,7 +25,7 @@ class RegisterService : PostStartingProcess {
         val ip = findFirstNonLoopBackAddress()
         val record =
             HttpEndpoint.createRecord(ctx.config.serverName, ip?.hostAddress ?: "", port as Int, ctx.config.rootPath)
-        val severId = SnowFlake.nextId().toString()
+        val severId = SnowFlakeContext.instance.currentContext().nextId().toString()
         shareData.put("serverId", severId).await()
         record.setMetadata(jsonObjectOf("serverId" to severId))
         ctx.discovery.publish(record) {

@@ -138,7 +138,7 @@ fun fillObjectHandleList(value: Any, it: KProperty<*>): Any {
     if (value is List<*> && value.isNotEmpty()) {
         val first = value.first() ?: return value
         return if (isBasicType(first::class.createType())) {
-            covertBasic(value, first::class.createType())
+            value.map { vt -> vt?.let { covertBasic(vt, first::class.createType()) } }
         } else {
             val childType = it.returnType.arguments.first().type?.classifier as KClass<*>
             value.map { vt -> vt?.let { fillObject(vt.toJsonObject(), childType) } }

@@ -23,6 +23,16 @@ interface PostStartingProcess {
 }
 
 /**
+ * 部署后后执行操作
+ * @author hubin
+ * @since 2023-07-30 21:18:12
+ * @desc
+ */
+interface PostDeployingProcess {
+    suspend fun exec(vertx: Vertx, deployId: String)
+}
+
+/**
  * 停止前执行操作
  * @author hubin
  * @since 2023-07-30 21:18:12
