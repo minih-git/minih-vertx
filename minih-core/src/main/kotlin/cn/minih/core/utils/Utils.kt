@@ -109,7 +109,7 @@ fun <T : Any> fillObject(jsonObject: JsonObject, clazz: KClass<T>): T {
         log.warn("创建${clazz.simpleName}对象失败，未设置的默认数据将被覆盖为null，请给所有字段赋予默认值,或提供无参数构造方法！")
     }
     val fields = clazz.memberProperties
-    fields.forEach { it ->
+    fields.forEach {
         if (it is KMutableProperty1<*, *>) {
             val value = jsonObject.getValue(it.name)
             value.notNullAndExec { value1 -> setField(it, pojo, value1) }
@@ -128,6 +128,7 @@ private fun setField(filed: KMutableProperty1<*, *>, pojo: Any, value: Any) {
         type.simpleName === List::class.simpleName -> fillObjectHandleList(valueTmp, filed)
         type.superclasses.contains(Enum::class) -> type.functions.first { it.name == "valueOf" }.call(valueTmp)!!
         !isBasicType(filed.returnType) -> fillObject(valueTmp.toJsonObject(), type)
+        isBasicType(filed.returnType) -> covertBasic(valueTmp, filed.returnType)
         else -> valueTmp
     }
     filed.setter.call(pojo, v)
@@ -137,13 +138,75 @@ fun fillObjectHandleList(value: Any, it: KProperty<*>): Any {
     if (value is List<*> && value.isNotEmpty()) {
         val first = value.first() ?: return value
         return if (isBasicType(first::class.createType())) {
-            value
+            covertBasic(value, first::class.createType())
         } else {
             val childType = it.returnType.arguments.first().type?.classifier as KClass<*>
             value.map { vt -> vt?.let { fillObject(vt.toJsonObject(), childType) } }
         }
     }
     return value
+}
+
+
+fun covertBasic(value: Any, typeTmp: KType): Any {
+    var type = typeTmp
+    if (typeTmp.isMarkedNullable) {
+        type = typeTmp.classifier?.createType()!!
+    }
+    return when (type) {
+        String::class.createType() -> value.toString()
+        Int::class.createType() -> when (value) {
+            is Int -> value
+            is String -> value.toString().toInt()
+            else -> value
+        }
+
+        Short::class.createType() -> when (value) {
+            is Short -> value
+            is String -> value.toString().toShort()
+            else -> value
+        }
+
+        Long::class.createType() -> when (value) {
+            is Long -> value
+            is String -> value.toString().toLong()
+            else -> value
+        }
+
+        Byte::class.createType() -> when (value) {
+            is Byte -> value
+            is String -> value.toString().toByte()
+            else -> value
+        }
+
+        Float::class.createType() -> when (value) {
+            is Float -> value
+            is String -> value.toString().toFloat()
+            else -> value
+        }
+
+        Double::class.createType() -> when (value) {
+            is Double -> value
+            is String -> value.toString().toDouble()
+            else -> value
+        }
+
+        Boolean::class.createType() -> when (value) {
+            is Boolean -> value
+            is String -> value.toString().toBoolean()
+            is Int -> value == 1
+            is Long -> value == 1L
+            else -> value
+        }
+
+        Char::class.createType() -> when (value) {
+            is Char -> value
+            else -> value
+        }
+
+        else -> value.toString()
+    }
+
 }
 
 
@@ -168,31 +231,13 @@ private fun isWrapper(cs: KType?): Boolean {
 }
 
 suspend fun <T> T?.notNullAndExecSuspend(fn: suspend (T) -> Unit) {
-    if (this != null) {
-        if (this is String && this.isBlank()) {
-            return
-        }
-        if (this is Collection<*> && this.isNotEmpty()) {
-            return
-        }
-        if (this is Map<*, *> && this.isNotEmpty()) {
-            return
-        }
+    if (this != null && !isNullOrBlankOrZero(this)) {
         fn(this)
     }
 }
 
 fun <T> T?.notNullAndExec(fn: (T) -> Unit) {
-    if (this != null) {
-        if (this is String && this.isBlank()) {
-            return
-        }
-        if (this is Collection<*> && this.isNotEmpty()) {
-            return
-        }
-        if (this is Map<*, *> && this.isNotEmpty()) {
-            return
-        }
+    if (this != null && !isNullOrBlankOrZero(this)) {
         fn(this)
     }
 }
@@ -204,12 +249,26 @@ fun <T : Any> T.updateData(source: Any, ignoredNull: Boolean = true): T {
     targetFields.forEach {
         if (it is KMutableProperty1<*, *>) {
             val value = sourceData.getValue(it.name)
-            if (value != null || !ignoredNull) {
+
+            if ((value != null && !isNullOrBlankOrZero(value)) || !ignoredNull) {
                 setField(it, this, value)
             }
         }
     }
     return this
+}
+
+fun isNullOrBlankOrZero(v: Any): Boolean {
+    return when (v) {
+        is String -> v.isBlank()
+        is Int -> v == 0
+        is Double -> v == 0.0
+        is Float -> v == 0.0f
+        is Long -> v == 0L
+        is List<*> -> v.isEmpty()
+        is Map<*, *> -> v.isEmpty()
+        else -> false
+    }
 }
 
 object Utils {

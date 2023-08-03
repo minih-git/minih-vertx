@@ -3,7 +3,6 @@
 package cn.minih.auth.logic
 
 import cn.hutool.core.text.AntPathMatcher
-import cn.hutool.core.util.ObjectUtil.isBasicType
 import cn.hutool.core.util.URLUtil
 import cn.minih.auth.annotation.AuthCheckRole
 import cn.minih.auth.annotation.CheckRoleType
@@ -116,13 +115,30 @@ private fun generateArgs(argsNeed: List<KParameter>, ctx: RoutingContext): Array
     val params = getRequestBody(ctx)
     argsNeed.forEach { argsType ->
         val type = argsType.type
-        val isMarkedNullable = argsType.type.isMarkedNullable
-        val param: Any? = if (isBasicType(type)) {
-            argsType.name?.let { name -> params[name] }
-        } else {
+        val typeClass = type.classifier as KClass<*>
+        val isMarkedNullable = type.isMarkedNullable
+        val param = argsType.name?.let {
+            when {
+                isBasicType(type) -> covertBasic(params[it], type)
+                typeClass.simpleName === List::class.simpleName -> {
+                    val d = params.getJsonArray(it)
+                    when {
+                        d == null -> listOf<Any>()
+                        d.isEmpty -> listOf<Any>()
+                        else -> {
+                            val childType = type.arguments.first().type?.classifier as KClass<*>
+                            when {
+                                isBasicType(childType.createType()) -> covertBasic(params[it], childType.createType())
+                                else -> d.map { vt -> vt?.let { fillObject(vt.toJsonObject(), childType) } }
+                            }
+                        }
+                    }
+                }
 
-            argsType.name?.let { params.covertTo(argsType.type) }
+                else -> params.covertTo(type)
+            }
         }
+
         if (isBasicType(type)) {
             if (!isMarkedNullable && param == null) {
                 throw MinihArgumentErrorException("参数：${argsType.name} 不能为空！")

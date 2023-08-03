@@ -27,7 +27,6 @@ import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KParameter
-import kotlin.reflect.KProperty1
 import kotlin.reflect.full.*
 
 
@@ -233,25 +232,30 @@ object RepositoryManager {
 
     inline fun <reified T : Any> update(entity: T): Future<Boolean> {
         val tuple = Tuple.tuple()
-        val fields = T::class.memberProperties
-        var primaryKey: KProperty1<T, *> = fields.first()
+        val params = entity::class.primaryConstructor?.parameters
         val updateWrapper = UpdateWrapper<T>()
-        fields.forEach {
-            it.findAnnotation<TableId>()?.let { _ ->
-                primaryKey = it
-            }
-            if (it is KMutableProperty1 && it.findAnnotation<TableId>() == null) {
-                var value = it.get(entity)
-                if (value is List<*>) {
-                    value = value.joinToString(",")
+        params?.let {
+            val primaryKey = it.first { p -> p.hasAnnotation<TableId>() }
+            Assert.notNull(primaryKey) { MinihArgumentErrorException("未找到主键！") }
+            val fields = T::class.memberProperties
+            var primaryValue: Any? = null
+            fields.forEach { field ->
+                if (field is KMutableProperty1 && field.findAnnotation<TableId>() == null) {
+                    var value = field.get(entity)
+                    if (value is List<*>) {
+                        value = value.joinToString(",")
+                    }
+                    updateWrapper.set(field.name, value)
+                    tuple.addValue(value)
                 }
-                updateWrapper.set(it.name, value)
-                tuple.addValue(value)
+                if (field.name == primaryKey.name) {
+                    primaryValue = field.get(entity)!!
+                }
             }
+            tuple.addValue(primaryValue)
+            Assert.notNull(primaryValue) { MinihArgumentErrorException("未找到主键数据！") }
+            updateWrapper.eq(primaryKey.name!!, primaryValue!!)
         }
-        tuple.addValue(primaryKey.get(entity))
-        val pv = primaryKey.get(entity) ?: throw MinihArgumentErrorException("未找到主键数据！")
-        updateWrapper.eq(primaryKey.name, pv)
         return update(updateWrapper)
     }
 

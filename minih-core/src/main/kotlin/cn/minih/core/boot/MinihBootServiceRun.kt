@@ -139,8 +139,9 @@ object MinihBootServiceRun {
 
 
     suspend fun run(clazz: KClass<*>, vararg args: String) {
-        val vertx = when (args[0]) {
-            "-standalone" -> Vertx.vertx()
+        val vertx = when {
+            args.isEmpty() -> Vertx.vertx()
+            args[0] == "-standalone" -> Vertx.vertx()
             else -> {
                 val mgr = HazelcastClusterManager()
                 val options = VertxOptions().setClusterManager(mgr)

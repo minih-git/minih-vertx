@@ -7,6 +7,7 @@ import cn.minih.core.utils.getConfig
 import cn.minih.core.utils.notNullAndExec
 import cn.minih.web.config.WebConfig
 import cn.minih.web.handler.RouteFailureHandler
+import io.netty.handler.codec.http.HttpHeaderValues
 import io.vertx.core.Vertx
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Route
@@ -50,6 +51,8 @@ abstract class MinihWebVerticle(private val port: Int = 8080) : MinihVerticle, C
             bodyHandler = bodyHandler.setUploadsDirectory(it).setDeleteUploadedFilesOnEnd(false)
         }
         routerInstance.route()
+            .produces(HttpHeaderValues.APPLICATION_JSON.toString())
+            .consumes(HttpHeaderValues.APPLICATION_JSON.toString())
             .handler(ResponseContentTypeHandler.create())
             .handler(bodyHandler)
             .failureHandler(RouteFailureHandler.instance)
