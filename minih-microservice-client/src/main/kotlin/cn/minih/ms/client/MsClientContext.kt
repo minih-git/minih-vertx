@@ -28,9 +28,6 @@ class MsClientContext {
 
     fun initContext(vertx: Vertx): MsClientContext {
         config = getConfig("ms", Config::class, vertx)
-        Assert.notBlank(config.serverName) {
-            throw MinihException("请设置服务名称！")
-        }
         Assert.notBlank(config.rootPath) {
             throw MinihException("请设置根路径！")
         }

@@ -1,5 +1,6 @@
 package cn.minih.ms.backend
 
+import cn.minih.core.utils.getEnv
 import cn.minih.core.utils.toJsonObject
 import cn.minih.ms.client.MsClient
 import io.vertx.core.*
@@ -86,7 +87,9 @@ class ConsulBackendService : ServiceDiscoveryBackend {
             l.forEach { s ->
                 if ("consul" != s.name) {
                     val serviceList: Promise<ServiceList> = Promise.promise()
-                    client.catalogServiceNodes(s.name).onComplete(serviceList)
+                    val options = ServiceQueryOptions()
+                    options.tag = getEnv()
+                    client.catalogServiceNodesWithOptions(s.name, options).onComplete(serviceList)
                     recordFutureList.add(serviceList.future())
                 }
             }
@@ -125,18 +128,27 @@ class ConsulBackendService : ServiceDiscoveryBackend {
             tags.add(record.type)
         }
         val meta = mutableMapOf<String, String>()
-        if (record.location != null) {
-            if (record.location.containsKey("host")) {
-                serviceOptions.setAddress(record.location.getString("host"))
+        record.location?.let {
+            if (it.containsKey("host")) {
+                serviceOptions.setAddress(it.getString("host"))
             }
-            if (record.location.containsKey("port")) {
-                serviceOptions.setPort(record.location.getInteger("port"))
+            if (it.containsKey("port")) {
+                serviceOptions.setPort(it.getInteger("port"))
             }
-            record.location.forEach {
-                meta[it.key] = it.value.toString()
-                tags.add(it.value.toString())
+            it.forEach { l ->
+                meta[l.key] = l.value.toString()
+                tags.add(l.value.toString())
             }
         }
+        record.metadata?.let {
+            if (it.containsKey("env")) {
+                tags.add(it.getString("env"))
+            }
+            it.forEach { l ->
+                meta[l.key] = l.value.toString()
+            }
+        }
+
         serviceOptions.meta = meta
         serviceOptions.setTags(tags.stream().map(java.lang.String::valueOf).collect(Collectors.toList()))
         return serviceOptions

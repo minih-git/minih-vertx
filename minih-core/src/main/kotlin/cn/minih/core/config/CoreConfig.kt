@@ -1,5 +1,7 @@
 package cn.minih.core.config
 
+import java.util.*
+
 /**
  * @author hubin
  * @date 2023/7/25
@@ -9,5 +11,6 @@ interface IConfig
 
 
 data class CoreConfig(
-    var serviceName: String
+    var name: String = "p_${UUID.randomUUID().toString().replace("-", "")}",
+    var env: String = "prod"
 ) : IConfig

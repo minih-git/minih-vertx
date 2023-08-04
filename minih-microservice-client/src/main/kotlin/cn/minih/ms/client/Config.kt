@@ -8,7 +8,6 @@ import cn.minih.core.config.IConfig
  * @since 2023-07-31 11:28:31
  */
 class Config(
-    var serverName: String = "",
     var rootPath: String = "",
     var consulHost: String = "",
     var consulPort: Int = 8500,

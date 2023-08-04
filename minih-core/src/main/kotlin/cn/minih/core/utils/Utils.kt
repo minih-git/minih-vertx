@@ -84,7 +84,29 @@ fun <T : Any> String.jsonConvertData(clazz: KClass<T>): T {
 }
 
 fun getConfig(): CoreConfig {
-    return getConfig(configName = "core", configClass = CoreConfig::class)
+    return getRootConfig()
+}
+
+private fun getRootConfigRaw(vertx: Vertx = Vertx.currentContext().owner()): JsonObject {
+    val configRaw = vertx.orCreateContext.config()
+    val c = configRaw.getValue(PROJECT_NAME)
+    if (c is JsonObject) {
+        return c
+    }
+    return JsonObject()
+}
+
+fun getRootConfig(vertx: Vertx = Vertx.currentContext().owner()): CoreConfig {
+    val configRaw = getRootConfigRaw(vertx)
+    return fillObject(configRaw, CoreConfig::class)
+}
+
+fun getProjectName(): String {
+    return getRootConfig().name
+}
+
+fun getEnv(): String {
+    return getRootConfig().env
 }
 
 fun <T : IConfig> getConfig(
@@ -92,9 +114,7 @@ fun <T : IConfig> getConfig(
     configClass: KClass<T>,
     vertx: Vertx = Vertx.currentContext().owner()
 ): T {
-    val configRaw = vertx.orCreateContext.config()
-    val configObj = configRaw.getJsonObject(PROJECT_NAME) ?: jsonObjectOf()
-    val config = configObj.getJsonObject(configName) ?: jsonObjectOf()
+    val config = getRootConfigRaw(vertx).getJsonObject(configName) ?: jsonObjectOf()
     return fillObject(config, configClass)
 }
 

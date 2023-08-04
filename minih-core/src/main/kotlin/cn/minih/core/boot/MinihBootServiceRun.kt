@@ -9,10 +9,8 @@ import cn.minih.core.constants.MAX_INSTANCE_COUNT
 import cn.minih.core.constants.SYSTEM_CONFIGURATION_SUBSCRIBE
 import cn.minih.core.eventbus.EventBusConsumer
 import cn.minih.core.utils.Utils.getClassesByPath
-import cn.minih.core.utils.covertTo
+import cn.minih.core.utils.getEnv
 import cn.minih.core.utils.log
-import cn.minih.core.utils.toJsonObject
-import com.google.gson.Gson
 import io.vertx.config.ConfigRetriever
 import io.vertx.config.ConfigRetrieverOptions
 import io.vertx.config.ConfigStoreOptions
@@ -174,7 +172,7 @@ object MinihBootServiceRun {
             })
             val shareData = vertx.sharedData().getAsyncMap<String, Int>("share")
             val port = shareData.await().get("port").await()
-            var msg = "服务启动成功,"
+            var msg = "服务启动成功,当前环境：${getEnv()},"
             port?.let {
                 msg = msg.plus("端口:${it},")
             }
@@ -204,6 +202,7 @@ object MinihBootServiceRun {
     private suspend fun initConfig(vertx: Vertx): JsonObject {
 
         val retrieverOptions = ConfigRetrieverOptions().setIncludeDefaultStores(true)
+
         if (systemConfigs.isNotEmpty()) {
             systemConfigs.forEach { retrieverOptions.addStore(it) }
         }
@@ -214,29 +213,28 @@ object MinihBootServiceRun {
             }
         }
         val config = retriever.config.await()
-        val obj = config.covertTo(com.google.gson.JsonObject::class)
-        config.forEach {
+        val configCopy = config.copy()
+        configCopy.forEach {
             if (it.key.contains(".")) {
-                updateJson(obj, it.key.split("."), it.value.toString())
+                updateJson(config, it.key.split("."), it.value.toString())
             }
         }
         val vertxConfig = vertx.orCreateContext.config()
-        obj.entrySet().forEach {
-            vertxConfig.put(it.key, it.value.toString())
-            if (it.value is com.google.gson.JsonObject) {
-                vertxConfig.put(it.key, it.value.toJsonObject())
-            }
+        config.forEach {
+            vertxConfig.put(it.key, it.value)
         }
-        return obj.toJsonObject()
+        return config
     }
 
-    private fun updateJson(jsonObj: com.google.gson.JsonObject, keys: List<String>, newValue: String) {
+    private fun updateJson(jsonObj: JsonObject, keys: List<String>, newValue: String) {
         val key = keys[0]
         if (keys.size == 1) {
-            jsonObj.addProperty(key, newValue)
+            jsonObj.put(key, newValue)
         } else {
-            val nextObj = jsonObj.getAsJsonObject(key) ?: com.google.gson.JsonObject().also { jsonObj.add(key, it) }
-            updateJson(Gson().toJsonTree(nextObj).asJsonObject, keys.drop(1), newValue)
+            val nextObj = jsonObj.getValue(key) ?: JsonObject().also { jsonObj.put(key, it) }
+            if (nextObj is JsonObject) {
+                updateJson(nextObj, keys.drop(1), newValue)
+            }
         }
     }
 
