@@ -6,7 +6,6 @@ import cn.minih.core.utils.SnowFlakeContext
 import cn.minih.core.utils.findFirstNonLoopBackAddress
 import cn.minih.core.utils.log
 import io.vertx.core.Vertx
-import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.kotlin.coroutines.await
 import io.vertx.servicediscovery.types.HttpEndpoint
 
@@ -27,10 +26,9 @@ class RegisterService : PostStartingProcess {
             HttpEndpoint.createRecord(ctx.config.serverName, ip?.hostAddress ?: "", port as Int, ctx.config.rootPath)
         val severId = SnowFlakeContext.instance.currentContext().nextId().toString()
         shareData.put("serverId", severId).await()
-        record.setMetadata(jsonObjectOf("serverId" to severId))
+        record.registration = severId
         ctx.discovery.publish(record) {
             log.info("${ctx.config.serverName}  服务注册成功!")
         }
     }
-
 }

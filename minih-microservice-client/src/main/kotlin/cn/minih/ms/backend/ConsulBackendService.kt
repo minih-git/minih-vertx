@@ -1,8 +1,7 @@
 package cn.minih.ms.backend
 
-import cn.minih.core.exception.MinihException
-import cn.minih.core.utils.Assert
-import cn.minih.core.utils.SnowFlakeContext
+import cn.minih.core.utils.toJsonObject
+import cn.minih.ms.client.MsClient
 import io.vertx.core.*
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
@@ -13,6 +12,7 @@ import io.vertx.servicediscovery.Status
 import io.vertx.servicediscovery.impl.ServiceTypes
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
 import io.vertx.servicediscovery.spi.ServiceType
+import kotlinx.coroutines.DelicateCoroutinesApi
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.concurrent.scheduleAtFixedRate
@@ -34,16 +34,24 @@ class ConsulBackendService : ServiceDiscoveryBackend {
         this.client = ConsulClient.create(vertx, opt)
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun store(record: Record, resultHandler: Handler<AsyncResult<Record>>?) {
-        Assert.isNull(record.registration) { throw MinihException("The record has already been registered") }
         val serviceOptions: ServiceOptions = recordToServiceOptions(record)
-        record.setRegistration(serviceOptions.id)
         val registration: Promise<Void> = Promise.promise()
         client.registerService(serviceOptions).onComplete(registration)
-        registration.future().map(record).onComplete(resultHandler)
-        Timer().scheduleAtFixedRate(0, 10000) {
-            client.passCheck(serviceOptions.checkOptions.id)
+        registration.future().map(record).onComplete {
+            startHealthCheck(serviceOptions)
+            resultHandler?.handle(it)
         }
+
+    }
+
+    private fun startHealthCheck(serviceOptions: ServiceOptions) {
+        Timer().scheduleAtFixedRate(0, 15000) {
+            client.passCheck(serviceOptions.checkOptions.id)
+            MsClient.updateCache()
+        }
+        client.passCheck(serviceOptions.checkOptions.id)
     }
 
     override fun remove(record: Record?, resultHandler: Handler<AsyncResult<Record>>) {
@@ -73,34 +81,22 @@ class ConsulBackendService : ServiceDiscoveryBackend {
     override fun getRecords(resultHandler: Handler<AsyncResult<MutableList<Record>>>) {
         val nameList: Promise<ServiceList> = Promise.promise()
         client.catalogServices().onComplete(nameList)
-        nameList.future().map { obj: ServiceList -> obj.list }
-            .map { l ->
-                val recordFutureList: MutableList<Future<ServiceList>> =
-                    ArrayList()
-                l.forEach { s ->
-                    if ("consul" != s.name) {
-                        val opt = ServiceQueryOptions()
-                        if (s.tags.isNotEmpty()) {
-                            opt.setTag(s.tags[0])
-                        }
-                        val serviceList: Promise<ServiceList> = Promise.promise()
-                        client.catalogServiceNodesWithOptions(s.name, opt).onComplete(serviceList)
-                        recordFutureList.add(serviceList.future())
-                    }
+        nameList.future().map { obj: ServiceList -> obj.list }.map { l ->
+            val recordFutureList: MutableList<Future<ServiceList>> = ArrayList()
+            l.forEach { s ->
+                if ("consul" != s.name) {
+                    val serviceList: Promise<ServiceList> = Promise.promise()
+                    client.catalogServiceNodes(s.name).onComplete(serviceList)
+                    recordFutureList.add(serviceList.future())
                 }
-                recordFutureList
             }
-            .compose {
-                Future.all(it)
-            }
+            recordFutureList
+        }.compose { Future.all(it) }
             .map { c ->
                 c.list<ServiceList>().stream().flatMap { l -> l.list.stream().map { serviceToRecord(it) } }
-            }
-            .compose { Future.all(it.toList()) }
-            .map { c ->
+            }.compose { Future.all(it.toList()) }.map { c ->
                 c.list<Record>().stream().collect(Collectors.toList())
-            }
-            .onComplete(resultHandler)
+            }.onComplete(resultHandler)
     }
 
     override fun getRecord(uuid: String?, resultHandler: Handler<AsyncResult<Record>>?) {
@@ -117,33 +113,18 @@ class ConsulBackendService : ServiceDiscoveryBackend {
         val serviceOptions = ServiceOptions()
         serviceOptions.setName(record.name)
         val tags = JsonArray()
-        if (record.metadata != null) {
-            tags.addAll(record.metadata.getJsonArray("tags", JsonArray()))
-            //only put CheckOptions to newly registered services
-            if (record.registration == null) {
-                serviceOptions.setCheckOptions(
-                    CheckOptions(
-                        jsonObjectOf(
-                            "id" to SnowFlakeContext.instance.currentContext().nextId().toString(),
-                            "name" to "${record.name}  health check",
-                            "ttl" to "15s"
-                        )
-                    )
-                )
-                record.metadata.remove("checkOptions")
-            }
-
-            record.metadata.remove("tags")
-            tags.add("metadata:" + record.metadata.encode())
-        }
-        if (record.registration != null) {
-            serviceOptions.setId(record.registration)
-        } else {
-            serviceOptions.setId(record.metadata.getString("serverId"))
-        }
+        serviceOptions.checkOptions = CheckOptions(
+            jsonObjectOf(
+                "id" to record.registration,
+                "name" to "${record.name}  health check",
+                "ttl" to "18s"
+            )
+        )
+        serviceOptions.setId(record.registration)
         if (!tags.contains(record.type) && record.type != null) {
             tags.add(record.type)
         }
+        val meta = mutableMapOf<String, String>()
         if (record.location != null) {
             if (record.location.containsKey("host")) {
                 serviceOptions.setAddress(record.location.getString("host"))
@@ -151,71 +132,42 @@ class ConsulBackendService : ServiceDiscoveryBackend {
             if (record.location.containsKey("port")) {
                 serviceOptions.setPort(record.location.getInteger("port"))
             }
-            tags.add("location:" + record.location.encode())
+            record.location.forEach {
+                meta[it.key] = it.value.toString()
+                tags.add(it.value.toString())
+            }
         }
+        serviceOptions.meta = meta
         serviceOptions.setTags(tags.stream().map(java.lang.String::valueOf).collect(Collectors.toList()))
         return serviceOptions
     }
 
     private fun serviceToRecord(service: Service): Future<Record> {
-        //use the checks to set the record status
         val checkListFuture: Promise<CheckList> = Promise.promise()
         client.healthChecks(service.name).onComplete(checkListFuture)
         return checkListFuture.future().map { cl ->
-            cl.list.stream().map(Check::getStatus).allMatch(CheckStatus.PASSING::equals)
+            val record = Record()
+            record.status =
+                if (cl.list.any { check -> (check.status == CheckStatus.PASSING) }) Status.UP else Status.DOWN
+            record.setMetadata(JsonObject())
+            record.setLocation(JsonObject())
+            record.setName(service.name)
+            val tags = service.tags
+            record.setType(ServiceType.UNKNOWN)
+            record.setRegistration(service.id)
+            ServiceTypes.all().forEachRemaining { type: ServiceType ->
+                if (service.tags.contains(type.name())) {
+                    record.setType(type.name())
+                    tags.remove(type.name())
+                }
+            }
+            record.setRegistration(service.id)
+            record.location = service.meta.toJsonObject()
+            if (record.location.containsKey("port")) {
+                record.location.put("port", record.location.getString("port").toInt())
+            }
+
+            record
         }
-            .map { st ->
-                if (st) Record().setStatus(Status.UP) else Record()
-                    .setStatus(Status.DOWN)
-            }
-            .map { record ->
-                record.setMetadata(JsonObject())
-                record.setLocation(JsonObject())
-                record.setName(service.name)
-                record.setRegistration(service.id)
-                val tags = service.tags
-                record.setType(ServiceType.UNKNOWN)
-                ServiceTypes.all()
-                    .forEachRemaining { type: ServiceType ->
-                        if (service.tags.contains(type.name())) {
-                            record.setType(type.name())
-                            tags.remove(type.name())
-                        }
-                    }
-                //retrieve the metadata object
-                tags.stream()
-                    .filter { t: String? -> t!!.startsWith("metadata:") }
-                    .map { s: String? -> s!!.substring("metadata:".length) }
-                    .map { json: String? ->
-                        JsonObject(
-                            json
-                        )
-                    }.forEach { json: JsonObject? ->
-                        record.metadata.mergeIn(json)
-                    }
-                //retrieve the location object
-                tags.stream()
-                    .filter { t: String? -> t!!.startsWith("location:") }
-                    .map { s: String? -> s!!.substring("location:".length) }
-                    .map { json: String? ->
-                        JsonObject(
-                            json
-                        )
-                    }.forEach { json: JsonObject? ->
-                        record.location.mergeIn(json)
-                    }
-                record.metadata.put(
-                    "tags",
-                    JsonArray(
-                        tags.stream().filter { t: String? ->
-                            !t!!.startsWith(
-                                "metadata:"
-                            ) && !t.startsWith("location:")
-                        }
-                            .collect(Collectors.toList())
-                    )
-                )
-                record
-            }
     }
 }

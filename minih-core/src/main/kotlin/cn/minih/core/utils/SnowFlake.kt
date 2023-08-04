@@ -39,7 +39,6 @@ class SnowFlakeContext {
     private val context = mutableMapOf<String, SnowFlake>()
 
     fun putContext(dId: String, sk: SnowFlake) {
-        println(dId)
         context[dId] = sk
     }
 
