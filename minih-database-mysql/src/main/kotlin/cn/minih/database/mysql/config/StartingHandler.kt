@@ -1,8 +1,8 @@
 package cn.minih.database.mysql.config
 
+import cn.minih.common.util.getConfig
 import cn.minih.core.annotation.Component
 import cn.minih.core.boot.PostStartingProcess
-import cn.minih.core.utils.getConfig
 import cn.minih.database.mysql.manager.RepositoryManager
 import io.vertx.core.Vertx
 

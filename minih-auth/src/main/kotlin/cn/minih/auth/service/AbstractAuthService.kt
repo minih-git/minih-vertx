@@ -3,7 +3,7 @@ package cn.minih.auth.service
 import cn.minih.auth.cache.MinihAuthRedisManager
 import cn.minih.auth.data.AuthLoginModel
 import cn.minih.auth.exception.AuthLoginException
-import cn.minih.core.utils.Assert
+import cn.minih.common.util.Assert
 import io.vertx.kotlin.coroutines.await
 
 /**

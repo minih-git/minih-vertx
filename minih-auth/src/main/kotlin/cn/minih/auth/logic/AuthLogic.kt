@@ -8,8 +8,9 @@ import cn.minih.auth.data.AuthSession
 import cn.minih.auth.data.TokenSign
 import cn.minih.auth.exception.AuthLoginException
 import cn.minih.auth.logic.AuthUtil.getRandomString
-import cn.minih.core.exception.IMinihErrorCode
-import cn.minih.core.utils.*
+import cn.minih.common.exception.IMinihErrorCode
+import cn.minih.common.util.*
+import cn.minih.core.util.SnowFlakeContext
 import io.vertx.core.Vertx
 import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.kotlin.coroutines.await

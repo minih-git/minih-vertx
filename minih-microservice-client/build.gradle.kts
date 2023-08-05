@@ -20,6 +20,13 @@ publishing {
 
     repositories {
         mavenLocal()
+        maven {
+            url = uri("https://packages.aliyun.com/maven/repository/2405309-snapshot-BRUb5T/")
+            credentials {
+                username = "64ccfc96d7cc86cfb4a243ac"
+                password = "Kzd4TVR-FiJU"
+            }
+        }
     }
 }
 
@@ -27,12 +34,15 @@ dependencies {
 
     api(libs.vertx.discovery)
     api(libs.vertx.consul)
-//    api(libs.vertx.discovery.backend)
     api(libs.vertx.web.client)
+
+
 
     implementation(libs.logging)
     implementation(libs.logback)
     implementation(libs.gson)
     implementation(libs.minih.core)
+    implementation(libs.minih.common)
+
 
 }

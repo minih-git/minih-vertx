@@ -4,8 +4,6 @@ package cn.minih.auth.logic
 
 import cn.hutool.core.text.AntPathMatcher
 import cn.hutool.core.util.URLUtil
-import cn.minih.auth.annotation.AuthCheckRole
-import cn.minih.auth.annotation.CheckRoleType
 import cn.minih.auth.config.AuthConfig
 import cn.minih.auth.config.LockType
 import cn.minih.auth.constants.*
@@ -15,26 +13,42 @@ import cn.minih.auth.exception.MinihAuthException
 import cn.minih.auth.service.AbstractAuthService
 import cn.minih.auth.service.AuthService
 import cn.minih.auth.utils.*
-import cn.minih.core.exception.MinihArgumentErrorException
-import cn.minih.core.exception.MinihException
-import cn.minih.core.utils.*
+import cn.minih.common.exception.MinihException
+import cn.minih.common.util.*
+import cn.minih.core.annotation.AuthCheckRole
+import cn.minih.core.annotation.CheckRoleType
+import cn.minih.core.beans.BeanFactory
 import cn.minih.web.response.R
+import cn.minih.web.service.FileUpload
+import cn.minih.web.service.Service
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.http.Cookie
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Route
 import io.vertx.ext.web.RoutingContext
-import io.vertx.kotlin.core.json.get
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
-import kotlin.reflect.full.*
+import kotlin.reflect.full.callSuspend
+import kotlin.reflect.full.createType
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.hasAnnotation
+
+
+fun getBeanCall(params: List<KParameter>): Any? {
+    if (params.isNotEmpty()) {
+        val p1 = params.first()
+        if (p1::class.supertypes.contains(Service::class.createType())) {
+            return BeanFactory.instance.getBeanFromType(p1.type)
+        }
+    }
+    return null
+}
 
 @OptIn(DelicateCoroutinesApi::class)
 fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
@@ -43,10 +57,16 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
         GlobalScope.launch(v) {
             try {
                 authCheckRole(fn, ctx)
-                val args = generateArgs(fn.parameters, ctx)
-                val rawResult = when (fn.parameters.size) {
-                    0 -> if (fn.isSuspend) fn.callSuspend() else fn.call()
-                    else -> if (fn.isSuspend) fn.callSuspend(*args) else fn.call(*args)
+                val bean: Any? = getBeanCall(fn.parameters)
+                val realArgs = bean?.let {
+                    fn.parameters.subList(1, fn.parameters.size)
+                } ?: fn.parameters
+                val args = generateArgs(realArgs, getRequestBody(ctx))
+                val rawResult = when {
+                    bean == null && realArgs.isEmpty() -> if (fn.isSuspend) fn.callSuspend() else fn.call()
+                    bean == null -> if (fn.isSuspend) fn.callSuspend(*args) else fn.call(*args)
+                    realArgs.isEmpty() -> if (fn.isSuspend) fn.callSuspend(bean) else fn.call(bean)
+                    else -> if (fn.isSuspend) fn.callSuspend(bean, *args) else fn.call(bean, *args)
                 }
                 val config = getConfig("auth", AuthConfig::class)
                 if (config.encryptData) {
@@ -67,28 +87,6 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
-fun Route.coroutineJsonHandlerNoAuth(fn: KFunction<Any?>) {
-    handler { ctx ->
-        val v: CoroutineDispatcher = Vertx.currentContext().dispatcher()
-        GlobalScope.launch(v) {
-            try {
-                val args = generateArgs(fn.parameters, ctx)
-                val result = when (fn.parameters.size) {
-                    0 -> if (fn.isSuspend) fn.callSuspend() else fn.call()
-                    else -> if (fn.isSuspend) fn.callSuspend(*args) else fn.call(*args)
-                }
-                ctx.json(R.ok(result).jsToJsonString())
-            } catch (e: Exception) {
-                if (e.cause is MinihException) {
-                    ctx.fail(e.cause)
-                } else {
-                    ctx.fail(e)
-                }
-            }
-        }
-    }
-}
 
 @OptIn(DelicateCoroutinesApi::class)
 fun Route.coroutineFileUploadHandler(fn: KFunction<Any?>) {
@@ -96,8 +94,22 @@ fun Route.coroutineFileUploadHandler(fn: KFunction<Any?>) {
         val v: CoroutineDispatcher = Vertx.currentContext().dispatcher()
         GlobalScope.launch(v) {
             try {
-                val files = ctx.fileUploads()
-                val result = fn.callSuspend(files)
+                val bean: Any? = getBeanCall(fn.parameters)
+                val files = ctx.fileUploads().map {
+                    FileUpload(
+                        it.name(),
+                        it.uploadedFileName(),
+                        it.fileName(),
+                        it.size(),
+                        it.contentType(),
+                        it.contentTransferEncoding(),
+                        it.charSet()
+                    )
+                }
+                val result = when {
+                    bean == null -> fn.callSuspend(files)
+                    else -> fn.callSuspend(bean, files)
+                }
                 ctx.json(R.ok(result).jsToJsonString())
             } catch (e: Exception) {
                 if (e.cause is MinihException) {
@@ -110,53 +122,6 @@ fun Route.coroutineFileUploadHandler(fn: KFunction<Any?>) {
     }
 }
 
-private fun generateArgs(argsNeed: List<KParameter>, ctx: RoutingContext): Array<Any?> {
-    val args = mutableListOf<Any?>()
-    val params = getRequestBody(ctx)
-    argsNeed.forEach { argsType ->
-        val type = argsType.type
-        val typeClass = type.classifier as KClass<*>
-        val isMarkedNullable = type.isMarkedNullable
-        val param = argsType.name?.let {
-            when {
-                isBasicType(type) -> covertBasic(params[it], type)
-                typeClass.simpleName === List::class.simpleName -> {
-                    val d = params.getJsonArray(it)
-                    when {
-                        d == null -> listOf<Any>()
-                        d.isEmpty -> listOf<Any>()
-                        else -> {
-                            val childType = type.arguments.first().type?.classifier as KClass<*>
-                            when {
-                                isBasicType(childType.createType()) -> covertBasic(params[it], childType.createType())
-                                else -> d.map { vt -> vt?.let { fillObject(vt.toJsonObject(), childType) } }
-                            }
-                        }
-                    }
-                }
-
-                else -> params.covertTo(type)
-            }
-        }
-
-        if (isBasicType(type)) {
-            if (!isMarkedNullable && param == null) {
-                throw MinihArgumentErrorException("参数：${argsType.name} 不能为空！")
-            }
-        } else {
-            val c = type.classifier as KClass<*>
-            c.primaryConstructor?.parameters?.forEach {
-                if (!it.type.isMarkedNullable) {
-                    val field = c.memberProperties.find { p -> p.name == it.name }
-                    field?.getter?.call(param) ?: throw MinihArgumentErrorException("参数：${it.name} 不能为空！")
-                }
-            }
-        }
-
-        args.add(param)
-    }
-    return args.toTypedArray()
-}
 
 private suspend fun authCheckRole(fn: KFunction<Any?>, ctx: RoutingContext) {
     if (fn.hasAnnotation<AuthCheckRole>()) {

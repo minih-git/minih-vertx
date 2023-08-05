@@ -1,11 +1,12 @@
-package cn.minih.auth.annotation
+@file:Suppress("unused")
+
+package cn.minih.core.annotation
 
 /**
  * @author hubin
  * @date 2023/7/10
  * @desc
  */
-@Suppress("unused")
 enum class CheckRoleType {
     AND, OR
 }

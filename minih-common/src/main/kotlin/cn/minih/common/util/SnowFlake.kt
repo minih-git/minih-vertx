@@ -1,10 +1,7 @@
 @file:Suppress("unused")
 
-package cn.minih.core.utils
+package cn.minih.common.util
 
-import cn.minih.core.annotation.Component
-import cn.minih.core.boot.PostDeployingProcess
-import io.vertx.core.Vertx
 import java.net.InetAddress
 
 private const val sp = 1585644268888L
@@ -15,39 +12,6 @@ private const val workerIdShift = sequenceBits
 private const val datacenterIdShift = sequenceBits + workerIdBits
 private const val timestampLeftShift = sequenceBits + workerIdBits + datacenterIdBits
 private const val sequenceMask = -1L xor (-1L shl sequenceBits.toInt())
-
-/**
- * 雪花算法实现
- * @author hubin
- * @since 2023-07-30 22:33:13
- * @desc
- */
-@Suppress("unused")
-@Component
-class InitSnowFlake : PostDeployingProcess {
-    override suspend fun exec(vertx: Vertx, deployId: String) {
-        SnowFlakeContext.instance.putContext(deployId, SnowFlake(deployId))
-
-    }
-}
-
-class SnowFlakeContext {
-    companion object {
-        val instance by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { SnowFlakeContext() }
-    }
-
-    private val context = mutableMapOf<String, SnowFlake>()
-
-    fun putContext(dId: String, sk: SnowFlake) {
-        context[dId] = sk
-    }
-
-    fun currentContext(): SnowFlake {
-        return context[Vertx.currentContext().deploymentID()] ?: SnowFlake("1")
-    }
-
-
-}
 
 
 class SnowFlake(wid: String) {

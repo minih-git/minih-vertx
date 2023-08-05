@@ -1,10 +1,10 @@
 package cn.minih.database.mysql.manager
 
-import cn.minih.core.exception.MinihArgumentErrorException
-import cn.minih.core.utils.Assert
-import cn.minih.core.utils.SnowFlakeContext
-import cn.minih.core.utils.log
-import cn.minih.core.utils.toJsonObject
+import cn.minih.common.exception.MinihArgumentErrorException
+import cn.minih.common.util.Assert
+import cn.minih.common.util.log
+import cn.minih.common.util.toJsonObject
+import cn.minih.core.util.SnowFlakeContext
 import cn.minih.database.mysql.annotation.TableId
 import cn.minih.database.mysql.annotation.TableName
 import cn.minih.database.mysql.config.DbConfig

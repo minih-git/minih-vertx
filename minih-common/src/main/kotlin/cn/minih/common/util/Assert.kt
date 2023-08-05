@@ -1,4 +1,6 @@
-package cn.minih.core.utils
+@file:Suppress("unused")
+
+package cn.minih.common.util
 
 /**
  * @author hubin

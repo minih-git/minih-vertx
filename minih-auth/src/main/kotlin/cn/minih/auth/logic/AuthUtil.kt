@@ -7,7 +7,7 @@ import cn.minih.auth.constants.*
 import cn.minih.auth.data.AuthLoginModel
 import cn.minih.auth.data.TokenInfo
 import cn.minih.auth.exception.AuthLoginException
-import cn.minih.core.utils.getConfig
+import cn.minih.common.util.getConfig
 import io.vertx.core.Vertx
 import java.util.concurrent.ThreadLocalRandom
 

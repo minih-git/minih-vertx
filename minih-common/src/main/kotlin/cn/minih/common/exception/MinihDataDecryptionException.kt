@@ -1,4 +1,4 @@
-package cn.minih.core.exception
+package cn.minih.common.exception
 
 /**
  *  数据解密错误

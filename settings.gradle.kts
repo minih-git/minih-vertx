@@ -33,6 +33,7 @@ dependencyResolutionManagement {
             library("bcrypt", "org.mindrot:jbcrypt:0.4")
             library("kotlin-reflect", "org.jetbrains.kotlin:kotlin-reflect:1.9.0")
 
+            library("minih-common", "cn.minih", "minih-common").versionRef("minih-vertx")
             library("minih-core", "cn.minih", "minih-core").versionRef("minih-vertx")
             library("minih-web", "cn.minih", "minih-web").versionRef("minih-vertx")
             library("minih-auth", "cn.minih", "minih-auth").versionRef("minih-vertx")
@@ -49,3 +50,4 @@ include("minih-database-mysql")
 include("minih-web")
 include("minih-auth")
 include("minih-microservice-client")
+include("minih-common")

@@ -1,6 +1,7 @@
 package cn.minih.auth.constants
 
-import cn.minih.core.exception.IMinihErrorCode
+import cn.minih.common.exception.IMinihErrorCode
+
 
 /**
  * @author hubin

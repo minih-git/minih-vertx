@@ -1,8 +1,8 @@
 package cn.minih.ms.client
 
+import cn.minih.common.util.log
 import cn.minih.core.annotation.Component
 import cn.minih.core.boot.PreStopProcess
-import cn.minih.core.utils.log
 import io.vertx.core.Vertx
 import io.vertx.ext.consul.ConsulClient
 import io.vertx.ext.consul.ConsulClientOptions

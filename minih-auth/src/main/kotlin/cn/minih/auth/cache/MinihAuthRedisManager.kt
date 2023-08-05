@@ -2,8 +2,8 @@ package cn.minih.auth.cache
 
 import cn.minih.auth.config.AuthConfig
 import cn.minih.auth.exception.MinihAuthException
-import cn.minih.core.utils.Assert
-import cn.minih.core.utils.getConfig
+import cn.minih.common.util.Assert
+import cn.minih.common.util.getConfig
 import io.vertx.core.Vertx
 import io.vertx.redis.client.Redis
 import io.vertx.redis.client.RedisAPI

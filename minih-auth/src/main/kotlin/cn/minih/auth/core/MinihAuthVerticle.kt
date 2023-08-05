@@ -1,9 +1,12 @@
 package cn.minih.auth.core
 
 import cn.minih.auth.logic.AuthServiceHandler
+import cn.minih.auth.logic.coroutineJsonHandlerHasAuth
 import cn.minih.web.core.MinihWebVerticle
 import cn.minih.web.handler.RouteFailureHandler
 import io.vertx.ext.web.AllowForwardHeaders
+import io.vertx.ext.web.Route
+import kotlin.reflect.KFunction
 
 
 /**
@@ -24,6 +27,10 @@ abstract class MinihAuthVerticle(port: Int = 8080) : MinihWebVerticle(port) {
         router.allowForward(AllowForwardHeaders.X_FORWARD)
         router.route().handler(AuthServiceHandler.instance)
         super.start()
+    }
+
+    override fun registerRouterHandler(route: Route, fn: KFunction<Any?>) {
+        route.coroutineJsonHandlerHasAuth(fn)
     }
 
 }

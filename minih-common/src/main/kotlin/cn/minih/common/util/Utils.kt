@@ -1,26 +1,25 @@
 @file:Suppress("unused")
 
-package cn.minih.core.utils
+package cn.minih.common.util
 
+import cn.minih.common.exception.MinihArgumentErrorException
 import cn.minih.core.config.CoreConfig
 import cn.minih.core.config.IConfig
-import cn.minih.core.constants.PROJECT_NAME
+import cn.minih.core.config.PROJECT_NAME
 import com.google.gson.Gson
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
+import io.vertx.kotlin.core.json.get
 import io.vertx.kotlin.core.json.jsonObjectOf
 import java.io.File
 import java.io.IOException
 import java.net.*
 import java.util.*
 import java.util.jar.JarFile
-import kotlin.reflect.KClass
-import kotlin.reflect.KMutableProperty1
-import kotlin.reflect.KProperty
-import kotlin.reflect.KType
+import kotlin.reflect.*
 import kotlin.reflect.full.*
 import kotlin.reflect.jvm.internal.impl.types.SimpleType
 
@@ -291,78 +290,120 @@ fun isNullOrBlankOrZero(v: Any): Boolean {
     }
 }
 
-object Utils {
-
-    fun getClassesByPath(path: String): MutableSet<KClass<*>> {
-
-        val slashPath = path.replace(".", "/")
-
-        val result = mutableSetOf<KClass<*>>()
-        var dirOrFiles: Enumeration<URL>? = null
-        try {
-            dirOrFiles = Thread.currentThread().contextClassLoader.getResources(slashPath)
-        } catch (e: IOException) {
-            log.error("load class failed, path = {}", path, e)
-        }
-        if (dirOrFiles == null) return result
-        while (dirOrFiles.hasMoreElements()) {
-            val dirOrFile = dirOrFiles.nextElement()
-            val fileType = dirOrFile.protocol
-            if ("file" == fileType) {
-                val filePath = dirOrFile.file
-                val file = File(filePath)
-                if (!file.exists()) {
-                    log.warn("path: {}, file not exist", filePath)
-                    continue
-                }
-                if (file.isDirectory) {
-                    val files = file.listFiles { f -> f.isDirectory || f.name.endsWith(".class") } ?: continue
-                    for (f in files) {
-                        var fileName = f.name
-                        if (f.isDirectory) {
-                            result.addAll(getClassesByPath("$path.$fileName"))
-                        } else if (f.name.endsWith(".class")) {
-                            //去掉 .class 结尾
-                            fileName = fileName.substring(0, fileName.length - 6)
-                            result.add(ClassLoader.getSystemClassLoader().loadClass("$path.$fileName").kotlin)
+fun generateArgs(argsNeed: List<KParameter>, params: JsonObject): Array<Any?> {
+    val args = mutableListOf<Any?>()
+    argsNeed.forEach { argsType ->
+        val type = argsType.type
+        val typeClass = type.classifier as KClass<*>
+        val isMarkedNullable = type.isMarkedNullable
+        val param = argsType.name?.let {
+            when {
+                isBasicType(type) -> covertBasic(params[it], type)
+                typeClass.simpleName === List::class.simpleName -> {
+                    val d = params.getJsonArray(it)
+                    when {
+                        d == null -> listOf<Any>()
+                        d.isEmpty -> listOf<Any>()
+                        else -> {
+                            val childType = type.arguments.first().type?.classifier as KClass<*>
+                            when {
+                                isBasicType(childType.createType()) -> covertBasic(params[it], childType.createType())
+                                else -> d.map { vt -> vt?.let { fillObject(vt.toJsonObject(), childType) } }
+                            }
                         }
                     }
-                    continue
-                }
-            } else if ("jar" == fileType) {
-                var jar: JarFile? = null
-                try {
-                    jar = (dirOrFile.openConnection() as JarURLConnection)
-                        .jarFile
-                } catch (e: IOException) {
-                    log.warn("load classes failed... path -> {}", path, e)
                 }
 
-                if (jar == null) continue
-                val itemsForJar = jar.entries()
-                while (itemsForJar.hasMoreElements()) {
-                    val jarEntry = itemsForJar.nextElement()
-                    var fileName = jarEntry.name
-                    //目录
-                    if (fileName.endsWith("/")) continue
-                    if (fileName.first() == '/') {
-                        fileName = fileName.substring(1)
-                    }
-                    //jar中文件或目录的路径，不与需要解析的路径匹配
-                    if (!fileName.startsWith(slashPath)) continue
-                    //class文件
-                    if (fileName.endsWith(".class") && !jarEntry.isDirectory) {
-                        //去掉 .class 结尾
-                        val filePath = fileName.substring(0, fileName.length - 6)
-                        val loadClass =
-                            ClassLoader.getSystemClassLoader().loadClass(filePath.replace('/', '.')).kotlin
-                        result.add(loadClass)
-                    }
+                else -> params.covertTo(type)
+            }
+        }
+
+        if (isBasicType(type)) {
+            if (!isMarkedNullable && param == null) {
+                throw MinihArgumentErrorException("参数：${argsType.name} 不能为空！")
+            }
+        } else {
+            val c = type.classifier as KClass<*>
+            c.primaryConstructor?.parameters?.forEach {
+                if (!it.type.isMarkedNullable) {
+                    val field = c.memberProperties.find { p -> p.name == it.name }
+                    field?.getter?.call(param) ?: throw MinihArgumentErrorException("参数：${it.name} 不能为空！")
                 }
             }
         }
-        return result
+
+        args.add(param)
     }
+    return args.toTypedArray()
+}
 
+fun getClassesByPath(path: String): MutableSet<KClass<*>> {
 
+    val slashPath = path.replace(".", "/")
+
+    val result = mutableSetOf<KClass<*>>()
+    var dirOrFiles: Enumeration<URL>? = null
+    try {
+        dirOrFiles = Thread.currentThread().contextClassLoader.getResources(slashPath)
+    } catch (e: IOException) {
+        log.error("load class failed, path = {}", path, e)
+    }
+    if (dirOrFiles == null) return result
+    while (dirOrFiles.hasMoreElements()) {
+        val dirOrFile = dirOrFiles.nextElement()
+        val fileType = dirOrFile.protocol
+        if ("file" == fileType) {
+            val filePath = dirOrFile.file
+            val file = File(filePath)
+            if (!file.exists()) {
+                log.warn("path: {}, file not exist", filePath)
+                continue
+            }
+            if (file.isDirectory) {
+                val files = file.listFiles { f -> f.isDirectory || f.name.endsWith(".class") } ?: continue
+                for (f in files) {
+                    var fileName = f.name
+                    if (f.isDirectory) {
+                        result.addAll(getClassesByPath("$path.$fileName"))
+                    } else if (f.name.endsWith(".class")) {
+                        //去掉 .class 结尾
+                        fileName = fileName.substring(0, fileName.length - 6)
+                        result.add(ClassLoader.getSystemClassLoader().loadClass("$path.$fileName").kotlin)
+                    }
+                }
+                continue
+            }
+        } else if ("jar" == fileType) {
+            var jar: JarFile? = null
+            try {
+                jar = (dirOrFile.openConnection() as JarURLConnection)
+                    .jarFile
+            } catch (e: IOException) {
+                log.warn("load classes failed... path -> {}", path, e)
+            }
+
+            if (jar == null) continue
+            val itemsForJar = jar.entries()
+            while (itemsForJar.hasMoreElements()) {
+                val jarEntry = itemsForJar.nextElement()
+                var fileName = jarEntry.name
+                //目录
+                if (fileName.endsWith("/")) continue
+                if (fileName.first() == '/') {
+                    fileName = fileName.substring(1)
+                }
+                //jar中文件或目录的路径，不与需要解析的路径匹配
+                if (!fileName.startsWith(slashPath)) continue
+                //class文件
+                if (fileName.endsWith(".class") && !jarEntry.isDirectory) {
+                    //去掉 .class 结尾
+                    val filePath = fileName.substring(0, fileName.length - 6)
+                    val loadClass =
+                        ClassLoader.getSystemClassLoader().loadClass(filePath.replace('/', '.')).kotlin
+                    result.add(loadClass)
+                }
+            }
+        }
+    }
+    return result
 }

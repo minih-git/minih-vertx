@@ -1,7 +1,9 @@
+@file:Suppress("unused")
+
 package cn.minih.core.beans
 
-import cn.minih.core.exception.MinihException
-import cn.minih.core.utils.Assert
+import cn.minih.common.exception.MinihException
+import cn.minih.common.util.Assert
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
@@ -79,6 +81,16 @@ class BeanFactory {
             return bean
         }
         throw MinihException("未找到bean！")
+    }
+
+    fun getBeanFromType(type: KType): Any {
+        val definition = getBeanDefinitionByType(type)
+        return getBean(definition.beanName)
+    }
+
+    fun getBeanFromClass(clazz: KClass<*>): Any {
+        val definition = getBeanDefinitionByType(clazz.createType())
+        return getBean(definition.beanName)
     }
 
 

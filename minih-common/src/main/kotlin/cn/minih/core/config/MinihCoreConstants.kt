@@ -1,4 +1,6 @@
-package cn.minih.core.constants
+@file:Suppress("unused")
+
+package cn.minih.core.config
 
 /**
  * @author hubin

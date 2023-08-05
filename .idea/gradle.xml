@@ -9,6 +9,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/minih-auth" />
+            <option value="$PROJECT_DIR$/minih-common" />
             <option value="$PROJECT_DIR$/minih-core" />
             <option value="$PROJECT_DIR$/minih-database-mysql" />
             <option value="$PROJECT_DIR$/minih-microservice-client" />

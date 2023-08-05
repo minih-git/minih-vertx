@@ -1,8 +1,8 @@
 package cn.minih.auth.exception
 
-import cn.minih.core.exception.IMinihErrorCode
-import cn.minih.core.exception.MinihErrorCode
-import cn.minih.core.exception.MinihException
+import cn.minih.common.exception.IMinihErrorCode
+import cn.minih.common.exception.MinihErrorCode
+import cn.minih.common.exception.MinihException
 
 
 /**

@@ -19,6 +19,13 @@ publishing {
 
     repositories {
         mavenLocal()
+        maven {
+            url = uri("https://packages.aliyun.com/maven/repository/2405309-snapshot-BRUb5T/")
+            credentials {
+                username = "64ccfc96d7cc86cfb4a243ac"
+                password = "Kzd4TVR-FiJU"
+            }
+        }
     }
 }
 
@@ -30,6 +37,8 @@ dependencies {
 
 
     implementation(libs.minih.core)
+    implementation(libs.minih.common)
+
     implementation(libs.minih.web)
     implementation(libs.hutool)
 

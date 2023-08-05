@@ -1,10 +1,11 @@
-@file:Suppress("unused")
+@file:Suppress("unused", "MemberVisibilityCanBePrivate")
 
 package cn.minih.web.response
 
-import cn.minih.core.exception.IMinihErrorCode
-import cn.minih.core.exception.MinihErrorCode
-import cn.minih.core.utils.toJsonString
+import cn.minih.common.exception.IMinihErrorCode
+import cn.minih.common.exception.MinihErrorCode
+import cn.minih.common.util.toJsonString
+
 
 /**
  * @author hubin

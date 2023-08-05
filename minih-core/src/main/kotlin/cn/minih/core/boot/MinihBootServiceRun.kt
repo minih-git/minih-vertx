@@ -1,16 +1,19 @@
+@file:Suppress("KotlinConstantConditions")
+
 package cn.minih.core.boot
 
+import cn.minih.common.util.getClassesByPath
+import cn.minih.common.util.getEnv
+import cn.minih.common.util.log
 import cn.minih.core.annotation.Component
 import cn.minih.core.annotation.ComponentScan
 import cn.minih.core.annotation.MinihServiceVerticle
+import cn.minih.core.annotation.Service
 import cn.minih.core.beans.BeanDefinitionBuilder
 import cn.minih.core.beans.BeanFactory
-import cn.minih.core.constants.MAX_INSTANCE_COUNT
+import cn.minih.core.config.MAX_INSTANCE_COUNT
 import cn.minih.core.constants.SYSTEM_CONFIGURATION_SUBSCRIBE
 import cn.minih.core.eventbus.EventBusConsumer
-import cn.minih.core.utils.Utils.getClassesByPath
-import cn.minih.core.utils.getEnv
-import cn.minih.core.utils.log
 import io.vertx.config.ConfigRetriever
 import io.vertx.config.ConfigRetrieverOptions
 import io.vertx.config.ConfigStoreOptions
@@ -56,6 +59,11 @@ object MinihBootServiceRun {
             if (it.simpleName != null) {
                 var beanName = it.simpleName!!
                 clazz.findAnnotation<Component>()?.let { con ->
+                    if (con.value.isNotBlank()) {
+                        beanName = con.value
+                    }
+                }
+                clazz.findAnnotation<Service>()?.let { con ->
                     if (con.value.isNotBlank()) {
                         beanName = con.value
                     }
@@ -240,7 +248,7 @@ object MinihBootServiceRun {
 
     private fun hasComponentsAnnotation(clazz: KClass<*>): Boolean {
         try {
-            return clazz.hasAnnotation<Component>() || clazz.hasAnnotation<MinihServiceVerticle>()
+            return clazz.hasAnnotation<Component>() || clazz.hasAnnotation<MinihServiceVerticle>() || clazz.hasAnnotation<Service>()
         } catch (_: UnsupportedOperationException) {
         }
         return false

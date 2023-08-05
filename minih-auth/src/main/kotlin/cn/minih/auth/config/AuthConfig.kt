@@ -2,7 +2,7 @@ package cn.minih.auth.config
 
 import cn.minih.auth.constants.*
 import cn.minih.core.config.IConfig
-import cn.minih.core.constants.PROJECT_NAME
+import cn.minih.core.config.PROJECT_NAME
 
 /**
  * 权限系统配置

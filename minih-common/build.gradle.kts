@@ -4,7 +4,7 @@ plugins {
     id("maven-publish")
 
 }
-java{
+java {
     withJavadocJar()
     withSourcesJar()
 }
@@ -29,13 +29,12 @@ publishing {
 }
 
 dependencies {
-    implementation(libs.kotlin.reflect)
-    implementation(libs.minih.core)
-    implementation(libs.minih.common)
 
+    implementation(libs.logging)
     implementation(libs.logback)
     implementation(libs.gson)
-    api(libs.vertx.web)
-
-
+    api(libs.kotlin.reflect)
+    api(libs.vertx.core)
+    api(libs.vertx.kotlin)
+    api(libs.vertx.kotlin.coroutines)
 }

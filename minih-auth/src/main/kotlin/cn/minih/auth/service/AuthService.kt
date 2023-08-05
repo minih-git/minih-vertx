@@ -2,7 +2,7 @@ package cn.minih.auth.service
 
 import cn.minih.auth.config.AuthConfig
 import cn.minih.auth.data.AuthLoginModel
-import cn.minih.core.utils.getConfig
+import cn.minih.common.util.getConfig
 
 /**
  * @author hubin
