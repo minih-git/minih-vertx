@@ -407,3 +407,16 @@ fun getClassesByPath(path: String): MutableSet<KClass<*>> {
     }
     return result
 }
+
+fun getSuperClassRecursion(clazz: KClass<*>): Set<KClass<*>> {
+    val list = mutableSetOf<KClass<*>>()
+    val superTypes = clazz.supertypes
+    if (superTypes.isNotEmpty()) {
+        superTypes.forEach {
+            val clazz1 = it.classifier as KClass<*>
+            list.addAll(getSuperClassRecursion(clazz1))
+        }
+    }
+    list.addAll(clazz.superclasses)
+    return list
+}

@@ -32,23 +32,25 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.callSuspend
-import kotlin.reflect.full.createType
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
-
 
 fun getBeanCall(params: List<KParameter>): Any? {
     if (params.isNotEmpty()) {
         val p1 = params.first()
-        if (p1::class.supertypes.contains(Service::class.createType())) {
+        val clazz = p1.type.classifier as KClass<*>
+        val superClasses = getSuperClassRecursion(clazz)
+        if (superClasses.contains(Service::class)) {
             return BeanFactory.instance.getBeanFromType(p1.type)
         }
     }
     return null
 }
+
 
 @OptIn(DelicateCoroutinesApi::class)
 fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
