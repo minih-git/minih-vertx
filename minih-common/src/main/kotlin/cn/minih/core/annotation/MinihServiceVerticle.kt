@@ -5,6 +5,7 @@ package cn.minih.core.annotation
  * @date 2023/7/18
  * @desc
  */
-@Target(AnnotationTarget.TYPE, AnnotationTarget.CLASS)
+@Suppress("unused")
+@Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class ComponentScan(val basePackage: String = "")
+annotation class MinihServiceVerticle(val instance: Int = 1)

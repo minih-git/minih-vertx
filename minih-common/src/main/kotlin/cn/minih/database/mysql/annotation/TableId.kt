@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package cn.minih.database.mysql.annotation
 
 import cn.minih.database.mysql.enum.TableIdType
