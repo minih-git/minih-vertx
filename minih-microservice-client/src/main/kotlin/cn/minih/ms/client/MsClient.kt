@@ -5,8 +5,8 @@ package cn.minih.ms.client
 import io.vertx.core.http.HttpClient
 import io.vertx.kotlin.coroutines.await
 import io.vertx.servicediscovery.Record
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.concurrent.ThreadLocalRandom
 
@@ -28,6 +28,7 @@ object MsClient {
         return records
     }
 
+
     suspend fun getAvailableService(name: String): Record? {
         val records = getServiceFromCache(name)
         if (records.isNullOrEmpty()) {
@@ -44,9 +45,8 @@ object MsClient {
 
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     fun updateCache() {
-        GlobalScope.launch {
+        CoroutineScope(Dispatchers.Default).launch {
             if (serviceCache.isNotEmpty()) {
                 serviceCache.forEach {
                     val records = MsClientContext.instance.discovery.getRecords { rc -> rc.name == it.key }.await()

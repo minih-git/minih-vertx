@@ -18,6 +18,8 @@ import cn.minih.common.util.*
 import cn.minih.core.annotation.AuthCheckRole
 import cn.minih.core.annotation.CheckRoleType
 import cn.minih.core.beans.BeanFactory
+import cn.minih.core.config.MICROSERVICE_INNER_REQUEST_HEADER
+import cn.minih.core.config.MICROSERVICE_INNER_REQUEST_HEADER_VALUE
 import cn.minih.web.response.R
 import cn.minih.web.service.FileUpload
 import cn.minih.web.service.Service
@@ -29,8 +31,7 @@ import io.vertx.ext.web.Route
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -52,11 +53,10 @@ fun getBeanCall(params: List<KParameter>): Any? {
 }
 
 
-@OptIn(DelicateCoroutinesApi::class)
 fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
     handler { ctx ->
         val v: CoroutineDispatcher = Vertx.currentContext().dispatcher()
-        GlobalScope.launch(v) {
+        CoroutineScope(v).launch {
             try {
                 authCheckRole(fn, ctx)
                 val bean: Any? = getBeanCall(fn.parameters)
@@ -90,11 +90,10 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
 }
 
 
-@OptIn(DelicateCoroutinesApi::class)
 fun Route.coroutineFileUploadHandler(fn: KFunction<Any?>) {
     blockingHandler { ctx ->
         val v: CoroutineDispatcher = Vertx.currentContext().dispatcher()
-        GlobalScope.launch(v) {
+        CoroutineScope(v).launch {
             try {
                 val bean: Any? = getBeanCall(fn.parameters)
                 val files = ctx.fileUploads().map {
@@ -165,10 +164,9 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         this.authService = authService
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun handle(ctx: RoutingContext) {
         val v: CoroutineDispatcher = Vertx.currentContext().dispatcher()
-        GlobalScope.launch(v) {
+        CoroutineScope(v).launch {
             try {
                 val path = ctx.request().path()
                 val config = getConfig("auth", AuthConfig::class)
@@ -251,12 +249,15 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         var tokenValue: String? = ""
         val config = getConfig("auth", AuthConfig::class)
         val request = ctx.request()
-        if (AntPathMatcher().match("/ws/**", request.path()) || config.ignoreAuthUri.any {
+        if (AntPathMatcher().match("/ws/**", request.path())
+            || config.ignoreAuthUri.any {
                 AntPathMatcher().match(
                     it,
                     request.path()
                 )
-            }) {
+            }
+            || request.getHeader(MICROSERVICE_INNER_REQUEST_HEADER) == MICROSERVICE_INNER_REQUEST_HEADER_VALUE
+        ) {
             return
         }
         if (tokenValue.isNullOrBlank() && config.isReadHeader) {

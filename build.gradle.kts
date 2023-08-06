@@ -6,15 +6,8 @@ plugins {
 
 allprojects {
     group = "cn.minih"
-    version = "1.0.0"
+    version = "1.0.1"
     repositories {
-        maven {
-            url = uri("https://packages.aliyun.com/maven/repository/2405309-snapshot-BRUb5T/")
-            credentials {
-                username = "64ccfc96d7cc86cfb4a243ac"
-                password = "Kzd4TVR-FiJU"
-            }
-        }
         mavenLocal()
         maven { url = uri("https://maven.aliyun.com/repository/google") }
         maven { url = uri("https://maven.aliyun.com/nexus/content/groups/public") }

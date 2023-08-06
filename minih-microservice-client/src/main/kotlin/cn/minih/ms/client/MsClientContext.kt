@@ -3,6 +3,7 @@ package cn.minih.ms.client
 import cn.minih.common.exception.MinihException
 import cn.minih.common.util.Assert
 import cn.minih.common.util.getConfig
+import cn.minih.ms.client.config.Config
 import cn.minih.ms.client.constants.MICROSERVICE_ADDRESS
 import io.vertx.core.Vertx
 import io.vertx.kotlin.core.json.jsonObjectOf

@@ -10,7 +10,7 @@ import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.kotlin.coroutines.await
 
 /**
- *  服务状态监听
+ * 取消服务注册
  * @author hubin
  * @since 2023-08-01 08:57:24
  */

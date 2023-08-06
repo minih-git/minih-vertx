@@ -22,8 +22,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -44,26 +43,27 @@ object MinihBootServiceRun {
 
     private val systemConfigs = mutableListOf<ConfigStoreOptions>()
     private val successDeploy = mutableListOf<String>()
+    private val allClazzList = mutableListOf<KClass<*>>()
 
 
     private fun initBean(clazz: KClass<*>) {
-        val componentsList = getClassesByPath("cn.minih")
+        allClazzList.addAll(getClassesByPath("cn.minih"))
         if (clazz.hasAnnotation<ComponentScan>()) {
             val componentScan = clazz.findAnnotation<ComponentScan>()
             if (componentScan != null && componentScan.basePackage.isNotBlank()) {
-                componentsList.addAll(getClassesByPath(componentScan.basePackage))
+                allClazzList.addAll(getClassesByPath(componentScan.basePackage))
             }
         }
-        val components = componentsList.filter { hasComponentsAnnotation(it) }
+        val components = allClazzList.filter { hasComponentsAnnotation(it) }
         components.forEach {
             if (it.simpleName != null) {
                 var beanName = it.simpleName!!
-                clazz.findAnnotation<Component>()?.let { con ->
+                it.findAnnotation<Component>()?.let { con ->
                     if (con.value.isNotBlank()) {
                         beanName = con.value
                     }
                 }
-                clazz.findAnnotation<Service>()?.let { con ->
+                it.findAnnotation<Service>()?.let { con ->
                     if (con.value.isNotBlank()) {
                         beanName = con.value
                     }
@@ -98,52 +98,60 @@ object MinihBootServiceRun {
 
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
+    private fun replenishInitBean(vertx: Vertx): Future<Boolean> {
+        val initBeanProcess = BeanFactory.instance.findBeanDefinitionByType(ReplenishInitBeanProcess::class)
+        return Future.all(initBeanProcess.map { process ->
+            val promise = Promise.promise<Boolean>()
+            val bean = BeanFactory.instance.getBean(process.beanName) as ReplenishInitBeanProcess
+            CoroutineScope(vertx.orCreateContext.dispatcher()).launch {
+                bean.exec(vertx, allClazzList);
+                promise.complete()
+            }
+            promise.future()
+        }).compose { Future.succeededFuture(true) }
+    }
+
     private fun deployEventBusConsumers(vertx: Vertx) {
         val consumers = BeanFactory.instance.findBeanDefinitionByType(EventBusConsumer::class)
         consumers.forEach { consumer ->
             val bean = BeanFactory.instance.getBean(consumer.beanName) as EventBusConsumer
             vertx.eventBus().consumer<JsonObject>(bean.channel).handler { obj ->
-                GlobalScope.launch(Vertx.currentContext().dispatcher()) { bean.exec(obj.body()) }
+                CoroutineScope(vertx.orCreateContext.dispatcher()).launch { bean.exec(obj.body()) }
             }
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun preStartHandling(vertx: Vertx) {
         val startingProcess = BeanFactory.instance.findBeanDefinitionByType(PreStartingProcess::class)
         startingProcess.forEach { process ->
             val bean = BeanFactory.instance.getBean(process.beanName) as PreStartingProcess
-            GlobalScope.launch(vertx.orCreateContext.dispatcher()) { bean.exec(vertx) }
+            CoroutineScope(vertx.orCreateContext.dispatcher()).launch { bean.exec(vertx) }
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun postStartHandling(vertx: Vertx) {
         val startingProcess = BeanFactory.instance.findBeanDefinitionByType(PostStartingProcess::class)
         startingProcess.forEach { process ->
             val bean = BeanFactory.instance.getBean(process.beanName) as PostStartingProcess
-            GlobalScope.launch(vertx.orCreateContext.dispatcher()) { bean.exec(vertx) }
+            CoroutineScope(vertx.orCreateContext.dispatcher()).launch { bean.exec(vertx) }
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun postDeployHandling(vertx: Vertx, deployId: String) {
         val startingProcess = BeanFactory.instance.findBeanDefinitionByType(PostDeployingProcess::class)
         startingProcess.forEach { process ->
             val bean = BeanFactory.instance.getBean(process.beanName) as PostDeployingProcess
-            GlobalScope.launch(vertx.orCreateContext.dispatcher()) { bean.exec(vertx, deployId) }
+            CoroutineScope(vertx.orCreateContext.dispatcher()).launch { bean.exec(vertx, deployId) }
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun registerCloseHandling(vertx: Vertx): Future<Boolean> {
         log.info("开始执行关闭程序...")
         val stopProcess = BeanFactory.instance.findBeanDefinitionByType(PreStopProcess::class)
         return Future.all(stopProcess.map { process ->
             val bean = BeanFactory.instance.getBean(process.beanName) as PreStopProcess
             val future: Promise<Boolean> = Promise.promise()
-            GlobalScope.launch(vertx.orCreateContext.dispatcher()) {
+            CoroutineScope(vertx.orCreateContext.dispatcher()).launch {
                 bean.exec(vertx)
             }.invokeOnCompletion {
                 log.info("${process.beanName} 完成...")
@@ -168,6 +176,7 @@ object MinihBootServiceRun {
             log.info("服务开始启动...")
             val currentTime = System.currentTimeMillis()
             initBean(clazz)
+            replenishInitBean(vertx)
             deployEventBusConsumers(vertx)
             preStartHandling(vertx)
             deployVerticle(vertx).await()
@@ -196,6 +205,7 @@ object MinihBootServiceRun {
         }
 
     }
+
 
     fun setSystemConfigs(fn: () -> List<ConfigStoreOptions>): MinihBootServiceRun {
         systemConfigs.addAll(fn())

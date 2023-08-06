@@ -38,6 +38,7 @@ dependencies {
     api(libs.vertx.kotlin.coroutines)
     api(libs.vertx.kotlin)
     api(libs.vertx.hazelcast)
+    api(libs.cglib)
 
     implementation(libs.minih.common)
 

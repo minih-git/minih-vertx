@@ -1,26 +1,23 @@
 package cn.minih.web.core
 
+import cn.minih.common.exception.MinihErrorCode
 import cn.minih.common.exception.MinihException
-import cn.minih.common.util.Assert
-import cn.minih.common.util.generateArgs
-import cn.minih.common.util.getProjectName
-import cn.minih.common.util.toJsonObject
+import cn.minih.common.util.*
+import cn.minih.core.annotation.Service
 import cn.minih.core.beans.BeanFactory
 import cn.minih.web.annotation.Delete
 import cn.minih.web.annotation.Get
 import cn.minih.web.annotation.Post
 import cn.minih.web.annotation.Put
-import cn.minih.web.util.findRequestMapping
-import cn.minih.web.util.formatPath
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
 import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.reflect.KAnnotatedElement
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.KParameter
 import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.memberFunctions
 
@@ -67,15 +64,42 @@ object RegisterService {
 
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
+    private fun getBeanCall(params: List<KParameter>): Any? {
+        if (params.isNotEmpty()) {
+            val p1 = params.first()
+            val clazz = p1.type.classifier as KClass<*>
+            val superClasses = getSuperClassRecursion(clazz)
+            if (superClasses.contains(cn.minih.web.service.Service::class)) {
+                return BeanFactory.instance.getBeanFromType(p1.type)
+            }
+        }
+        return null
+    }
+
     private fun registerEventBusConsumer(realPath: String, fn: KFunction<Any?>) {
         val serverName = getProjectName()
         vertx.eventBus().consumer(serverName.plus(realPath.replace("/", "."))) { p ->
-            GlobalScope.launch(vertx.orCreateContext.dispatcher()) {
-                val args = generateArgs(fn.parameters, p.body())
-                val rawResult = when (fn.parameters.size) {
-                    0 -> if (fn.isSuspend) fn.callSuspend() else fn.call()
-                    else -> if (fn.isSuspend) fn.callSuspend(*args) else fn.call(*args)
+
+            CoroutineScope(vertx.orCreateContext.dispatcher()).launch {
+                var rawResult: Any?
+                try {
+                    val bean: Any? = getBeanCall(fn.parameters)
+                    val realArgs = bean?.let {
+                        fn.parameters.subList(1, fn.parameters.size)
+                    } ?: fn.parameters
+                    val args = generateArgs(realArgs, p.body())
+                    rawResult = when {
+                        bean == null && realArgs.isEmpty() -> if (fn.isSuspend) fn.callSuspend() else fn.call()
+                        bean == null -> if (fn.isSuspend) fn.callSuspend(*args) else fn.call(*args)
+                        realArgs.isEmpty() -> if (fn.isSuspend) fn.callSuspend(bean) else fn.call(bean)
+                        else -> if (fn.isSuspend) fn.callSuspend(bean, *args) else fn.call(bean, *args)
+                    }
+                } catch (e: Exception) {
+                    rawResult =
+                        MinihException(
+                            "远程接口调用出现错误,${e.cause}",
+                            errorCode = MinihErrorCode.ERR_CODE_REMOTE_CALL_ERROR
+                        )
                 }
                 p.reply(rawResult?.toJsonObject())
             }
@@ -90,6 +114,7 @@ object RegisterService {
         this.vertx = vertx
         serviceList.forEach { iservice ->
             val serviceDefs = BeanFactory.instance.findBeanDefinitionByType(iservice)
+                .filter { it.annotations.map { a1 -> a1.annotationClass }.contains(Service::class) }
             Assert.isTrue(serviceDefs.size == 1) {
                 MinihException("${iservice.simpleName} 实例未找到或找到多个！")
             }

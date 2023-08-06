@@ -13,7 +13,6 @@ import io.vertx.servicediscovery.Status
 import io.vertx.servicediscovery.impl.ServiceTypes
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
 import io.vertx.servicediscovery.spi.ServiceType
-import kotlinx.coroutines.DelicateCoroutinesApi
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.concurrent.scheduleAtFixedRate
@@ -35,7 +34,6 @@ class ConsulBackendService : ServiceDiscoveryBackend {
         this.client = ConsulClient.create(vertx, opt)
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun store(record: Record, resultHandler: Handler<AsyncResult<Record>>?) {
         val serviceOptions: ServiceOptions = recordToServiceOptions(record)
         val registration: Promise<Void> = Promise.promise()

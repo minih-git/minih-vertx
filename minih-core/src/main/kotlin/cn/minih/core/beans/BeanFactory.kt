@@ -4,6 +4,7 @@ package cn.minih.core.beans
 
 import cn.minih.common.exception.MinihException
 import cn.minih.common.util.Assert
+import cn.minih.common.util.log
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
@@ -34,6 +35,13 @@ class BeanFactory {
         Assert.isNull(existingDefinition) { MinihException("$beanName bean definition不能重复定义！") }
         beanDefinitionMap[beanName] = beanDefinition
         this.beanDefinitionNames.add(beanName)
+    }
+
+    fun registerBean(beanName: String, bean: Any) {
+        if (this.singletonObjects.containsKey(beanName)) {
+            log.info("$beanName 已经初始化过，重复注册将会覆盖原有")
+        }
+        this.singletonObjects[beanName] = bean
     }
 
     private fun getBeanDefinitionByType(type: KType): BeanDefinition {

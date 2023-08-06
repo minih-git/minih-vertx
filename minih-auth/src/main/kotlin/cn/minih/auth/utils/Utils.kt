@@ -19,8 +19,8 @@ import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.security.SecureRandom
 import java.util.*
@@ -90,11 +90,10 @@ fun getRequestBody(ctx: RoutingContext): JsonObject {
 }
 
 
-@OptIn(DelicateCoroutinesApi::class)
 fun Route.coroutineHandler(fn: suspend (RoutingContext) -> Unit) {
     val v: CoroutineDispatcher = Vertx.currentContext().dispatcher()
     handler { ctx ->
-        GlobalScope.launch(v) {
+        CoroutineScope(v).launch {
             try {
                 fn(ctx)
             } catch (e: Exception) {
@@ -104,11 +103,10 @@ fun Route.coroutineHandler(fn: suspend (RoutingContext) -> Unit) {
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 fun Route.coroutineVoidHandler(fn: suspend (Any?) -> Unit) {
     val v: CoroutineDispatcher = Vertx.currentContext().dispatcher()
     handler { ctx ->
-        GlobalScope.launch(v) {
+        CoroutineScope(v).launch {
             try {
                 fn(null)
                 ctx.end()
@@ -119,11 +117,10 @@ fun Route.coroutineVoidHandler(fn: suspend (Any?) -> Unit) {
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 fun Route.neeRole(vararg role: String, type: CheckRoleType = CheckRoleType.AND): Route {
     putMetadata("needRoles", role)
         .handler { ctx ->
-            GlobalScope.launch {
+            CoroutineScope(Dispatchers.Default).launch {
                 try {
                     AuthServiceHandler.instance.checkRole(
                         ctx.get(CONTEXT_LOGIN_ID),

@@ -20,8 +20,7 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -90,11 +89,10 @@ abstract class MinihWebVerticle(private val port: Int = 8080) : MinihVerticle, C
 
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 fun Route.coroutineHandler(fn: KFunction<Any?>) {
     handler { ctx ->
         val v: CoroutineDispatcher = Vertx.currentContext().dispatcher()
-        GlobalScope.launch(v) {
+        CoroutineScope(v).launch {
             fn.call(ctx)
         }
     }

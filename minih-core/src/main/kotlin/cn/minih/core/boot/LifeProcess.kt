@@ -1,6 +1,14 @@
 package cn.minih.core.boot
 
 import io.vertx.core.Vertx
+import kotlin.reflect.KClass
+
+/**
+ * 初始化bean之前操作
+ */
+interface ReplenishInitBeanProcess {
+    suspend fun exec(vertx: Vertx, clazz: List<KClass<*>>)
+}
 
 /**
  * 启动前执行操作

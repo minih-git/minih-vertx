@@ -6,6 +6,7 @@ import cn.minih.common.exception.MinihArgumentErrorException
 import cn.minih.core.config.CoreConfig
 import cn.minih.core.config.IConfig
 import cn.minih.core.config.PROJECT_NAME
+import cn.minih.web.annotation.*
 import com.google.gson.Gson
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -419,4 +420,35 @@ fun getSuperClassRecursion(clazz: KClass<*>): Set<KClass<*>> {
     }
     list.addAll(clazz.superclasses)
     return list
+}
+
+fun findRequestMapping(t: KAnnotatedElement): RequestMapping? {
+    val requestType = when {
+        t.findAnnotation<Post>() != null -> t.findAnnotation<Post>()
+        t.findAnnotation<Get>() != null -> t.findAnnotation<Get>()
+        t.findAnnotation<Put>() != null -> t.findAnnotation<Put>()
+        t.findAnnotation<Delete>() != null -> t.findAnnotation<Delete>()
+        t.findAnnotation<Request>() != null -> t.findAnnotation<Request>()
+        else -> null
+    } ?: return null
+    val fields = requestType::class.memberProperties
+    var url = ""
+    fields.forEach { field ->
+        if (field.name == "value") {
+            url = field.getter.call(requestType).toString()
+        }
+    }
+
+    return RequestMapping(url, requestType)
+}
+
+fun formatPath(pathTmp: String): String {
+    var path = pathTmp
+    if (!path.startsWith("/")) {
+        path = "/$path"
+    }
+    if (path.endsWith("/")) {
+        path = path.substring(0, path.length - 1)
+    }
+    return path
 }

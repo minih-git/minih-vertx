@@ -1,5 +1,6 @@
-package cn.minih.ms.client
+package cn.minih.ms.client.config
 
+import cn.minih.core.config.DEFAULT_TIMEOUT
 import cn.minih.core.config.IConfig
 
 /**
@@ -11,5 +12,6 @@ class Config(
     var rootPath: String = "",
     var consulHost: String = "",
     var consulPort: Int = 8500,
-    var dcName: String = "dc1"
+    var dcName: String = "dc1",
+    var timeout: Long = DEFAULT_TIMEOUT
 ) : IConfig

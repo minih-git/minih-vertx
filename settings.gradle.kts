@@ -6,7 +6,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             version("vertx", "4.4.4")
-            version("minih-vertx", "1.0.0")
+            version("minih-vertx", "1.0.1")
             library("vertx-core", "io.vertx", "vertx-core").versionRef("vertx")
             library("vertx-web", "io.vertx", "vertx-web").versionRef("vertx")
             library("vertx-kotlin", "io.vertx", "vertx-lang-kotlin").versionRef("vertx")
@@ -32,6 +32,7 @@ dependencyResolutionManagement {
             library("jackson", "com.fasterxml.jackson.core:jackson-databind:2.15.2")
             library("bcrypt", "org.mindrot:jbcrypt:0.4")
             library("kotlin-reflect", "org.jetbrains.kotlin:kotlin-reflect:1.9.0")
+            library("cglib", "cglib:cglib:3.3.0")
 
             library("minih-common", "cn.minih", "minih-common").versionRef("minih-vertx")
             library("minih-core", "cn.minih", "minih-core").versionRef("minih-vertx")
