@@ -2,6 +2,7 @@
 
 package cn.minih.ms.client
 
+import io.vertx.core.Future
 import io.vertx.core.http.HttpClient
 import io.vertx.kotlin.coroutines.await
 import io.vertx.servicediscovery.Record
@@ -28,6 +29,17 @@ object MsClient {
         return records
     }
 
+    private fun getServiceFromCacheNoSuspend(name: String): Future<List<Record>?> {
+        if (serviceCache.containsKey(name)) {
+            return Future.succeededFuture(serviceCache[name])
+        }
+        return MsClientContext.instance.discovery.getRecords { it.name == name }.compose {
+            serviceCache[name] = it
+            Future.succeededFuture(it)
+        }
+
+    }
+
 
     suspend fun getAvailableService(name: String): Record? {
         val records = getServiceFromCache(name)
@@ -37,6 +49,18 @@ object MsClient {
         val number = ThreadLocalRandom.current().nextInt(records.size)
         return records[number % records.size]
     }
+
+    fun getAvailableServiceNoSuspend(name: String): Future<Record?> {
+        return getServiceFromCacheNoSuspend(name).compose {
+            var r: Record? = null
+            it?.let {
+                val number = ThreadLocalRandom.current().nextInt(it.size)
+                r = it[number % it.size]
+            }
+            Future.succeededFuture(r)
+        }
+    }
+
 
     suspend fun getAvailableHttpService(name: String): HttpClient? {
         val record = getAvailableService(name)

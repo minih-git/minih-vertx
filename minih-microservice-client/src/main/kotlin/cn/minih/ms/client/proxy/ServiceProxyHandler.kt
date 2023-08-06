@@ -10,15 +10,10 @@ import cn.minih.ms.client.config.Config
 import cn.minih.web.annotation.*
 import cn.minih.web.service.Service
 import io.vertx.core.Future
-import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.RequestOptions
 import io.vertx.core.json.JsonObject
-import io.vertx.kotlin.coroutines.dispatcher
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import kotlin.reflect.KAnnotatedElement
@@ -93,7 +88,7 @@ class ServiceProxyHandler : InvocationHandler, Service {
         val args1 = buildArgs(proxied.second, args)
         return vertx.eventBus()
             .request<JsonObject>(remoteServiceAnno.remote.plus(address), args1)
-            .compose { Future.succeededFuture<Any>(it?.body()) }
+            .compose { Future.succeededFuture<Any>(it?.body()?.toJsonObject()?.covertTo(proxied.second.returnType)) }
 
     }
 
@@ -108,11 +103,11 @@ class ServiceProxyHandler : InvocationHandler, Service {
 
     }
 
-    private suspend fun invokeByHttpClient(
+    private fun invokeByHttpClient(
         proxy: Any,
         method: Method,
         args: Array<out Any>?,
-        vertx: Vertx
+        vertx: Vertx,
     ): Future<Any> {
         val proxied = getProxied(proxy, method)
         val path =
@@ -125,29 +120,37 @@ class ServiceProxyHandler : InvocationHandler, Service {
             "未找到远程服务配置！",
             errorCode = MinihErrorCode.ERR_CODE_NOT_FOUND_ERROR
         )
-        val client = MsClient.getAvailableService(remoteServiceAnno.remote) ?: throw MinihException(
-            "未找到服务器！",
-            errorCode = MinihErrorCode.ERR_CODE_NOT_FOUND_ERROR
-        )
-        val httpClient = vertx.createHttpClient()
-        val requestOptions = RequestOptions()
-        val args1 = buildArgs(proxied.second, args).toBuffer()
-        requestOptions.method = getHttpMethod(methodMapping.type)
-        requestOptions.uri = path
-        requestOptions.host = client.location.getString("host")
-        requestOptions.port = client.location.getInteger("port")
-        requestOptions.addHeader("Content-Length", args1.length().toString())
-        requestOptions.addHeader(MICROSERVICE_INNER_REQUEST_HEADER, MICROSERVICE_INNER_REQUEST_HEADER_VALUE)
-        requestOptions.addHeader("Content-Type", "application/json")
-        requestOptions.setTimeout(getConfig("ms", Config::class, vertx).timeout)
-        return httpClient.request(requestOptions).compose { req ->
-            req.write(args1)
-            req.response().compose { res -> res.body() }.compose { Future.succeededFuture(it.toJson()) }
+        return MsClient.getAvailableServiceNoSuspend(remoteServiceAnno.remote).compose {
+            if (it == null) {
+                throw MinihException(
+                    "未找到服务器！",
+                    errorCode = MinihErrorCode.ERR_CODE_NOT_FOUND_ERROR
+                )
+            }
+            val args1 = buildArgs(proxied.second, args).toBuffer()
+            val httpClient = vertx.createHttpClient()
+            val requestOptions = RequestOptions()
+            requestOptions.method = getHttpMethod(methodMapping.type)
+            requestOptions.uri = path
+            requestOptions.host = it.location.getString("host")
+            requestOptions.port = it.location.getInteger("port")
+            requestOptions.addHeader("Content-Length", args1.length().toString())
+            requestOptions.addHeader(MICROSERVICE_INNER_REQUEST_HEADER, MICROSERVICE_INNER_REQUEST_HEADER_VALUE)
+            requestOptions.addHeader("Content-Type", "application/json")
+            requestOptions.setTimeout(getConfig("ms", Config::class, vertx).timeout)
+            httpClient.request(requestOptions).compose { req ->
+                req.write(args1)
+                req.response().compose { res -> res.body() }
+            }
+        }.compose {
+            val result = it.toJson().toJsonObject()
+            val rType = proxied.second.returnType.arguments.first().type!!
+            Future.succeededFuture(result.getJsonObject("data").covertTo(rType))
         }
+
     }
 
     override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {
-        val promise = Promise.promise<Any>()
         try {
             if (method.name.equals("toString")) {
                 return proxy::class.simpleName + "@" + Integer.toHexString(System.identityHashCode(proxy))
@@ -157,28 +160,12 @@ class ServiceProxyHandler : InvocationHandler, Service {
                 return proxy == args[0]
             }
             val vertx = Vertx.currentContext().owner()
-            val handler = CoroutineExceptionHandler { _, exception ->
-                log.warn("c")
-                throw exception
+            val proxied = getProxied(proxy, method)
+            val remoteService = proxied.first?.findAnnotation<RemoteService>()
+            return when (remoteService?.remoteType) {
+                RemoteType.EVENT_BUS -> invokeByEventBus(proxy, method, args, vertx)
+                else -> invokeByHttpClient(proxy, method, args, vertx)
             }
-            CoroutineScope(vertx.dispatcher() + handler).launch {
-                val proxied = getProxied(proxy, method)
-                val remoteService = proxied.first?.findAnnotation<RemoteService>()
-                try {
-                    val result = when (remoteService?.remoteType) {
-                        RemoteType.EVENT_BUS -> invokeByEventBus(proxy, method, args, vertx)
-                        else -> invokeByHttpClient(proxy, method, args, vertx)
-                    }
-                    result.onSuccess {
-                        promise.complete(it)
-                    }.onFailure {
-                        promise.complete(null)
-                    }
-                } catch (e: Exception) {
-                    log.warn("远程服务执行错误,${e.message}")
-                }
-            }
-            return promise.future()
         } catch (e: Exception) {
             throw MinihException("远程服务执行错误!")
         }

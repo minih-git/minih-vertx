@@ -4,31 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="调整服务结构，提取公共模块">
-      <change afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/web/annotation/RemoteService.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/InitRemoteService.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/proxy/ServiceProxyFactory.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/proxy/ServiceProxyHandler.kt" afterDir="false" />
+    <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="新增服务间调用">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthServiceHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthServiceHandler.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/utils/Utils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/utils/Utils.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/exception/MinihErrorCode.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/exception/MinihErrorCode.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/util/Utils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/util/Utils.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/core/config/MinihCoreConstants.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/core/config/MinihCoreConstants.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-core/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/minih-core/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/beans/BeanFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/beans/BeanFactory.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/boot/LifeProcess.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/boot/LifeProcess.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/boot/MinihBootServiceRun.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/boot/MinihBootServiceRun.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/backend/ConsulBackendService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/backend/ConsulBackendService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/Config.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/config/Config.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/DeregisterService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/DeregisterService.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/MsClient.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/MsClient.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/MsClientContext.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/MsClientContext.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/core/MinihWebVerticle.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/core/MinihWebVerticle.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/core/RegisterService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/core/RegisterService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/util/Utils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/util/Utils.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/proxy/ServiceProxyHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/proxy/ServiceProxyHandler.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/response/R.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/web/response/R.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -145,11 +125,11 @@
       <recent name="D:\minih-vertx\minih-annotation\src\main\kotlin\cn\minih\core\annotation" />
     </key>
     <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
+      <recent name="cn.minih.web.response" />
       <recent name="cn.minih.web.annotation" />
       <recent name="cn.minih.auth.annotation" />
       <recent name="cn.minih.ms.client.config" />
       <recent name="proxy" />
-      <recent name="cn.minih.web.service" />
     </key>
     <key name="CopyKotlinDeclarationDialog.RECENTS_KEY">
       <recent name="cn.minih.database.mysql.manager" />
@@ -302,7 +282,7 @@
       <workItem from="1691252205680" duration="1322000" />
       <workItem from="1691256753197" duration="7000" />
       <workItem from="1691256770440" duration="155000" />
-      <workItem from="1691289759295" duration="43078000" />
+      <workItem from="1691289759295" duration="46097000" />
     </task>
     <task id="LOCAL-00001" summary="提取组件">
       <option name="closed" value="true" />
@@ -360,7 +340,15 @@
       <option name="project" value="LOCAL" />
       <updated>1691250443604</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="新增服务间调用">
+      <option name="closed" value="true" />
+      <created>1691335511312</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1691335511312</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -383,7 +371,8 @@
     <MESSAGE value="优化代码 解决一些bug" />
     <MESSAGE value="优化唯一id算法" />
     <MESSAGE value="调整服务结构，提取公共模块" />
-    <option name="LAST_COMMIT_MESSAGE" value="调整服务结构，提取公共模块" />
+    <MESSAGE value="新增服务间调用" />
+    <option name="LAST_COMMIT_MESSAGE" value="新增服务间调用" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
