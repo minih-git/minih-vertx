@@ -121,20 +121,22 @@ object MinihBootServiceRun {
         }
     }
 
-    private fun preStartHandling(vertx: Vertx) {
+    private fun preStartHandling(vertx: Vertx): Future<Boolean> {
         val startingProcess = BeanFactory.instance.findBeanDefinitionByType(PreStartingProcess::class)
-        startingProcess.forEach { process ->
+        return Future.all(startingProcess.map { process ->
             val bean = BeanFactory.instance.getBean(process.beanName) as PreStartingProcess
             CoroutineScope(vertx.orCreateContext.dispatcher()).launch { bean.exec(vertx) }
-        }
+            Future.succeededFuture(true)
+        }).compose { Future.succeededFuture(true) }
     }
 
-    private fun postStartHandling(vertx: Vertx) {
+    private fun postStartHandling(vertx: Vertx): Future<Boolean> {
         val startingProcess = BeanFactory.instance.findBeanDefinitionByType(PostStartingProcess::class)
-        startingProcess.forEach { process ->
+        return Future.all(startingProcess.map { process ->
             val bean = BeanFactory.instance.getBean(process.beanName) as PostStartingProcess
             CoroutineScope(vertx.orCreateContext.dispatcher()).launch { bean.exec(vertx) }
-        }
+            Future.succeededFuture(true)
+        }).compose { Future.succeededFuture(true) }
     }
 
     private fun postDeployHandling(vertx: Vertx, deployId: String) {
@@ -161,10 +163,9 @@ object MinihBootServiceRun {
         }).compose { vertx.close();Future.succeededFuture() }
     }
 
-
-    suspend fun run(clazz: KClass<*>, vararg args: String) {
-        val vertx = when {
-            args.isEmpty() -> Vertx.vertx()
+    private suspend fun getVertx(vararg args: String): Vertx {
+        return when {
+            args.isEmpty() -> Vertx.clusteredVertx(VertxOptions()).await()
             args[0] == "-standalone" -> Vertx.vertx()
             else -> {
                 val mgr = HazelcastClusterManager()
@@ -172,40 +173,48 @@ object MinihBootServiceRun {
                 Vertx.clusteredVertx(options).await()
             }
         }
+    }
+
+
+    suspend fun run(clazz: KClass<*>, vararg args: String) {
+        val vertx = getVertx(*args)
         try {
             log.info("服务开始启动...")
             val currentTime = System.currentTimeMillis()
             initBean(clazz)
-            replenishInitBean(vertx)
+            replenishInitBean(vertx).await()
             deployEventBusConsumers(vertx)
-            preStartHandling(vertx)
+            preStartHandling(vertx).await()
             deployVerticle(vertx).await()
-            postStartHandling(vertx)
-            Runtime.getRuntime().addShutdownHook(Thread() {
-                val a = registerCloseHandling(vertx)
-                @Suppress("ControlFlowWithEmptyBody")
-                while (!a.isComplete) {
-                }
-            })
-            val shareData = vertx.sharedData().getAsyncMap<String, Int>("share")
-            val port = shareData.await().get("port").await()
-            var msg = "服务启动成功,当前环境：${getEnv()},"
-            port?.let {
-                msg = msg.plus("端口:${it},")
-            }
-            var bd = BigDecimal((System.currentTimeMillis() - currentTime) / 1000.00)
-            bd = bd.setScale(2, RoundingMode.HALF_UP)
-            log.info(msg.plus("耗时: {}s"), bd.toString())
+            postStartHandling(vertx).await()
+            shutdownHook(vertx)
+            log(vertx, currentTime)
         } catch (e: Exception) {
-            successDeploy.forEach {
-                vertx.undeploy(it)
-            }
+            successDeploy.forEach { vertx.undeploy(it) }
             registerCloseHandling(vertx)
             log.warn("部署服务出现错误,{}", e.message, e)
         }
 
     }
 
+    private suspend fun log(vertx: Vertx, startTime: Long) {
+        val shareData = vertx.sharedData().getAsyncMap<String, Int>("share")
+        val port = shareData.await().get("port").await()
+        var msg = "服务启动成功,当前环境：${getEnv()},"
+        port?.let { msg = msg.plus("端口:${it},") }
+        var bd = BigDecimal((System.currentTimeMillis() - startTime) / 1000.00)
+        bd = bd.setScale(2, RoundingMode.HALF_UP)
+        log.info(msg.plus("耗时: {}s"), bd.toString())
+    }
+
+    private fun shutdownHook(vertx: Vertx) {
+        Runtime.getRuntime().addShutdownHook(Thread() {
+            val a = registerCloseHandling(vertx)
+            @Suppress("ControlFlowWithEmptyBody")
+            while (!a.isComplete) {
+            }
+        })
+    }
 
     fun setSystemConfigs(fn: () -> List<ConfigStoreOptions>): MinihBootServiceRun {
         systemConfigs.addAll(fn())

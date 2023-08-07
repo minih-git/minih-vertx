@@ -30,6 +30,7 @@ abstract class MinihAuthVerticle(port: Int = 8080) : MinihWebVerticle(port) {
     }
 
     override fun registerRouterHandler(route: Route, fn: KFunction<Any?>) {
+
         route.coroutineJsonHandlerHasAuth(fn)
     }
 

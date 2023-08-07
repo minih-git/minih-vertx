@@ -30,7 +30,6 @@ class InitRemoteService : ReplenishInitBeanProcess {
     }
 
     override suspend fun exec(vertx: Vertx, clazz: List<KClass<*>>) {
-
         val remoteService = clazz.filter { hasRemoteAnnotation(it) }
         remoteService.forEach {
             if (it.simpleName != null) {

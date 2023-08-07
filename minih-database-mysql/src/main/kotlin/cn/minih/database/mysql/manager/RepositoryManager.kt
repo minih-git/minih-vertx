@@ -75,8 +75,9 @@ object RepositoryManager {
                         printLog(sql, tuple, null)
                         Future.succeededFuture<T>(null)
                     } else {
-                        printLog(sql, tuple, rowSet.first())
-                        Future.succeededFuture(covert(rowSet.first()))
+                        val data = covert<T>(rowSet.first())
+                        printLog(sql, tuple, data)
+                        Future.succeededFuture(data)
                     }
                 }
                 .onFailure {
