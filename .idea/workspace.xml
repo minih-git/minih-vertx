@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="修复一些bug">
+    <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="优化雪花算法">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/util/SnowFlake.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/util/SnowFlake.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryManager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -140,7 +142,7 @@
       <recent name="cn.minih.core.eventbus" />
     </key>
   </component>
-  <component name="RunManager" selected="Kotlin.SnowFlakeKt">
+  <component name="RunManager" selected="Gradle.minih-vertx [publish]">
     <configuration name="minih-vertx [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -163,10 +165,32 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="minih-vertx:minih-auth [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="minih-vertx:minih-common [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-auth" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-common" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="publish" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="minih-vertx:minih-core [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-core" />
         <option name="externalSystemIdString" value="GRADLE" />
         <option name="scriptParameters" />
         <option name="taskDescriptions">
@@ -229,20 +253,13 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="SnowFlakeKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="cn.minih.common.util.SnowFlakeKt" />
-      <module name="minih-vertx.minih-common.main" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Kotlin.SnowFlakeKt" />
-        <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publish]" />
         <item itemvalue="Gradle.minih-vertx [publish]" />
-        <item itemvalue="Gradle.minih-vertx:minih-auth [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-web [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-core [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-common [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publish]" />
       </list>
     </recent_temporary>
   </component>
@@ -269,7 +286,7 @@
       <workItem from="1691256753197" duration="7000" />
       <workItem from="1691256770440" duration="155000" />
       <workItem from="1691289759295" duration="46097000" />
-      <workItem from="1691401490095" duration="2700000" />
+      <workItem from="1691401490095" duration="8053000" />
     </task>
     <task id="LOCAL-00001" summary="提取组件">
       <option name="closed" value="true" />
@@ -343,7 +360,15 @@
       <option name="project" value="LOCAL" />
       <updated>1691400639160</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="优化雪花算法">
+      <option name="closed" value="true" />
+      <created>1691457238199</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1691457238199</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -368,7 +393,8 @@
     <MESSAGE value="调整服务结构，提取公共模块" />
     <MESSAGE value="新增服务间调用" />
     <MESSAGE value="修复一些bug" />
-    <option name="LAST_COMMIT_MESSAGE" value="修复一些bug" />
+    <MESSAGE value="优化雪花算法" />
+    <option name="LAST_COMMIT_MESSAGE" value="优化雪花算法" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />

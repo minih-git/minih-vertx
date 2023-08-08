@@ -94,7 +94,8 @@ object RepositoryManager {
             throw MinihArgumentErrorException("请设置主键标志！")
         }
         primaryKey?.name?.let {
-            val wrapper = QueryWrapper<T>().eq(it, id)
+            val wrapper = QueryWrapper<T>()
+            wrapper.eq(it, id)
             return findOne<T>(wrapper)
         }
         return Future.succeededFuture(null)
@@ -373,7 +374,7 @@ object RepositoryManager {
             val fields = entity::class.memberProperties
             fields.forEach { filed ->
                 if (filed.name == primaryKey.name) {
-                    if (filed.getter.call(entity) == null && tableId.value != TableIdType.AUTO_INCREMENT) {
+                    if ((filed.getter.call(entity) == null || filed.getter.call(entity) == 0) && tableId.value != TableIdType.AUTO_INCREMENT) {
                         if (filed is KMutableProperty1<*, *>) {
                             filed.setter.call(
                                 entity, when (tableId.value) {

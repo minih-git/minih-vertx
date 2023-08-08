@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     group = "cn.minih"
-    version = "1.0.1"
+    version = "1.0.2"
     repositories {
         mavenLocal()
         maven { url = uri("https://maven.aliyun.com/repository/google") }
