@@ -140,7 +140,7 @@ object RepositoryManager {
             conn.preparedQuery(sql).execute(tuple)
                 .onComplete { rowSet ->
                     val resultRaw = rowSet.result()
-                    if (resultRaw.size() == 0) {
+                    if (resultRaw == null || resultRaw.size() == 0) {
                         printLog(sql, tuple, listOf<T>())
                         future.complete(listOf())
                     } else {
@@ -374,7 +374,8 @@ object RepositoryManager {
             val fields = entity::class.memberProperties
             fields.forEach { filed ->
                 if (filed.name == primaryKey.name) {
-                    if ((filed.getter.call(entity) == null || filed.getter.call(entity) == 0) && tableId.value != TableIdType.AUTO_INCREMENT) {
+                    val id = filed.getter.call(entity)
+                    if ((id == null || id == 0L || id == 0) && tableId.value != TableIdType.AUTO_INCREMENT) {
                         if (filed is KMutableProperty1<*, *>) {
                             filed.setter.call(
                                 entity, when (tableId.value) {
