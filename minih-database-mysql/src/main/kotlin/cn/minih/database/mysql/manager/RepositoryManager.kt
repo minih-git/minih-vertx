@@ -9,10 +9,7 @@ import cn.minih.database.mysql.annotation.TableId
 import cn.minih.database.mysql.annotation.TableName
 import cn.minih.database.mysql.config.DbConfig
 import cn.minih.database.mysql.enum.TableIdType
-import cn.minih.database.mysql.operation.QueryConditionType
-import cn.minih.database.mysql.operation.QueryWrapper
-import cn.minih.database.mysql.operation.UpdateWrapper
-import cn.minih.database.mysql.operation.Wrapper
+import cn.minih.database.mysql.operation.*
 import cn.minih.database.mysql.page.Page
 import com.google.common.base.CaseFormat
 import io.vertx.core.Future
@@ -113,12 +110,28 @@ object RepositoryManager {
 
     inline fun <reified T : Any> page(page: Page<T>, wrapper: Wrapper<T>): Future<Page<T>> {
         val tuple = Tuple.tuple()
+        wrapper.condition.add(
+            QueryCondition(
+                CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, page.cursorName),
+                listOf(page.nextCursor),
+                QueryConditionType.GT
+            )
+        )
         wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
         val sql = generateQuerySql(wrapper).plus("limit ${page.pageSize}")
         val future: Promise<Page<T>> = Promise.promise()
-        list<T>(sql, tuple).onComplete { page.data = it.result();future.complete(page) }
+        list<T>(sql, tuple).onComplete {
+            val data = it.result()
+            if (data.isEmpty() || data.size < page.pageSize) {
+                page.nextCursor = 0
+            } else {
+                page.nextCursor = getNextCursorByFieldName(page.cursorName, data.last())
+            }
+            page.data = it.result();future.complete(page)
+        }
         return future.future()
     }
+
 
     inline fun <reified T : Any> list(sql: String, tuple: Tuple): Future<List<T>> {
         val future: Promise<List<T>> = Promise.promise()
@@ -418,5 +431,14 @@ object RepositoryManager {
         log.warn("====>结果:${result}")
     }
 
+    fun getNextCursorByFieldName(name: String, data: Any): Long {
+        val clazz = data::class
+        val field = clazz.memberProperties.first { it.name == name }
+        return when (val value = field.getter.call(data)) {
+            null -> 0
+            is Long -> value
+            else -> value.hashCode().toLong()
+        }
+    }
 
 }

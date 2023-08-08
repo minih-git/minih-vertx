@@ -9,7 +9,8 @@ package cn.minih.database.mysql.page
 
 @Suppress("unused")
 data class Page<T>(
-    val nextCursor: Long,
-    var data: List<T>?,
-    val pageSize:Int = 10,
+    var nextCursor: Long = 0,
+    var data: List<T> = mutableListOf(),
+    var pageSize: Int = 10,
+    var cursorName: String = "createTime"
 )
