@@ -6,7 +6,6 @@ import cn.minih.common.util.log
 import cn.minih.common.util.toJsonObject
 import cn.minih.core.util.SnowFlakeContext
 import cn.minih.database.mysql.annotation.TableId
-import cn.minih.database.mysql.annotation.TableName
 import cn.minih.database.mysql.config.DbConfig
 import cn.minih.database.mysql.enum.TableIdType
 import cn.minih.database.mysql.operation.*
@@ -63,7 +62,7 @@ object RepositoryManager {
     inline fun <reified T : Any> findOne(wrapper: Wrapper<T>): Future<T?> {
         val tuple = Tuple.tuple()
         wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
-        val sql = generateQuerySql(wrapper)
+        val sql = SqlBuilder.generateQuerySql(wrapper).plus("limit 1")
         return getPool().connection.compose { conn ->
             conn.preparedQuery(sql).execute(tuple)
                 .compose { rowSet ->
@@ -105,7 +104,7 @@ object RepositoryManager {
     inline fun <reified T : Any> list(wrapper: Wrapper<T>): Future<List<T>> {
         val tuple = Tuple.tuple()
         wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
-        val sql = generateQuerySql(wrapper)
+        val sql = SqlBuilder.generateQuerySql(wrapper)
         return list(sql, tuple)
     }
 
@@ -119,7 +118,7 @@ object RepositoryManager {
             )
         )
         wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
-        val sql = generateQuerySql(wrapper).plus("limit ${page.pageSize}")
+        val sql = SqlBuilder.generateQuerySql(wrapper).plus("limit ${page.pageSize}")
         val future: Promise<Page<T>> = Promise.promise()
         list<T>(sql, tuple).onComplete {
             val data = it.result()
@@ -170,7 +169,7 @@ object RepositoryManager {
                 tuple.addValue(value)
             }
         }
-        val sql = generateInsertSql<T>(entity)
+        val sql = SqlBuilder.generateInsertSql<T>(entity)
         getPool().connection.compose { conn ->
             conn.preparedQuery(sql).execute(tuple)
                 .onComplete {
@@ -202,7 +201,7 @@ object RepositoryManager {
             }
             tuple
         }
-        val sql = generateInsertSql<T>(entities.first())
+        val sql = SqlBuilder.generateInsertSql<T>(entities.first())
 
         getPool().connection.compose { conn ->
             conn.preparedQuery(sql).executeBatch(batchTuple)
@@ -228,10 +227,10 @@ object RepositoryManager {
             }
             tuple.addValue(value)
         }
-        val sql = generateUpdateSql<T>(wrapper)
+        val sql = SqlBuilder.generateUpdateSql<T>(wrapper)
         wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
         getPool().connection.compose { conn ->
-            conn.preparedQuery(generateUpdateSql<T>(wrapper))
+            conn.preparedQuery(sql)
                 .execute(tuple)
                 .onComplete {
                     printLog(sql, tuple, true)
@@ -272,71 +271,6 @@ object RepositoryManager {
             updateWrapper.eq(primaryKey.name!!, primaryValue!!)
         }
         return update(updateWrapper)
-    }
-
-
-    inline fun <reified T : Any> generateQuerySql(wrapper: Wrapper<T>): String {
-        var tableName = T::class.findAnnotation<TableName>()?.value
-        if (tableName.isNullOrBlank()) {
-            tableName = T::class.simpleName?.let { CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it) }
-        }
-        return """
-                select * from $tableName  ${generateConditionSql(wrapper)}
-            """.trimIndent()
-    }
-
-    inline fun <reified T : Any> generateUpdateSql(wrapper: Wrapper<T>): String {
-        var tableName = T::class.findAnnotation<TableName>()?.value
-        if (tableName.isNullOrBlank()) {
-            tableName = T::class.simpleName?.let { CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it) }
-        }
-        val sql = """
-                update $tableName  set 
-            """.trimIndent().plus(wrapper.updateItems.joinToString(", ") {
-            "${CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.key)} = ? "
-        })
-        return sql.plus("  ${generateConditionSql(wrapper)}")
-    }
-
-    inline fun <reified T : Any> generateConditionSql(wrapper: Wrapper<T>): String {
-        var sql = ""
-        wrapper.condition.forEach {
-            sql = sql.plus(" and  ${CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.key)} ").plus(
-                when (it.type) {
-                    QueryConditionType.EQ -> " = ?"
-                    QueryConditionType.IN -> {
-                        val perch = when {
-                            it.value.isEmpty() -> "?"
-                            else -> it.value.joinToString(",") { _ -> "?" }
-                        }
-                        " in (${perch})"
-                    }
-
-                    QueryConditionType.BETWEEN -> " between ? an ?"
-                    QueryConditionType.GT -> " > ? "
-                    QueryConditionType.LT -> " < ? "
-                    QueryConditionType.GTE -> " >= ? "
-                    QueryConditionType.LTE -> " =< ? "
-                }
-            )
-        }
-        return sql.replaceFirst("and", "where")
-    }
-
-    inline fun <reified T : Any> generateInsertSql(entity: T): String {
-        var tableName = entity::class.findAnnotation<TableName>()?.value
-        if (tableName.isNullOrBlank()) {
-            tableName = T::class.simpleName?.let { CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it) }
-        }
-        val fields = T::class.memberProperties
-        val sql = """
-                insert into $tableName (
-            """.trimIndent()
-            .plus(fields.joinToString(", ") { CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.name) })
-            .plus(") values (")
-            .plus(fields.filter { it is KMutableProperty1<*, *> }.joinToString(", ") { "?" })
-        return sql.plus(")")
-
     }
 
 

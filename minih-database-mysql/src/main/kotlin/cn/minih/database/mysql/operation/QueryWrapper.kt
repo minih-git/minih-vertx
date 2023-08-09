@@ -1,5 +1,7 @@
 package cn.minih.database.mysql.operation
 
+import kotlin.reflect.KProperty1
+
 /**
  *  查询条件
  * @author hubin
@@ -7,5 +9,20 @@ package cn.minih.database.mysql.operation
  */
 open class QueryWrapper<T : Any> : AbstractWrapper<T, QueryWrapper<T>, QueryWrapper<T>>() {
 
+    fun orderBy(vararg key: KProperty1<T, Any>, orderType: OrderByType = OrderByType.ASC): QueryWrapper<T> {
+        return maybeDo {
+            key.forEach {
+                orderByItems.add(OrderByItem(it.name, orderType))
+            }
+        }
+    }
+
+    fun orderByDesc(vararg key: KProperty1<T, Any>): QueryWrapper<T> {
+        return maybeDo {
+            key.forEach {
+                orderByItems.add(OrderByItem(it.name, OrderByType.DESC))
+            }
+        }
+    }
 
 }
