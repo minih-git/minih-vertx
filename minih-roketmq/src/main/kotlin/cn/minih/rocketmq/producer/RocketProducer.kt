@@ -1,5 +1,8 @@
+@file:Suppress("unused")
+
 package cn.minih.rocketmq.producer
 
+import cn.minih.rocketmq.client.RocketClient
 import cn.minih.rocketmq.producer.impl.RocketProducerImpl
 import io.vertx.core.Vertx
 import io.vertx.core.streams.WriteStream
@@ -9,12 +12,11 @@ import io.vertx.core.streams.WriteStream
  * @author hubin
  * @since 2023-08-09 17:42:09
  */
-interface RocketProducer<K, V> : WriteStream<RocketProducerRecord<K, V>> {
-
+interface RocketProducer<T : Any> : WriteStream<IRocketProducerRecord<T>> {
     companion object {
-        fun <K, V> create(vertx: Vertx): RocketProducer<K, V> {
-            val stream = RocketWriteStream.create<K, V>(vertx)
-            return RocketProducerImpl(vertx, stream)
+        fun <T : Any> create(vertx: Vertx): RocketProducer<T> {
+            val stream = RocketWriteStream.create<T>(vertx, RocketClient.producer)
+            return RocketProducerImpl(stream)
         }
     }
 
