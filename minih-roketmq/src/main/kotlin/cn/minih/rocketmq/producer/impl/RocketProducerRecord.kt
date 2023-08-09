@@ -3,7 +3,7 @@ package cn.minih.rocketmq.producer.impl
 import cn.minih.common.exception.MinihException
 import cn.minih.common.util.Assert
 import cn.minih.common.util.toJsonString
-import cn.minih.rocketmq.producer.IRocketProducerRecord
+import cn.minih.rocketmq.producer.RocketProducerRecord
 import java.nio.ByteBuffer
 import java.util.*
 import java.util.regex.Pattern
@@ -16,7 +16,7 @@ import java.util.regex.Pattern
  */
 val TOPIC_PATTERN: Pattern = Pattern.compile("^[%a-zA-Z0-9_-]+$")
 
-class RocketProducerRecord<T : Any>(
+class RocketProducerRecordImpl<T : Any>(
     private val topic: String,
     private val data: T,
     private val tag: Optional<String> = Optional.empty(),
@@ -24,7 +24,7 @@ class RocketProducerRecord<T : Any>(
     private val messageGroup: Optional<String> = Optional.empty(),
     private val deliveryTimestamp: Optional<Long> = Optional.empty(),
     private val properties: MutableMap<String, String> = mutableMapOf()
-) : IRocketProducerRecord<T> {
+) : RocketProducerRecord<T> {
 
     init {
         Assert.isTrue(TOPIC_PATTERN.matcher(topic).matches()) {

@@ -12,7 +12,7 @@ import io.vertx.core.streams.WriteStream
  * @author hubin
  * @since 2023-08-09 17:42:09
  */
-interface RocketProducer<T : Any> : WriteStream<IRocketProducerRecord<T>> {
+interface RocketProducer<T : Any> : WriteStream<RocketProducerRecord<T>> {
     companion object {
         fun <T : Any> create(vertx: Vertx): RocketProducer<T> {
             val stream = RocketWriteStream.create<T>(vertx, RocketClient.producer)

@@ -14,7 +14,7 @@ import org.apache.rocketmq.client.apis.producer.SendReceipt
  * @author hubin
  * @since 2023-08-09 17:53:45
  */
-interface RocketWriteStream<T : Any> : WriteStream<IRocketProducerRecord<T>> {
+interface RocketWriteStream<T : Any> : WriteStream<RocketProducerRecord<T>> {
 
     companion object {
         fun <T : Any> create(vertx: Vertx, producer: Producer): RocketWriteStream<T> {
@@ -22,8 +22,8 @@ interface RocketWriteStream<T : Any> : WriteStream<IRocketProducerRecord<T>> {
         }
     }
 
-    fun send(message: IRocketProducerRecord<T>): Future<SendReceipt>
-    fun send(message: IRocketProducerRecord<T>, handler: Handler<AsyncResult<Void>>)
+    fun send(message: RocketProducerRecord<T>): Future<SendReceipt>
+    fun send(message: RocketProducerRecord<T>, handler: Handler<AsyncResult<Void>>)
 
 
 }
