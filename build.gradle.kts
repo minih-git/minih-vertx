@@ -4,6 +4,7 @@ plugins {
     id("maven-publish")
 }
 
+
 allprojects {
     group = "cn.minih"
     version = "1.0.2"

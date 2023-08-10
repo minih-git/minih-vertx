@@ -19,8 +19,8 @@ object RocketClient {
     val producer: Producer by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         val config = getConfig("rocketmq", RocketConfig::class)
         Assert.notBlank(config.endpoints) { MinihException("请设置rocketmq的地址") }
-        val configBuilder = ClientConfigurationBuilder().setEndpoints(config.endpoints)
-        ProducerBuilderImpl().setClientConfiguration(configBuilder.build())
+        val configBuild = ClientConfigurationBuilder().setEndpoints(config.endpoints).build()
+        ProducerBuilderImpl().setClientConfiguration(configBuild)
             .setTopics(*config.topics.toTypedArray()).build()
     }
 

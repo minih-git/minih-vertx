@@ -4,16 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="优化数据库接口">
-      <change afterPath="$PROJECT_DIR$/minih-roketmq/build.gradle.kts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/config/RocketConfig.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/RocketProducer.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/RocketProducerRecord.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/RocketWriteStream.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketProducerImpl.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketWriteStreamImpl.kt" afterDir="false" />
+    <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="新增rocketmq客户端">
+      <change afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketConsumer.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketConsumerRecord.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketReadStream.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketConsumerImpl.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketConsumerRecordImpl.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketReadStreamImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/client/RocketClient.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/client/RocketClient.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketProducerRecord.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketProducerRecordImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/test/kotlin/cn/minih/rocketmq/ProducerTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-roketmq/src/test/kotlin/cn/minih/rocketmq/ProducerTest.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,6 +71,7 @@
         <option value="Kotlin Object" />
         <option value="Kotlin Annotation" />
         <option value="Kotlin Interface" />
+        <option value="Class" />
         <option value="Kotlin Class" />
       </list>
     </option>
@@ -152,55 +156,11 @@
       <recent name="cn.minih.core.eventbus" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.minih-vertx:minih-database-mysql [publish]">
+  <component name="RunManager" selected="Kotlin.MainKt">
     <configuration name="minih-vertx [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="publish" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="minih-vertx:minih-common [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-common" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="publish" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="minih-vertx:minih-core [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-core" />
         <option name="externalSystemIdString" value="GRADLE" />
         <option name="scriptParameters" />
         <option name="taskDescriptions">
@@ -263,13 +223,27 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
+    <configuration name="MainKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="MainKt" />
+      <module name="minih-vertx.test" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ProducerTestKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="cn.minih.rocketmq.ProducerTestKt" />
+      <module name="minih-vertx.minih-roketmq.test" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Kotlin.MainKt" />
+        <item itemvalue="Kotlin.ProducerTestKt" />
         <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publish]" />
         <item itemvalue="Gradle.minih-vertx [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-web [publish]" />
-        <item itemvalue="Gradle.minih-vertx:minih-core [publish]" />
-        <item itemvalue="Gradle.minih-vertx:minih-common [publish]" />
       </list>
     </recent_temporary>
   </component>
@@ -299,7 +273,8 @@
       <workItem from="1691401490095" duration="8199000" />
       <workItem from="1691484019610" duration="3057000" />
       <workItem from="1691543650964" duration="6675000" />
-      <workItem from="1691573280128" duration="5764000" />
+      <workItem from="1691573280128" duration="20497000" />
+      <workItem from="1691654741324" duration="5116000" />
     </task>
     <task id="LOCAL-00001" summary="提取组件">
       <option name="closed" value="true" />
@@ -405,7 +380,15 @@
       <option name="project" value="LOCAL" />
       <updated>1691565625965</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="新增rocketmq客户端">
+      <option name="closed" value="true" />
+      <created>1691579536257</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1691579536257</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -433,12 +416,32 @@
     <MESSAGE value="优化雪花算法" />
     <MESSAGE value="升级版本" />
     <MESSAGE value="优化数据库接口" />
-    <option name="LAST_COMMIT_MESSAGE" value="优化数据库接口" />
+    <MESSAGE value="新增rocketmq客户端" />
+    <option name="LAST_COMMIT_MESSAGE" value="新增rocketmq客户端" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketConsumerImpl.kt</url>
+          <line>33</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$USER_HOME$/gradle-8.0.2/caches/modules-2/files-2.1/org.apache.rocketmq/rocketmq-client-java/5.0.5/86762955ac78739192ad5a878d557bf6129090ab/rocketmq-client-java-5.0.5-sources.jar!/org/apache/rocketmq/client/java/impl/ClientImpl.java</url>
+          <line>180</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$USER_HOME$/gradle-8.0.2/caches/modules-2/files-2.1/org.apache.rocketmq/rocketmq-client-java/5.0.5/86762955ac78739192ad5a878d557bf6129090ab/rocketmq-client-java-5.0.5-sources.jar!/org/apache/rocketmq/client/java/impl/ClientImpl.java</url>
+          <line>189</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
     <pin-to-top-manager>
       <pinned-members>
         <PinnedItemInfo parentTag="java.util.LinkedHashMap$Entry" memberName="value" />
