@@ -13,7 +13,7 @@
             <option value="$PROJECT_DIR$/minih-core" />
             <option value="$PROJECT_DIR$/minih-database-mysql" />
             <option value="$PROJECT_DIR$/minih-microservice-client" />
-            <option value="$PROJECT_DIR$/minih-roketmq" />
+            <option value="$PROJECT_DIR$/minih-rocketmq" />
             <option value="$PROJECT_DIR$/minih-web" />
           </set>
         </option>

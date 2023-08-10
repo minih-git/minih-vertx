@@ -40,7 +40,7 @@ dependencyResolutionManagement {
             library("minih-auth", "cn.minih", "minih-auth").versionRef("minih-vertx")
             library("minih-mysql", "cn.minih", "minih-database-mysql").versionRef("minih-vertx")
 
-            library("rocketmq", "org.apache.rocketmq:rocketmq-client-java:5.0.5")
+            library("rocketmq", "org.apache.rocketmq:rocketmq-client-java-noshade:5.0.5")
 
 
         }
@@ -54,4 +54,4 @@ include("minih-web")
 include("minih-auth")
 include("minih-microservice-client")
 include("minih-common")
-include("minih-roketmq")
+include("minih-rocketmq")

@@ -2,6 +2,8 @@ package cn.minih.rocketmq.consumer.impl
 
 import cn.minih.common.exception.MinihException
 import cn.minih.common.util.Assert
+import cn.minih.common.util.getConfig
+import cn.minih.rocketmq.config.RocketConfig
 import cn.minih.rocketmq.consumer.RocketConsumer
 import cn.minih.rocketmq.consumer.RocketConsumerRecord
 import cn.minih.rocketmq.consumer.RocketReadStream
@@ -25,16 +27,15 @@ class RocketConsumerImpl<T : Any>(private val vertx: Vertx, private val msgClazz
     override fun subscribe(topic: String, consumerGroup: String, tag: String): RocketConsumer<T> {
         try {
             Assert.notBlank(consumerGroup) { MinihException("consumerGroup 不能为空！") }
-//            val config = getConfig("rocketmq", RocketConfig::class)
-//            Assert.notBlank(config.endpoints) { MinihException("请设置rocketmq的地址") }
-            val configBuild = ClientConfigurationBuilder().setEndpoints("foobar.com:8080").build()
+            val config = getConfig("rocketmq", RocketConfig::class)
+            Assert.notBlank(config.endpoints) { MinihException("请设置rocketmq的地址") }
+            val configBuild = ClientConfigurationBuilder().setEndpoints(config.endpoints).build()
             val filterExpression = FilterExpression(tag, FilterExpressionType.TAG)
             val consumer = SimpleConsumerBuilderImpl().setClientConfiguration(configBuild)
                 .setConsumerGroup(consumerGroup)
                 .setAwaitDuration(Duration.ofSeconds(15))
                 .setSubscriptionExpressions(mapOf(topic to filterExpression)).build()
             this.stream = RocketReadStream.create(vertx, consumer, msgClazz)
-            println("1")
             return this
         } catch (e: Exception) {
             throw e

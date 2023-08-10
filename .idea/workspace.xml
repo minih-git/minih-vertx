@@ -5,18 +5,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="新增rocketmq客户端">
-      <change afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketConsumer.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketConsumerRecord.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketReadStream.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketConsumerImpl.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketConsumerRecordImpl.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketReadStreamImpl.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/client/RocketClient.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/client/RocketClient.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketProducerRecord.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketProducerRecordImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/test/kotlin/cn/minih/rocketmq/ProducerTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-roketmq/src/test/kotlin/cn/minih/rocketmq/ProducerTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/client/RocketClient.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/client/RocketClient.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/config/RocketConfig.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/config/RocketConfig.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketConsumer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketConsumer.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketConsumerRecord.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketConsumerRecord.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketReadStream.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketReadStream.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketConsumerImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketConsumerImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketConsumerRecordImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketConsumerRecordImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketReadStreamImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketReadStreamImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/RocketProducer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/producer/RocketProducer.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/RocketProducerRecord.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/producer/RocketProducerRecord.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/RocketWriteStream.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/producer/RocketWriteStream.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketProducerImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketProducerImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketProducerRecordImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketProducerRecordImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketWriteStreamImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketWriteStreamImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/test/kotlin/cn/minih/rocketmq/ProducerTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/test/kotlin/cn/minih/rocketmq/ProducerTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,6 +94,13 @@
   <component name="GitToolBoxStore">
     <option name="projectConfigVersion" value="5" />
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.vertx/vertx-core/4.4.4/7a5c176de3a60991778fb6646850a3c5d809d1aa/vertx-core-4.4.4-sources.jar!/io/vertx/core/streams/WriteStream.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.rocketmq/rocketmq-client-java/5.0.5/86762955ac78739192ad5a878d557bf6129090ab/rocketmq-client-java-5.0.5-sources.jar!/org/apache/rocketmq/client/apis/producer/Producer.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.rocketmq/rocketmq-client-java/5.0.5/86762955ac78739192ad5a878d557bf6129090ab/rocketmq-client-java-5.0.5-sources.jar!/org/apache/rocketmq/client/java/impl/producer/ProducerImpl.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.rocketmq/rocketmq-client-java/5.0.5/86762955ac78739192ad5a878d557bf6129090ab/rocketmq-client-java-5.0.5-sources.jar!/org/apache/rocketmq/shaded/com/google/common/util/concurrent/AbstractFuture.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.6.4/f6a09bbc88df97983306c692aa43889ac78b98ef/kotlinx-coroutines-core-jvm-1.6.4-sources.jar!/jvmMain/debug/AgentPremain.kt" root0="SKIP_INSPECTION" />
+  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -108,7 +122,7 @@
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;jdk.selected.JAVA_MODULE&quot;: &quot;17&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/minih-vertx/minih-common/src/main/kotlin/cn/minih/database/mysql/enum&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/IdeaProjects/rocketmq-clients&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -156,7 +170,7 @@
       <recent name="cn.minih.core.eventbus" />
     </key>
   </component>
-  <component name="RunManager" selected="Kotlin.MainKt">
+  <component name="RunManager" selected="Kotlin.ProducerTestKt (1)">
     <configuration name="minih-vertx [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -201,31 +215,16 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="minih-vertx:minih-web [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-web" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="publish" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
     <configuration name="MainKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="MainKt" />
       <module name="minih-vertx.test" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ProducerTestKt (1)" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="cn.minih.rocketmq.ProducerTestKt" />
+      <module name="minih-vertx.minih-rocketmq.test" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -239,11 +238,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Kotlin.MainKt" />
+        <item itemvalue="Kotlin.ProducerTestKt (1)" />
         <item itemvalue="Kotlin.ProducerTestKt" />
+        <item itemvalue="Kotlin.MainKt" />
         <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publish]" />
         <item itemvalue="Gradle.minih-vertx [publish]" />
-        <item itemvalue="Gradle.minih-vertx:minih-web [publish]" />
       </list>
     </recent_temporary>
   </component>
@@ -275,6 +274,7 @@
       <workItem from="1691543650964" duration="6675000" />
       <workItem from="1691573280128" duration="20497000" />
       <workItem from="1691654741324" duration="5116000" />
+      <workItem from="1691675162886" duration="5985000" />
     </task>
     <task id="LOCAL-00001" summary="提取组件">
       <option name="closed" value="true" />
@@ -425,11 +425,6 @@
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketConsumerImpl.kt</url>
-          <line>33</line>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>jar://$USER_HOME$/gradle-8.0.2/caches/modules-2/files-2.1/org.apache.rocketmq/rocketmq-client-java/5.0.5/86762955ac78739192ad5a878d557bf6129090ab/rocketmq-client-java-5.0.5-sources.jar!/org/apache/rocketmq/client/java/impl/ClientImpl.java</url>
           <line>180</line>
@@ -446,6 +441,8 @@
       <pinned-members>
         <PinnedItemInfo parentTag="java.util.LinkedHashMap$Entry" memberName="value" />
         <PinnedItemInfo parentTag="kotlin.reflect.jvm.internal.KClassImpl" memberName="supertypes" />
+        <PinnedItemInfo parentTag="java.util.concurrent.CancellationException" memberName="cause" />
+        <PinnedItemInfo parentTag="java.util.concurrent.CancellationException" memberName="stackTrace" />
         <PinnedItemInfo parentTag="kotlin.reflect.jvm.internal.KClassImpl" memberName="objectInstance" />
       </pinned-members>
     </pin-to-top-manager>

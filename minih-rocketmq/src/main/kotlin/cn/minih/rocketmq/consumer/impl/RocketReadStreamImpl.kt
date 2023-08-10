@@ -12,10 +12,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.apache.rocketmq.client.apis.consumer.SimpleConsumer
 import org.apache.rocketmq.client.apis.message.MessageView
+import java.nio.charset.Charset
 import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.reflect.KClass
+
 
 /**
  *  mq消费流实现
@@ -67,23 +69,17 @@ class RocketReadStreamImpl<T : Any>(
                     }
                 }
                 val data = current.next()
-                context.emit {
-                    handler.handle(
-                        RocketConsumerRecord.create(
-                            String(data.body.array()).jsonConvertData(
-                                msgClazz
-                            )
-                        )
-                    )
-                }
+
+                val charset = Charset.forName("UTF-8")
+                val s = charset.decode(data.body).toString()
+                consumer.ack(data)
+                context.emit { handler.handle(RocketConsumerRecord.create(s.jsonConvertData(msgClazz))) }
             }
             schedule(0)
         }
     }
 
     private fun schedule(delay: Long) {
-        println("3")
-        println("delay:$delay")
         this.handler?.let { handler ->
             if (consuming.get() && demand.get() > 0L) {
                 context.runOnContext {
@@ -157,8 +153,8 @@ class RocketReadStreamImpl<T : Any>(
     }
 
     override fun handler(handler: Handler<RocketConsumerRecord<T>>): ReadStream<RocketConsumerRecord<T>> {
-        println("2")
         this.handler = handler
+        consuming.set(true)
         schedule(0)
         return this
     }
