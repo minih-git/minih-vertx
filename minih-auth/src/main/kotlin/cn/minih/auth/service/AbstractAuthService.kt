@@ -1,8 +1,10 @@
 package cn.minih.auth.service
 
-import cn.minih.auth.cache.MinihAuthRedisManager
+import cn.minih.auth.constants.LOGIN_USER_ROLES_CACHE_KEY
 import cn.minih.auth.data.AuthLoginModel
 import cn.minih.auth.exception.AuthLoginException
+import cn.minih.cache.core.CacheManager
+import cn.minih.cache.redis.impl.RedisCacheManagerImpl
 import cn.minih.common.util.Assert
 import io.vertx.kotlin.coroutines.await
 
@@ -14,6 +16,10 @@ import io.vertx.kotlin.coroutines.await
  */
 @Suppress("unused")
 abstract class AbstractAuthService : AuthService {
+    private val cacheManager: CacheManager by lazy {
+        RedisCacheManagerImpl()
+    }
+
     override suspend fun login(params: MutableMap<String, Any>): AuthLoginModel {
         val username = params["username"]
         val password = params["password"]
@@ -28,16 +34,14 @@ abstract class AbstractAuthService : AuthService {
 
     override suspend fun setLoginRole(loginId: String) {
         val roles = getUserRoles(loginId)
-        val redisAPI = MinihAuthRedisManager.instance.getReidApi()
-        redisAPI.del(listOf("${getLoginRoleKey()}:$loginId"))
-        val args = mutableListOf("${getLoginRoleKey()}:$loginId")
-        args.addAll(roles)
-        redisAPI.sadd(args)
+        val cache = cacheManager.getCache(LOGIN_USER_ROLES_CACHE_KEY)
+        cache.evict(loginId).await()
+        cache.put(loginId, roles)
     }
 
     override suspend fun getLoginRole(loginId: String): List<String> {
-        val redisAPI = MinihAuthRedisManager.instance.getReidApi()
-        return redisAPI.smembers("${getLoginRoleKey()}:$loginId").await().map { it.toString() }
+        val cache = cacheManager.getCache(LOGIN_USER_ROLES_CACHE_KEY)
+        return cache.members(loginId, String::class).await() ?: emptyList()
     }
 
 

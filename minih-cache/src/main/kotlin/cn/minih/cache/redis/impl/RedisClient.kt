@@ -22,16 +22,15 @@ class RedisClient private constructor() {
             }
             var connectionString = config.connectionString
             if (connectionString.isBlank()) {
-                connectionString = "redis://:Minih123@tuoling.minih.cn:6379/1"
                 if (config.username.isNotBlank()) {
-                    connectionString.plus(config.username)
+                    connectionString = connectionString.plus(config.username)
                 }
                 if (config.password.isNotBlank()) {
-                    connectionString.plus(":").plus(config.password)
+                    connectionString = connectionString.plus(":").plus(config.password)
                 }
-                connectionString.plus("@").plus(config.host)
-                connectionString.plus(":").plus(config.port)
-                connectionString.plus("/").plus(config.db)
+                connectionString = connectionString.plus("@").plus(config.host)
+                connectionString = connectionString.plus(":").plus(config.port)
+                connectionString = connectionString.plus("/").plus(config.db)
             }
             val redisOption = RedisOptions()
                 .addConnectionString(connectionString)

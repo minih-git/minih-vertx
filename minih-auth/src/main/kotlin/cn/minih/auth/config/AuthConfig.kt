@@ -19,7 +19,7 @@ data class AuthConfig(
     var isConcurrent: Boolean = false,
     var tokenGenMaxTryTimes: Int = 5,
     var loginMaxTryTimes: Int = 5,
-    var loginMaxTryLockTimes: Int = 5 * 60,
+    var loginMaxTryLockTimes: Long = 5L * 60,
     var loginMaxTryLockType: LockType = LockType.ACCOUNT,
     var tokenStyle: String = DEFAULT_TOKEN_STYLE,
     var tokenPrefix: String = DEFAULT_TOKEN_PREFIX,

@@ -2,10 +2,10 @@
 
 package cn.minih.auth.utils
 
-import cn.minih.auth.cache.MinihAuthRedisManager
 import cn.minih.auth.constants.AES_SECRET_REDIS_KEY_PREFIX
 import cn.minih.auth.constants.CONTEXT_LOGIN_ID
 import cn.minih.auth.logic.AuthServiceHandler
+import cn.minih.cache.redis.impl.RedisCacheManagerImpl
 import cn.minih.common.exception.MinihDataDecryptionException
 import cn.minih.common.util.log
 import cn.minih.core.annotation.CheckRoleType
@@ -35,14 +35,13 @@ import javax.crypto.spec.SecretKeySpec
  */
 
 suspend fun generateAesSecret(): String {
-    val redisAPi = MinihAuthRedisManager.instance.getReidApi()
-    val aesSecret = redisAPi.get(AES_SECRET_REDIS_KEY_PREFIX)?.await()?.toString()
+    val cache = RedisCacheManagerImpl().getCache(AES_SECRET_REDIS_KEY_PREFIX)
+    var aesSecret = cache.get("secret", String::class).await()
     if (aesSecret == null) {
         val keyGenerator = KeyGenerator.getInstance("AES")
         keyGenerator.init(128, SecureRandom())
-        val secretKey = keyGenerator.generateKey().encoded.joinToString("") { "%02x".format(it) }
-        redisAPi.set(listOf(AES_SECRET_REDIS_KEY_PREFIX, secretKey))
-        return secretKey
+        aesSecret = keyGenerator.generateKey().encoded.joinToString("") { "%02x".format(it) }
+        cache.put("secret", aesSecret)
     }
     return aesSecret
 }

@@ -5,26 +5,29 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="新增rocketmq消费客户端">
-      <change afterPath="$PROJECT_DIR$/minh-cache/build.gradle.kts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/config/CacheConfig.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/core/Cache.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/core/CacheManager.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheConfig.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheImpl.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheManagerImpl.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisClient.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisClientConfig.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/util/Utils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/exception/MinihArgumentErrorException.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/exception/MinihDataDecryptionException.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/exception/MinihErrorCode.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/exception/MinihErrorCode.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/exception/MinihException.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/exception/MinihException.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/util/Utils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/util/Utils.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryManager.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketConsumer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketConsumer.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketReadStream.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketReadStream.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketConsumerImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketConsumerImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketReadStreamImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketReadStreamImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minh-cache/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/minih-cache/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/config/CacheConfig.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/config/CacheConfig.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/core/Cache.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/core/Cache.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/core/CacheManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/core/CacheManager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheConfig.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheConfig.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheManagerImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheManagerImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisClient.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisClient.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisClientConfig.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisClientConfig.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-auth/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/cache/MinihAuthRedisManager.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/config/AuthConfig.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/config/AuthConfig.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/constants/AuthConstants.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/constants/AuthConstants.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthLogic.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthLogic.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/service/AbstractAuthService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/service/AbstractAuthService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/utils/Utils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/utils/Utils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/core/annotation/Component.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/core/annotation/Component.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/boot/MinihBootServiceRun.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/boot/MinihBootServiceRun.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-rocketmq/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -68,6 +71,12 @@
         <task path="$PROJECT_DIR$/minih-rocketmq">
           <activation />
         </task>
+        <task path="$PROJECT_DIR$/minh-cache">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/minih-cache">
+          <activation />
+        </task>
         <projects_view>
           <tree_state>
             <expand />
@@ -81,9 +90,9 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Kotlin Object" />
-        <option value="Kotlin Annotation" />
         <option value="Kotlin Interface" />
         <option value="Class" />
+        <option value="Kotlin Annotation" />
         <option value="Kotlin Class" />
       </list>
     </option>
@@ -136,7 +145,7 @@
     &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.254023&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.tools&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;MavenSettings&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
   &quot;keyToStringList&quot;: {
@@ -175,7 +184,51 @@
       <recent name="cn.minih.core.boot" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.minih-vertx:minih-common [publish]">
+  <component name="RunManager" selected="Gradle.minih-vertx:minih-core [publish]">
+    <configuration name="minih-vertx:minih-auth [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-auth" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="publish" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="minih-vertx:minih-cache [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-cache" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="publish" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
     <configuration name="minih-vertx:minih-common [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -198,10 +251,10 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="minih-vertx:minih-database-mysql [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="minih-vertx:minih-core [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-database-mysql" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-core" />
         <option name="externalSystemIdString" value="GRADLE" />
         <option name="scriptParameters" />
         <option name="taskDescriptions">
@@ -220,49 +273,20 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="minih-vertx:minih-rocketmq [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-rocketmq" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="publish" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="ProducerTestKt (1)" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="cn.minih.rocketmq.ProducerTestKt" />
-      <module name="minih-vertx.minih-rocketmq.test" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="ProducerTestKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="cn.minih.rocketmq.ProducerTestKt" />
-      <module name="minih-vertx.minih-roketmq.test" />
+    <configuration name="RedisCacheImplKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="cn.minih.cache.redis.impl.RedisCacheImplKt" />
+      <module name="minih-vertx.minih-cache.main" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.minih-vertx:minih-core [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-auth [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-cache [publish]" />
+        <item itemvalue="Kotlin.RedisCacheImplKt" />
         <item itemvalue="Gradle.minih-vertx:minih-common [publish]" />
-        <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publish]" />
-        <item itemvalue="Gradle.minih-vertx:minih-rocketmq [publish]" />
-        <item itemvalue="Kotlin.ProducerTestKt (1)" />
-        <item itemvalue="Kotlin.ProducerTestKt" />
       </list>
     </recent_temporary>
   </component>
@@ -295,6 +319,13 @@
       <workItem from="1691573280128" duration="20497000" />
       <workItem from="1691654741324" duration="5116000" />
       <workItem from="1691675162886" duration="5985000" />
+      <workItem from="1691757334788" duration="3617000" />
+      <workItem from="1691764155111" duration="2874000" />
+      <workItem from="1691767211045" duration="88000" />
+      <workItem from="1691767354591" duration="676000" />
+      <workItem from="1691768045596" duration="192000" />
+      <workItem from="1691768250619" duration="517000" />
+      <workItem from="1691768811724" duration="11523000" />
     </task>
     <task id="LOCAL-00001" summary="提取组件">
       <option name="closed" value="true" />
@@ -455,6 +486,11 @@
           <url>jar://$USER_HOME$/gradle-8.0.2/caches/modules-2/files-2.1/org.apache.rocketmq/rocketmq-client-java/5.0.5/86762955ac78739192ad5a878d557bf6129090ab/rocketmq-client-java-5.0.5-sources.jar!/org/apache/rocketmq/client/java/impl/ClientImpl.java</url>
           <line>189</line>
           <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheImpl.kt</url>
+          <line>152</line>
+          <option name="timeStamp" value="11" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

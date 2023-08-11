@@ -6,7 +6,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             version("vertx", "4.4.4")
-            version("minih-vertx", "1.0.2")
+            version("minih-vertx", "1.0.3")
             library("vertx-core", "io.vertx", "vertx-core").versionRef("vertx")
             library("vertx-web", "io.vertx", "vertx-web").versionRef("vertx")
             library("vertx-kotlin", "io.vertx", "vertx-lang-kotlin").versionRef("vertx")
@@ -37,6 +37,7 @@ dependencyResolutionManagement {
             library("minih-common", "cn.minih", "minih-common").versionRef("minih-vertx")
             library("minih-core", "cn.minih", "minih-core").versionRef("minih-vertx")
             library("minih-web", "cn.minih", "minih-web").versionRef("minih-vertx")
+            library("minih-cache", "cn.minih", "minih-cache").versionRef("minih-vertx")
             library("minih-auth", "cn.minih", "minih-auth").versionRef("minih-vertx")
             library("minih-mysql", "cn.minih", "minih-database-mysql").versionRef("minih-vertx")
 
@@ -55,4 +56,4 @@ include("minih-auth")
 include("minih-microservice-client")
 include("minih-common")
 include("minih-rocketmq")
-include("minh-cache")
+include("minih-cache")

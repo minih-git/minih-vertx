@@ -30,7 +30,6 @@ publishing {
 }
 
 dependencies {
-    api(libs.vertx.redis)
     implementation(libs.gson)
     implementation(libs.logging)
     implementation(libs.logback)
@@ -38,6 +37,7 @@ dependencies {
 
     implementation(libs.minih.core)
     implementation(libs.minih.common)
+    implementation(libs.minih.cache)
 
     implementation(libs.minih.web)
     implementation(libs.hutool)

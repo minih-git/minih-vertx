@@ -4,8 +4,6 @@ plugins {
     id("maven-publish")
 
 }
-
-
 java {
     withJavadocJar()
     withSourcesJar()
@@ -35,8 +33,6 @@ dependencies {
     api(libs.vertx.discovery)
     api(libs.vertx.consul)
     api(libs.vertx.web.client)
-
-
 
     implementation(libs.logging)
     implementation(libs.logback)

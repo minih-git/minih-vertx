@@ -5,10 +5,8 @@ package cn.minih.core.boot
 import cn.minih.common.util.getClassesByPath
 import cn.minih.common.util.getEnv
 import cn.minih.common.util.log
-import cn.minih.core.annotation.Component
-import cn.minih.core.annotation.ComponentScan
-import cn.minih.core.annotation.MinihServiceVerticle
-import cn.minih.core.annotation.Service
+import cn.minih.common.util.notNullAndExec
+import cn.minih.core.annotation.*
 import cn.minih.core.beans.BeanDefinitionBuilder
 import cn.minih.core.beans.BeanFactory
 import cn.minih.core.config.MAX_INSTANCE_COUNT
@@ -30,6 +28,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
+import kotlin.reflect.full.memberFunctions
 
 
 /**
@@ -46,6 +45,28 @@ object MinihBootServiceRun {
     private val allClazzList = mutableListOf<KClass<*>>()
 
 
+    private fun initFunctionBean(clazz: KClass<*>, hostName: String) {
+        clazz.memberFunctions.forEach { fn ->
+            fn.findAnnotation<Bean>()?.let { anno ->
+                val beanClazz = fn.returnType.classifier as KClass<*>
+                var beanName = beanClazz.simpleName!!
+                if (anno.value.isNotBlank()) {
+                    beanName = anno.value
+                }
+                val beanDefinition = BeanDefinitionBuilder().build(beanClazz, beanName)
+                BeanFactory.instance.registerBeanDefinition(beanName, beanDefinition)
+                val bean = BeanFactory.instance.getBean(hostName)
+                val realArgs = fn.parameters.subList(1, fn.parameters.size)
+                if (realArgs.isEmpty()) {
+                    fn.call(bean)?.let { BeanFactory.instance.registerBean(beanName, it) }
+                } else {
+                    val p = fn.parameters.map { p -> p.name?.let { BeanFactory.instance.getBean(it) } }
+                    fn.call(bean, p.toTypedArray())?.let { BeanFactory.instance.registerBean(beanName, it) }
+                }
+            }
+        }
+    }
+
     private fun initBean(clazz: KClass<*>) {
         allClazzList.addAll(getClassesByPath("cn.minih"))
         if (clazz.hasAnnotation<ComponentScan>()) {
@@ -56,21 +77,16 @@ object MinihBootServiceRun {
         }
         val components = allClazzList.filter { hasComponentsAnnotation(it) }
         components.forEach {
-            if (it.simpleName != null) {
-                var beanName = it.simpleName!!
-                it.findAnnotation<Component>()?.let { con ->
-                    if (con.value.isNotBlank()) {
-                        beanName = con.value
-                    }
-                }
-                it.findAnnotation<Service>()?.let { con ->
-                    if (con.value.isNotBlank()) {
-                        beanName = con.value
-                    }
-                }
-                val beanDefinition = BeanDefinitionBuilder().build(it, beanName)
-                BeanFactory.instance.registerBeanDefinition(beanName, beanDefinition)
+            var beanName = it.simpleName ?: ""
+            it.findAnnotation<Component>()?.let { con ->
+                con.value.notNullAndExec { beanName = con.value }
             }
+            it.findAnnotation<Service>()?.let { con ->
+                con.value.notNullAndExec { beanName = con.value }
+            }
+            val beanDefinition = BeanDefinitionBuilder().build(it, beanName)
+            BeanFactory.instance.registerBeanDefinition(beanName, beanDefinition)
+            initFunctionBean(it, beanName)
         }
     }
 
@@ -104,7 +120,7 @@ object MinihBootServiceRun {
             val promise = Promise.promise<Boolean>()
             val bean = BeanFactory.instance.getBean(process.beanName) as ReplenishInitBeanProcess
             CoroutineScope(vertx.orCreateContext.dispatcher()).launch {
-                bean.exec(vertx, allClazzList);
+                bean.exec(vertx, allClazzList)
                 promise.complete()
             }
             promise.future()
@@ -267,7 +283,10 @@ object MinihBootServiceRun {
 
     private fun hasComponentsAnnotation(clazz: KClass<*>): Boolean {
         try {
-            return clazz.hasAnnotation<Component>() || clazz.hasAnnotation<MinihServiceVerticle>() || clazz.hasAnnotation<Service>()
+            return clazz.hasAnnotation<Component>() ||
+                    clazz.hasAnnotation<MinihServiceVerticle>() ||
+                    clazz.hasAnnotation<Service>() ||
+                    clazz.hasAnnotation<Configuration>()
         } catch (_: UnsupportedOperationException) {
         }
         return false
