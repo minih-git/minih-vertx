@@ -31,7 +31,7 @@ class RocketReadStreamImpl<T : Any>(
 
     private var context: ContextInternal = vertx.orCreateContext as ContextInternal
 
-    private var handler: Handler<RocketConsumerRecord<T>>? = null
+    private var recordHandler: Handler<RocketConsumerRecord<T>>? = null
     private var endHandler: Handler<Void>? = null
     private var errorHandler: Handler<Throwable>? = null
     private val consuming = AtomicBoolean(false)
@@ -80,7 +80,7 @@ class RocketReadStreamImpl<T : Any>(
     }
 
     private fun schedule(delay: Long) {
-        this.handler?.let { handler ->
+        this.recordHandler?.let { handler ->
             if (consuming.get() && demand.get() > 0L) {
                 context.runOnContext {
                     when (delay) {
@@ -153,9 +153,10 @@ class RocketReadStreamImpl<T : Any>(
     }
 
     override fun handler(handler: Handler<RocketConsumerRecord<T>>): ReadStream<RocketConsumerRecord<T>> {
-        this.handler = handler
+        this.recordHandler = handler
         consuming.set(true)
         schedule(0)
         return this
     }
+
 }

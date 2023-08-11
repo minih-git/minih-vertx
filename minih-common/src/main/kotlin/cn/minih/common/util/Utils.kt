@@ -3,6 +3,7 @@
 package cn.minih.common.util
 
 import cn.minih.common.exception.MinihArgumentErrorException
+import cn.minih.common.exception.MinihDataCovertException
 import cn.minih.core.config.CoreConfig
 import cn.minih.core.config.IConfig
 import cn.minih.core.config.PROJECT_NAME
@@ -168,65 +169,75 @@ fun fillObjectHandleList(value: Any, it: KProperty<*>): Any {
 }
 
 
-fun covertBasic(value: Any, typeTmp: KType): Any {
+fun covertBasic(value: Any, typeTmp: KType, tryString: Boolean = true): Any {
     var type = typeTmp
     if (typeTmp.isMarkedNullable) {
         type = typeTmp.classifier?.createType()!!
     }
     return when (type) {
         String::class.createType() -> value.toString()
-        Int::class.createType() -> when (value) {
-            is Int -> value
-            is String -> value.toString().toInt()
-            else -> value
+        Int::class.createType() -> when {
+            value is Int -> value
+            tryString && value is String -> value.toString().toInt()
+            else -> throw MinihDataCovertException("非string类数据")
         }
 
-        Short::class.createType() -> when (value) {
-            is Short -> value
-            is String -> value.toString().toShort()
-            else -> value
+        Short::class.createType() -> when {
+            value is Short -> value
+            tryString && value is String -> value.toString().toShort()
+            else -> throw MinihDataCovertException("非short类数据")
         }
 
-        Long::class.createType() -> when (value) {
-            is Long -> value
-            is String -> value.toString().toLong()
-            else -> value
+        Long::class.createType() -> when {
+            value is Long -> value
+            tryString && value is String -> value.toString().toLong()
+            else -> throw MinihDataCovertException("非long类数据")
         }
 
-        Byte::class.createType() -> when (value) {
-            is Byte -> value
-            is String -> value.toString().toByte()
-            else -> value
+        Byte::class.createType() -> when {
+            value is Byte -> value
+            tryString && value is String -> value.toString().toByte()
+            else -> throw MinihDataCovertException("非byte类数据")
         }
 
-        Float::class.createType() -> when (value) {
-            is Float -> value
-            is String -> value.toString().toFloat()
-            else -> value
+        Float::class.createType() -> when {
+            value is Float -> value
+            tryString && value is String -> value.toString().toFloat()
+            else -> throw MinihDataCovertException("非float类数据")
         }
 
-        Double::class.createType() -> when (value) {
-            is Double -> value
-            is String -> value.toString().toDouble()
-            else -> value
+        Double::class.createType() -> when {
+            value is Double -> value
+            tryString && value is String -> value.toString().toDouble()
+            else -> throw MinihDataCovertException("非double类数据")
         }
 
-        Boolean::class.createType() -> when (value) {
-            is Boolean -> value
-            is String -> value.toString().toBoolean()
-            is Int -> value == 1
-            is Long -> value == 1L
-            else -> value
+        Boolean::class.createType() -> when {
+            value is Boolean -> value
+            tryString && value is String -> value.toString().toBoolean()
+            value is Int -> value == 1
+            value is Long -> value == 1L
+            else -> throw MinihDataCovertException("非boolean类数据")
         }
 
         Char::class.createType() -> when (value) {
             is Char -> value
-            else -> value
+            else -> throw MinihDataCovertException("非char类数据")
         }
 
-        else -> value.toString()
+        else -> throw MinihDataCovertException("非基础数据类型")
     }
 
+}
+
+fun <T : Any> covertBasic(value: Any, clazz: KClass<T>, tryString: Boolean = true): T {
+    @Suppress("UNCHECKED_CAST")
+    return covertBasic(value, clazz.createType(), tryString) as T
+}
+
+inline fun <reified T> covertBasic(value: Any, tryString: Boolean): T {
+    val clazz = T::class
+    return covertBasic(value, clazz.createType(), tryString) as T
 }
 
 

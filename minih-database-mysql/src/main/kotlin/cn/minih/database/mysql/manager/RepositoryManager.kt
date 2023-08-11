@@ -59,7 +59,7 @@ object RepositoryManager {
     }
 
 
-    inline fun <reified T : Any> findOne(wrapper: Wrapper<T>): Future<T?> {
+    inline fun <reified T : Any> findOne(wrapper: Wrapper<T> = QueryWrapper()): Future<T?> {
         val tuple = Tuple.tuple()
         wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
         val sql = SqlBuilder.generateQuerySql(wrapper).plus("limit 1")
@@ -101,14 +101,14 @@ object RepositoryManager {
     }
 
 
-    inline fun <reified T : Any> list(wrapper: Wrapper<T>): Future<List<T>> {
+    inline fun <reified T : Any> list(wrapper: Wrapper<T> = QueryWrapper()): Future<List<T>> {
         val tuple = Tuple.tuple()
         wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
         val sql = SqlBuilder.generateQuerySql(wrapper)
         return list(sql, tuple)
     }
 
-    inline fun <reified T : Any> page(page: Page<T>, wrapper: Wrapper<T>): Future<Page<T>> {
+    inline fun <reified T : Any> page(page: Page<T>, wrapper: Wrapper<T> = QueryWrapper()): Future<Page<T>> {
         val tuple = Tuple.tuple()
         wrapper.condition.add(
             QueryCondition(

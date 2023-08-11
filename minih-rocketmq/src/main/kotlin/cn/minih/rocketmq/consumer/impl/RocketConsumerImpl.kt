@@ -73,4 +73,5 @@ class RocketConsumerImpl<T : Any>(private val vertx: Vertx, private val msgClazz
         this.stream.handler(handler)
         return this
     }
+
 }

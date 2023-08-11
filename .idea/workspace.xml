@@ -4,25 +4,27 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="新增rocketmq客户端">
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+    <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="新增rocketmq消费客户端">
+      <change afterPath="$PROJECT_DIR$/minh-cache/build.gradle.kts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/config/CacheConfig.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/core/Cache.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/core/CacheManager.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheConfig.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheImpl.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheManagerImpl.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisClient.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/minh-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisClientConfig.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/client/RocketClient.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/client/RocketClient.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/config/RocketConfig.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/config/RocketConfig.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketConsumer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketConsumer.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketConsumerRecord.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketConsumerRecord.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketReadStream.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketReadStream.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketConsumerImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketConsumerImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketConsumerRecordImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketConsumerRecordImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketReadStreamImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketReadStreamImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/RocketProducer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/producer/RocketProducer.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/RocketProducerRecord.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/producer/RocketProducerRecord.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/RocketWriteStream.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/producer/RocketWriteStream.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketProducerImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketProducerImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketProducerRecordImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketProducerRecordImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketWriteStreamImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketWriteStreamImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-roketmq/src/test/kotlin/cn/minih/rocketmq/ProducerTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/test/kotlin/cn/minih/rocketmq/ProducerTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/exception/MinihArgumentErrorException.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/exception/MinihDataDecryptionException.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/exception/MinihErrorCode.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/exception/MinihErrorCode.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/exception/MinihException.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/exception/MinihException.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/util/Utils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/util/Utils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryManager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketConsumer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketConsumer.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketReadStream.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/RocketReadStream.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketConsumerImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketConsumerImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketReadStreamImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/consumer/impl/RocketReadStreamImpl.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -61,6 +63,9 @@
           <activation />
         </task>
         <task path="$PROJECT_DIR$/minih-microservice-client">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/minih-rocketmq">
           <activation />
         </task>
         <projects_view>
@@ -163,18 +168,18 @@
       <recent name="cn.minih.ms.client.config" />
     </key>
     <key name="CopyKotlinDeclarationDialog.RECENTS_KEY">
+      <recent name="cn.minih.cache.core.impl" />
       <recent name="cn.minih.database.mysql.manager" />
       <recent name="cn.minih.web.response" />
       <recent name="cn.minih.web.handler" />
       <recent name="cn.minih.core.boot" />
-      <recent name="cn.minih.core.eventbus" />
     </key>
   </component>
-  <component name="RunManager" selected="Kotlin.ProducerTestKt (1)">
-    <configuration name="minih-vertx [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+  <component name="RunManager" selected="Gradle.minih-vertx:minih-common [publish]">
+    <configuration name="minih-vertx:minih-common [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-common" />
         <option name="externalSystemIdString" value="GRADLE" />
         <option name="scriptParameters" />
         <option name="taskDescriptions">
@@ -215,12 +220,27 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="MainKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="MainKt" />
-      <module name="minih-vertx.test" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
+    <configuration name="minih-vertx:minih-rocketmq [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-rocketmq" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="publish" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
     </configuration>
     <configuration name="ProducerTestKt (1)" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="cn.minih.rocketmq.ProducerTestKt" />
@@ -238,11 +258,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.minih-vertx:minih-common [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-rocketmq [publish]" />
         <item itemvalue="Kotlin.ProducerTestKt (1)" />
         <item itemvalue="Kotlin.ProducerTestKt" />
-        <item itemvalue="Kotlin.MainKt" />
-        <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publish]" />
-        <item itemvalue="Gradle.minih-vertx [publish]" />
       </list>
     </recent_temporary>
   </component>
@@ -417,7 +437,8 @@
     <MESSAGE value="升级版本" />
     <MESSAGE value="优化数据库接口" />
     <MESSAGE value="新增rocketmq客户端" />
-    <option name="LAST_COMMIT_MESSAGE" value="新增rocketmq客户端" />
+    <MESSAGE value="新增rocketmq消费客户端" />
+    <option name="LAST_COMMIT_MESSAGE" value="新增rocketmq消费客户端" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />

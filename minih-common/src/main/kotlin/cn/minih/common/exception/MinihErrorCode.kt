@@ -17,5 +17,7 @@ enum class MinihErrorCode(override val code: Int, override val msg: String) : IM
     ERR_CODE_ARGUMENT_ERROR(-2, "参数错误"),
     ERR_CODE_NOT_FOUND_ERROR(-3, "未找到数据"),
     ERR_CODE_DATA_DECRYPTION_ERROR(-4, "数据解密出现错误"),
-    ERR_CODE_REMOTE_CALL_ERROR(-4, "远程接口调用出错"),
+    ERR_CODE_REMOTE_CALL_ERROR(-5, "远程接口调用出错"),
+    ERR_CODE_DATA_COVERT_ERROR(-6, "数据转换出现错误"),
+
 }
