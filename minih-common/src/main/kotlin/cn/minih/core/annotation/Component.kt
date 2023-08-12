@@ -18,3 +18,7 @@ annotation class Configuration(val value: String = "")
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class Bean(val value: String = "")
+
+@Target(AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class Service(val value: String = "")

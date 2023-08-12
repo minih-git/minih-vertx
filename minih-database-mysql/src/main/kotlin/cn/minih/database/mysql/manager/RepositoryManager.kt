@@ -10,6 +10,7 @@ import cn.minih.database.mysql.config.DbConfig
 import cn.minih.database.mysql.enum.TableIdType
 import cn.minih.database.mysql.operation.*
 import cn.minih.database.mysql.page.Page
+import cn.minih.database.mysql.page.PageType
 import com.google.common.base.CaseFormat
 import io.vertx.core.Future
 import io.vertx.core.Promise
@@ -109,23 +110,41 @@ object RepositoryManager {
     }
 
     inline fun <reified T : Any> page(page: Page<T>, wrapper: Wrapper<T> = QueryWrapper()): Future<Page<T>> {
+        Assert.isTrue(page.nextCursor >= 0) {
+            MinihArgumentErrorException("分页游标应该大于0！")
+        }
         val tuple = Tuple.tuple()
-        wrapper.condition.add(
-            QueryCondition(
-                CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, page.cursorName),
-                listOf(page.nextCursor),
-                QueryConditionType.GT
+        if (page.pageType == PageType.CURSOR) {
+            wrapper.condition.add(
+                QueryCondition(
+                    CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, page.cursorName),
+                    listOf(page.nextCursor),
+                    QueryConditionType.GT
+                )
             )
-        )
+        }
         wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
-        val sql = SqlBuilder.generateQuerySql(wrapper).plus("limit ${page.pageSize}")
+
+        val sql = SqlBuilder.generateQuerySql(wrapper)
+            .plus(
+                when (page.pageType) {
+                    PageType.CURSOR -> "limit ${page.pageSize}"
+                    PageType.OFFSET -> "limit ${(page.nextCursor - 1) * page.pageSize} ${page.pageSize}"
+                }
+            )
+
+
         val future: Promise<Page<T>> = Promise.promise()
         list<T>(sql, tuple).onComplete {
             val data = it.result()
             if (data.isEmpty() || data.size < page.pageSize) {
-                page.nextCursor = 0
+                page.nextCursor = -1
             } else {
-                page.nextCursor = getNextCursorByFieldName(page.cursorName, data.last())
+
+                page.nextCursor = when (page.pageType) {
+                    PageType.CURSOR -> getNextCursorByFieldName(page.cursorName, data.last())
+                    PageType.OFFSET -> page.nextCursor + 1
+                }
             }
             page.data = it.result();future.complete(page)
         }
