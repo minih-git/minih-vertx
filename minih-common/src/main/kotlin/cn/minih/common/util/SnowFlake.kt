@@ -15,6 +15,13 @@ const val timestampLeftShift = sequenceBits + businessIdBits + datacenterIdBits
 const val sequenceMask = -1L xor (-1L shl sequenceBits.toInt())
 
 class SnowFlake(bid: String) {
+
+    companion object {
+        fun getBusinessId(id: Long): Long {
+            return (id shl 47 ushr 1) and (-1L shl 59 ushr 1) shr 58
+        }
+    }
+
     private var businessId: Long
     private val datacenterId = getCenterId(InetAddress.getLocalHost().hostAddress)
     private var sequence = AtomicLong(0)

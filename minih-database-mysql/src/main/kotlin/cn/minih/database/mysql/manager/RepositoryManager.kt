@@ -109,6 +109,26 @@ object RepositoryManager {
         return list(sql, tuple)
     }
 
+    inline fun <reified T : Any> count(wrapper: Wrapper<T> = QueryWrapper()): Future<Long> {
+        val future: Promise<Long> = Promise.promise()
+        val tuple = Tuple.tuple()
+        wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
+        val sql = SqlBuilder.generateCountQuerySql(wrapper)
+        getPool().connection.compose { conn ->
+            conn.preparedQuery(sql).execute(tuple)
+                .onComplete { rowSet ->
+                    val resultRaw = rowSet.result()
+                    var count = 0L
+                    if (resultRaw != null && resultRaw.size() != 0) {
+                        count = resultRaw.first().get(Long::class.java, "count")
+                    }
+                    printLog(sql, tuple, count)
+                    future.complete(count)
+                }
+        }
+        return future.future()
+    }
+
     inline fun <reified T : Any> page(page: Page<T>, wrapper: Wrapper<T> = QueryWrapper()): Future<Page<T>> {
         Assert.isTrue(page.nextCursor >= 0) {
             MinihArgumentErrorException("分页游标应该大于0！")

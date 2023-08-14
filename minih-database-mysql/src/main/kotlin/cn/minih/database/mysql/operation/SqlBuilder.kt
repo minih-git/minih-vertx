@@ -22,6 +22,16 @@ object SqlBuilder {
             """.trimIndent()
     }
 
+    inline fun <reified T : Any> generateCountQuerySql(wrapper: Wrapper<T>): String {
+        var tableName = T::class.findAnnotation<TableName>()?.value
+        if (tableName.isNullOrBlank()) {
+            tableName = T::class.simpleName?.let { CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it) }
+        }
+        return """
+                select count(1) as count from $tableName  ${generateConditionSql(wrapper)} ${generateOderBySql(wrapper)}
+            """.trimIndent()
+    }
+
     inline fun <reified T : Any> generateUpdateSql(wrapper: Wrapper<T>): String {
         var tableName = T::class.findAnnotation<TableName>()?.value
         if (tableName.isNullOrBlank()) {

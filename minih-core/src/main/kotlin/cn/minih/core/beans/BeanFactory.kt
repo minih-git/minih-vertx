@@ -5,7 +5,6 @@ package cn.minih.core.beans
 import cn.minih.common.exception.MinihException
 import cn.minih.common.util.Assert
 import cn.minih.common.util.log
-import net.sf.cglib.proxy.Enhancer
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
@@ -86,11 +85,6 @@ class BeanFactory {
                 params[it1] = getBean(type)
             }
             val bean = beanConstructor.callBy(params)
-
-            val enhancer = Enhancer()
-            enhancer.setSuperclass(clazz.java)
-
-
             this.singletonObjects[beanName] = bean
             return bean
         }

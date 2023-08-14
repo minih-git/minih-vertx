@@ -4,11 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="完善缓存组件，将鉴权组件的缓存切换至缓存组件">
+    <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="新增缓存">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/core/Cache.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/core/Cache.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheImpl.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/util/SnowFlake.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/util/SnowFlake.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/database/mysql/annotation/TableId.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/database/mysql/annotation/TableId.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/beans/BeanFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/beans/BeanFactory.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryManager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/operation/SqlBuilder.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/operation/SqlBuilder.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -164,11 +167,11 @@
       <recent name="cn.minih.core.boot" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.minih-vertx:minih-common [publish]">
-    <configuration name="minih-vertx:minih-auth [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+  <component name="RunManager" selected="Gradle.minih-vertx:minih-core [publish]">
+    <configuration name="minih-vertx [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-auth" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
         <option name="scriptParameters" />
         <option name="taskDescriptions">
@@ -277,11 +280,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.minih-vertx:minih-common [publish]" />
-        <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-core [publish]" />
-        <item itemvalue="Gradle.minih-vertx:minih-auth [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-cache [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-common [publish]" />
+        <item itemvalue="Gradle.minih-vertx [publish]" />
       </list>
     </recent_temporary>
   </component>
@@ -496,7 +499,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheImpl.kt</url>
-          <line>152</line>
+          <line>157</line>
           <option name="timeStamp" value="11" />
         </line-breakpoint>
       </breakpoints>
