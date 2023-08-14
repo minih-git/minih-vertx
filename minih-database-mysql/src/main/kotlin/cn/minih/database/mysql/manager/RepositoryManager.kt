@@ -149,7 +149,7 @@ object RepositoryManager {
             .plus(
                 when (page.pageType) {
                     PageType.CURSOR -> "limit ${page.pageSize}"
-                    PageType.OFFSET -> "limit ${(page.nextCursor - 1) * page.pageSize} ${page.pageSize}"
+                    PageType.OFFSET -> "limit ${(page.nextCursor - 1) * page.pageSize},${page.pageSize}"
                 }
             )
 
