@@ -1,31 +1,35 @@
 @file:Suppress("unused")
+
 package cn.minih.common.util
 
 import java.net.InetAddress
 import java.util.concurrent.atomic.AtomicLong
 
-private const val sp = 1585644268888L
-private const val workerIdBits = 5L
-private const val datacenterIdBits = 5L
-private const val sequenceBits = 12L
-private const val workerIdShift = sequenceBits
-private const val datacenterIdShift = sequenceBits + workerIdBits
-private const val timestampLeftShift = sequenceBits + workerIdBits + datacenterIdBits
-private const val sequenceMask = -1L xor (-1L shl sequenceBits.toInt())
+const val sp = 1585644268888L
+const val businessIdBits = 5L
+const val datacenterIdBits = 5L
+const val sequenceBits = 12L
+const val businessIdShift = sequenceBits
+const val datacenterIdShift = sequenceBits + businessIdBits
+const val timestampLeftShift = sequenceBits + businessIdBits + datacenterIdBits
+const val sequenceMask = -1L xor (-1L shl sequenceBits.toInt())
 
-class SnowFlake(wid: String) {
-    private val workerId: Long
+class SnowFlake(bid: String) {
+    private var businessId: Long
     private val datacenterId = getCenterId(InetAddress.getLocalHost().hostAddress)
     private var sequence = AtomicLong(0)
 
     private var lastTimestamp = AtomicLong(-1L)
 
     init {
-        workerId = getWorkId(wid)
+        businessId = getBusinessId(bid)
     }
 
     @Synchronized
-    fun nextId(): Long {
+    fun nextId(bid: Long = 0L): Long {
+        if (bid != 0L) {
+            businessId = bid
+        }
         var timestamp: Long = System.currentTimeMillis()
         if (timestamp < lastTimestamp.get()) {
             log.error { "系统时间不正确" }
@@ -44,7 +48,7 @@ class SnowFlake(wid: String) {
         lastTimestamp.set(timestamp)
         return timestamp - sp shl timestampLeftShift.toInt() or
                 (datacenterId shl datacenterIdShift.toInt()) or
-                (workerId shl workerIdShift.toInt()) or sequence.get()
+                (businessId shl businessIdShift.toInt()) or sequence.get()
     }
 
     private fun tilNextMillis(lastTimestamp: Long): Long {
@@ -62,7 +66,7 @@ class SnowFlake(wid: String) {
                 (s[2].toLong() shl 8) + s[3].toLong())
     }
 
-    private fun getWorkId(deployId: String): Long {
-        return (deployId.hashCode() and Int.MAX_VALUE).toLong() % 31
+    private fun getBusinessId(businessId: String): Long {
+        return (businessId.hashCode() and Int.MAX_VALUE).toLong() % 31L
     }
 }

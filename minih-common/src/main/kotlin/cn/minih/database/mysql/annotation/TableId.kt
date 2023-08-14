@@ -11,4 +11,4 @@ import cn.minih.database.mysql.enum.TableIdType
  */
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class TableId(val value: TableIdType = TableIdType.INPUT)
+annotation class TableId(val value: TableIdType = TableIdType.INPUT, val sfBusId: Long = 0L)

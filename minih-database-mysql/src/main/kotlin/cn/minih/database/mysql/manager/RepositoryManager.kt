@@ -333,7 +333,9 @@ object RepositoryManager {
                             filed.setter.call(
                                 entity, when (tableId.value) {
                                     TableIdType.INPUT -> System.currentTimeMillis()
-                                    TableIdType.SNOWFLAKE -> SnowFlakeContext.instance.currentContext().nextId()
+                                    TableIdType.SNOWFLAKE -> SnowFlakeContext.instance.currentContext()
+                                        .nextId(tableId.sfBusId)
+
                                     TableIdType.UUID -> UUID.randomUUID().toString()
                                     else -> ""
                                 }

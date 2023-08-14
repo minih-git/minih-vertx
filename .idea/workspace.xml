@@ -5,22 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="完善缓存组件，将鉴权组件的缓存切换至缓存组件">
-      <change afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/core/annotation/NoArg.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-auth/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-cache/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/minih-cache/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-common/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/core/annotation/Component.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/core/annotation/Component.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/core/annotation/Service.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/database/mysql/page/Page.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/database/mysql/page/Page.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-core/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/minih-core/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/beans/BeanFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/beans/BeanFactory.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-database-mysql/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database-mysql/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/util/SnowFlake.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/util/SnowFlake.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/database/mysql/annotation/TableId.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/database/mysql/annotation/TableId.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryManager.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-microservice-client/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-rocketmq/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-web/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/minih-web/build.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -176,7 +164,7 @@
       <recent name="cn.minih.core.boot" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.minih-vertx:minih-database-mysql [publish]">
+  <component name="RunManager" selected="Gradle.minih-vertx:minih-common [publish]">
     <configuration name="minih-vertx:minih-auth [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -289,8 +277,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-common [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-core [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-auth [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-cache [publish]" />
@@ -335,6 +323,7 @@
       <workItem from="1691768811724" duration="11754000" />
       <workItem from="1691806221833" duration="5599000" />
       <workItem from="1691842925772" duration="634000" />
+      <workItem from="1691900232205" duration="6441000" />
     </task>
     <task id="LOCAL-00001" summary="提取组件">
       <option name="closed" value="true" />
