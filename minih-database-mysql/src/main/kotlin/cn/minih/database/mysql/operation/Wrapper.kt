@@ -10,4 +10,5 @@ abstract class Wrapper<T> {
     val updateItems: MutableList<UpdateItem> = mutableListOf()
     val condition: MutableList<QueryCondition> = mutableListOf()
     val orderByItems: MutableList<OrderByItem> = mutableListOf()
+    val selectItems: MutableList<String> = mutableListOf()
 }

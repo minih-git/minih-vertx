@@ -1,5 +1,6 @@
 package cn.minih.database.mysql.operation
 
+import cn.minih.common.util.notNullAndExec
 import cn.minih.database.mysql.annotation.TableName
 import com.google.common.base.CaseFormat
 import kotlin.reflect.KMutableProperty1
@@ -17,8 +18,14 @@ object SqlBuilder {
         if (tableName.isNullOrBlank()) {
             tableName = T::class.simpleName?.let { CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it) }
         }
+        var keys = "*"
+        wrapper.selectItems.notNullAndExec {
+            keys =
+                wrapper.selectItems.joinToString(",") { k -> CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, k) }
+        }
+
         return """
-                select * from $tableName  ${generateConditionSql(wrapper)} ${generateOderBySql(wrapper)}
+                select $keys from $tableName  ${generateConditionSql(wrapper)} ${generateOderBySql(wrapper)}
             """.trimIndent()
     }
 

@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package cn.minih.database.mysql.operation
 
 import kotlin.reflect.KProperty1
@@ -21,6 +23,14 @@ open class QueryWrapper<T : Any> : AbstractWrapper<T, QueryWrapper<T>, QueryWrap
         return maybeDo {
             key.forEach {
                 orderByItems.add(OrderByItem(it.name, OrderByType.DESC))
+            }
+        }
+    }
+
+    fun selects(vararg key: KProperty1<T, Any>): QueryWrapper<T> {
+        return maybeDo {
+            key.forEach {
+                selectItems.add(it.name)
             }
         }
     }

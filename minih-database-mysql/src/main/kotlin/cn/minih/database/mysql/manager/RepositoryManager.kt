@@ -72,7 +72,7 @@ object RepositoryManager {
                         printLog(sql, tuple, null)
                         Future.succeededFuture<T>(null)
                     } else {
-                        val data = covert<T>(rowSet.first())
+                        val data = covert<T>(rowSet.first(), wrapper)
                         printLog(sql, tuple, data)
                         Future.succeededFuture(data)
                     }
@@ -106,7 +106,7 @@ object RepositoryManager {
         val tuple = Tuple.tuple()
         wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
         val sql = SqlBuilder.generateQuerySql(wrapper)
-        return list(sql, tuple)
+        return list(sql, tuple, wrapper)
     }
 
     inline fun <reified T : Any> count(wrapper: Wrapper<T> = QueryWrapper()): Future<Long> {
@@ -155,7 +155,7 @@ object RepositoryManager {
 
 
         val future: Promise<Page<T>> = Promise.promise()
-        list<T>(sql, tuple).onComplete {
+        list<T>(sql, tuple, wrapper).onComplete {
             val data = it.result()
             if (data.isEmpty() || data.size < page.pageSize) {
                 page.nextCursor = -1
@@ -172,7 +172,7 @@ object RepositoryManager {
     }
 
 
-    inline fun <reified T : Any> list(sql: String, tuple: Tuple): Future<List<T>> {
+    inline fun <reified T : Any> list(sql: String, tuple: Tuple, wrapper: Wrapper<T>): Future<List<T>> {
         val future: Promise<List<T>> = Promise.promise()
         getPool().connection.compose { conn ->
             conn.preparedQuery(sql).execute(tuple)
@@ -182,7 +182,7 @@ object RepositoryManager {
                         printLog(sql, tuple, listOf<T>())
                         future.complete(listOf())
                     } else {
-                        val result: List<T> = resultRaw.map { covert(it) }
+                        val result: List<T> = resultRaw.map { covert(it, wrapper) }
                         printLog(sql, tuple, result)
                         future.complete(result)
                     }
@@ -313,7 +313,7 @@ object RepositoryManager {
     }
 
 
-    inline fun <reified T : Any> covert(row: Row): T {
+    inline fun <reified T : Any> covert(row: Row, wrapper: Wrapper<T>): T {
         val entity = T::class.createInstance()
         val fields = entity::class.memberProperties
         fields.forEach {
@@ -325,8 +325,16 @@ object RepositoryManager {
                     stringToList = true
                     type = String::class
                 }
-                val valueRaw = row.get(type.javaObjectType, fieldName)
-
+                var valueRaw: Any? = null
+                if (wrapper.selectItems.isNotEmpty()) {
+                    if (!wrapper.selectItems.contains(fieldName)) {
+                        return@forEach
+                    }
+                }
+                try {
+                    valueRaw = row.get(type.javaObjectType, fieldName)
+                } catch (_: Exception) {
+                }
                 valueRaw?.let { v ->
                     var value = v
                     if (stringToList) {
@@ -334,6 +342,7 @@ object RepositoryManager {
                     }
                     it.setter.call(entity, value)
                 }
+
             }
         }
         return entity

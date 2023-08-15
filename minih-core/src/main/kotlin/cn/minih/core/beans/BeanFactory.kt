@@ -45,8 +45,9 @@ class BeanFactory {
     }
 
     private fun getBeanDefinitionByType(type: KType): BeanDefinition {
-        return this.beanDefinitionMap.filter { it.value.type == type || it.value.supertypes.contains(type) }
-            .firstNotNullOf { it.value }
+        val filters = this.beanDefinitionMap.filter { it.value.type == type || it.value.supertypes.contains(type) }
+        Assert.notBlank(filters) { MinihException("未找到bean定义，$type") }
+        return filters.firstNotNullOf { it.value }
     }
 
     fun findBeanDefinitionByType(type: KClass<*>): Collection<BeanDefinition> {
@@ -81,8 +82,9 @@ class BeanFactory {
             }
             val params = mutableMapOf<KParameter, Any?>()
             beanConstructor.parameters.forEach { it1 ->
-                val type = getBeanDefinitionByType(it1.type).beanName
-                params[it1] = getBean(type)
+                val type = getBeanDefinitionByType(it1.type)
+                Assert.notNull(type) { MinihException("未找到实例${it1.name},请检查") }
+                params[it1] = getBean(type.beanName)
             }
             val bean = beanConstructor.callBy(params)
             this.singletonObjects[beanName] = bean
