@@ -2,12 +2,10 @@ package cn.minih.database.mysql.manager
 
 import cn.minih.common.exception.MinihArgumentErrorException
 import cn.minih.common.util.Assert
-import cn.minih.common.util.log
-import cn.minih.common.util.toJsonObject
-import cn.minih.core.util.SnowFlakeContext
+import cn.minih.database.mysql.annotation.LogicKey
 import cn.minih.database.mysql.annotation.TableId
 import cn.minih.database.mysql.config.DbConfig
-import cn.minih.database.mysql.enum.TableIdType
+import cn.minih.database.mysql.enum.DataSwitchType
 import cn.minih.database.mysql.operation.*
 import cn.minih.database.mysql.page.Page
 import cn.minih.database.mysql.page.PageType
@@ -18,13 +16,14 @@ import io.vertx.core.Vertx
 import io.vertx.mysqlclient.MySQLConnectOptions
 import io.vertx.mysqlclient.MySQLPool
 import io.vertx.sqlclient.PoolOptions
-import io.vertx.sqlclient.Row
 import io.vertx.sqlclient.Tuple
-import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KParameter
-import kotlin.reflect.full.*
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.hasAnnotation
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
 
 
 /**
@@ -34,7 +33,6 @@ import kotlin.reflect.full.*
  */
 @Suppress("unused")
 object RepositoryManager {
-
 
     private lateinit var pool: MySQLPool
 
@@ -58,7 +56,6 @@ object RepositoryManager {
     fun getPool(): MySQLPool {
         return this.pool
     }
-
 
     inline fun <reified T : Any> findOne(wrapper: Wrapper<T> = QueryWrapper()): Future<T?> {
         val tuple = Tuple.tuple()
@@ -100,7 +97,6 @@ object RepositoryManager {
         }
         return Future.succeededFuture(null)
     }
-
 
     inline fun <reified T : Any> list(wrapper: Wrapper<T> = QueryWrapper()): Future<List<T>> {
         val tuple = Tuple.tuple()
@@ -170,7 +166,6 @@ object RepositoryManager {
         }
         return future.future()
     }
-
 
     inline fun <reified T : Any> list(sql: String, tuple: Tuple, wrapper: Wrapper<T>): Future<List<T>> {
         val future: Promise<List<T>> = Promise.promise()
@@ -284,7 +279,6 @@ object RepositoryManager {
     }
 
     inline fun <reified T : Any> update(entity: T): Future<Boolean> {
-        val tuple = Tuple.tuple()
         val params = entity::class.primaryConstructor?.parameters
         val updateWrapper = UpdateWrapper<T>()
         params?.let {
@@ -299,132 +293,65 @@ object RepositoryManager {
                         value = value.joinToString(",")
                     }
                     updateWrapper.set(field.name, value)
-                    tuple.addValue(value)
                 }
                 if (field.name == primaryKey.name) {
                     primaryValue = field.get(entity)!!
                 }
             }
-            tuple.addValue(primaryValue)
             Assert.notNull(primaryValue) { MinihArgumentErrorException("未找到主键数据！") }
             updateWrapper.eq(primaryKey.name!!, primaryValue!!)
         }
         return update(updateWrapper)
     }
 
-
-    inline fun <reified T : Any> covert(row: Row, wrapper: Wrapper<T>): T {
-        val entity = T::class.createInstance()
-        val fields = entity::class.memberProperties
-        fields.forEach {
-            if (it is KMutableProperty1) {
-                var type = it.returnType.classifier as KClass<*>
-                val fieldName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.name)
-                var stringToList = false
-                if (type.simpleName === List::class.simpleName) {
-                    stringToList = true
-                    type = String::class
-                }
-                var valueRaw: Any? = null
-                if (wrapper.selectItems.isNotEmpty()) {
-                    if (!wrapper.selectItems.contains(fieldName)) {
-                        return@forEach
+    inline fun <reified T : Any> delete(wrapper: Wrapper<T>): Future<Boolean> {
+        val tuple = Tuple.tuple()
+        val params = T::class.primaryConstructor?.parameters
+        Assert.notNull(params, "未找到数据类字段！")
+        val updateWrapper = UpdateWrapper<T>()
+        val fields = T::class.memberProperties
+        val logicKey = params!!.firstOrNull { p -> p.hasAnnotation<LogicKey>() }
+        return if (logicKey == null) {
+            val future: Promise<Boolean> = Promise.promise()
+            val sql = SqlBuilder.generateDeleteSql<T>(wrapper)
+            wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
+            getPool().connection.compose { conn ->
+                conn.preparedQuery(sql)
+                    .execute(tuple)
+                    .onComplete {
+                        printLog(sql, tuple, true)
+                        future.complete(true)
                     }
-                }
-                try {
-                    valueRaw = row.get(type.javaObjectType, fieldName)
-                } catch (_: Exception) {
-                }
-                valueRaw?.let { v ->
-                    var value = v
-                    if (stringToList) {
-                        value = valueRaw.toString().split(",").toList()
-                    }
-                    it.setter.call(entity, value)
-                }
-
+                    .onFailure {
+                        printWarningLog(sql, tuple, it.message)
+                        future.complete(false)
+                    }.onComplete { conn.close() }
             }
+            future.future()
+        } else {
+            val logicKeyType = logicKey.type.classifier as KClass<*>
+            Assert.isTrue(logicKeyType == DataSwitchType::class, "logic字段的类型必须是DataSwitchType")
+            val logicKeyField = fields.find { field -> field.name == logicKey.name }
+            updateWrapper.set(logicKeyField!!.name, DataSwitchType.FALSE)
+            updateWrapper.condition.addAll(wrapper.condition)
+            update(updateWrapper)
         }
-        return entity
     }
 
-    fun <T : Any> insertPrimaryKey(entity: T) {
+    inline fun <reified T : Any> delete(entity: T): Future<Boolean> {
         val params = entity::class.primaryConstructor?.parameters
-        params?.let {
-            val primaryKey = it.first { p -> p.hasAnnotation<TableId>() }
-            val tableId = primaryKey.findAnnotation<TableId>() ?: return
-            val fields = entity::class.memberProperties
-            fields.forEach { filed ->
-                if (filed.name == primaryKey.name) {
-                    val id = filed.getter.call(entity)
-                    if ((id == null || id == 0L || id == 0) && tableId.value != TableIdType.AUTO_INCREMENT) {
-                        if (filed is KMutableProperty1<*, *>) {
-                            filed.setter.call(
-                                entity, when (tableId.value) {
-                                    TableIdType.INPUT -> System.currentTimeMillis()
-                                    TableIdType.SNOWFLAKE -> SnowFlakeContext.instance.currentContext()
-                                        .nextId(tableId.sfBusId)
-
-                                    TableIdType.UUID -> UUID.randomUUID().toString()
-                                    else -> ""
-                                }
-                            )
-                        }
-                        return
-                    }
-                }
-            }
-        }
+        Assert.notNull(params, "未找到数据类字段！")
+        val wrapper = QueryWrapper<T>()
+        val fields = T::class.memberProperties
+        val primaryKey = params!!.first { p -> p.hasAnnotation<TableId>() }
+        Assert.notNull(primaryKey) { MinihArgumentErrorException("未找到主键！") }
+        val primaryField = fields.first { field -> field.name == primaryKey.name }
+        Assert.notNull(primaryField) { MinihArgumentErrorException("未找到主键字段！") }
+        val primaryValue = primaryField.getter.call(entity)
+        Assert.notNull(primaryValue) { MinihArgumentErrorException("未找到主键字段！") }
+        wrapper.eq(primaryField.name, primaryField)
+        return delete(wrapper)
     }
 
-    fun printLog(sql: String, tuple: Tuple, resultRaw: Any?) {
-        log.info("====>sql:${sql}")
-        log.info("====>参数:${tuple.deepToString()}")
-        var result = resultRaw
-        if (resultRaw is List<*>) {
-            result = resultRaw.map { it?.toJsonObject() }
-        }
-        log.info("====>结果:${result}")
-    }
-
-    fun printLog(sql: String, tuples: List<Tuple>, resultRaw: Any?) {
-        log.info("====>sql:${sql}")
-        log.info("====>参数:${tuples.map { it.deepToString() }}")
-        var result = resultRaw
-        if (resultRaw is List<*>) {
-            result = resultRaw.map { it?.toJsonObject() }
-        }
-        log.info("====>结果:${result}")
-    }
-
-    fun printWarningLog(sql: String, tuple: Tuple, resultRaw: Any?) {
-        log.warn("====>sql:${sql}")
-        log.warn("====>参数:${tuple.deepToString()}")
-        var result = resultRaw
-        if (resultRaw is List<*>) {
-            result = resultRaw.map { it?.toJsonObject() }
-        }
-        log.warn("====>结果:${result}")
-    }
-
-    fun printWarningLog(sql: String, tuples: List<Tuple>, resultRaw: Any?) {
-        log.warn("====>sql:${sql}")
-        log.warn("====>参数:${tuples.map { it.deepToString() }}")
-        var result = resultRaw
-        if (resultRaw is List<*>) {
-            result = resultRaw.map { it?.toJsonObject() }
-        }
-        log.warn("====>结果:${result}")
-    }
-
-    fun getNextCursorByFieldName(name: String, data: Any): Long {
-        val clazz = data::class
-        val field = clazz.memberProperties.first { it.name == name }
-        return when (val value = field.getter.call(data)) {
-            null -> 0
-            is Long -> value
-            else -> value.hashCode().toLong()
-        }
-    }
 
 }

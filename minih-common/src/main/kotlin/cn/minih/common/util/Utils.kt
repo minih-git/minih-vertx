@@ -157,7 +157,7 @@ private fun setField(filed: KMutableProperty1<*, *>, pojo: Any, value: Any) {
 
 fun fillObjectHandleList(value: Any, it: KProperty<*>): Any {
     if (value is List<*> && value.isNotEmpty()) {
-        val first = value.first() ?: return value
+        val first = value.firstOrNull() ?: return value
         return if (isBasicType(first::class.createType())) {
             value.map { vt -> vt?.let { covertBasic(vt, first::class.createType()) } }
         } else {
@@ -291,7 +291,7 @@ fun <T : Any> T.updateData(source: Any, ignoredNull: Boolean = true): T {
 
 fun isNullOrBlankOrZero(v: Any): Boolean {
     return when (v) {
-        is String -> v.isBlank()
+        is String -> v.isBlank() || v == "null"
         is Int -> v == 0
         is Double -> v == 0.0
         is Float -> v == 0.0f

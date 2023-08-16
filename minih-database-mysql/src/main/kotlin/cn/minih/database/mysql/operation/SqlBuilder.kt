@@ -46,9 +46,26 @@ object SqlBuilder {
         }
         val sql = """
                 update $tableName  set 
-            """.trimIndent().plus(wrapper.updateItems.joinToString(", ") {
-            "${CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.key)} = ? "
-        })
+            """.trimIndent()
+            .plus(wrapper.updateItems.joinToString(", ") {
+                "${
+                    CaseFormat.LOWER_CAMEL.to(
+                        CaseFormat.LOWER_UNDERSCORE,
+                        it.key
+                    )
+                } = ? "
+            })
+        return sql.plus("  ${generateConditionSql(wrapper)}")
+    }
+
+    inline fun <reified T : Any> generateDeleteSql(wrapper: Wrapper<T>): String {
+        var tableName = T::class.findAnnotation<TableName>()?.value
+        if (tableName.isNullOrBlank()) {
+            tableName = T::class.simpleName?.let { CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it) }
+        }
+        val sql = """
+                delete $tableName  
+            """
         return sql.plus("  ${generateConditionSql(wrapper)}")
     }
 

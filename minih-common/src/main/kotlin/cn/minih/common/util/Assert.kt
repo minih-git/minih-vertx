@@ -2,6 +2,7 @@
 
 package cn.minih.common.util
 
+import cn.minih.common.exception.MinihErrorCode
 import cn.minih.common.exception.MinihException
 
 /**
@@ -20,7 +21,7 @@ object Assert {
     }
 
     fun <T> notBlank(v: T?, message: String = "") {
-        notBlank(v) { MinihException(message) }
+        notBlank(v) { MinihException(message, MinihErrorCode.ERR_CODE_ARGUMENT_ERROR) }
     }
 
     fun <T> notEmpty(obj: T?, fn: () -> Throwable) {
@@ -41,19 +42,29 @@ object Assert {
     }
 
     fun <T> notEmpty(v: T?, message: String = "") {
-        notEmpty(v) { MinihException(message) }
+        notEmpty(v) { MinihException(message, MinihErrorCode.ERR_CODE_ARGUMENT_ERROR) }
     }
 
     fun <T> notNull(obj: T?, fn: () -> Throwable) {
+        notNullOnly(obj)
+        if (isNullOrBlankOrZero(obj!!)) {
+            throw fn()
+        }
+    }
+
+    fun <T> notNull(obj: T?, message: String = "") {
+        notNull(obj) { MinihException(message, MinihErrorCode.ERR_CODE_ARGUMENT_ERROR) }
+    }
+
+    fun <T> notNullOnly(obj: T?, fn: () -> Throwable) {
         if (obj == null) {
             throw fn()
         }
     }
 
-    fun <T> notNull(v: T?, message: String = "") {
-        notNull(v) { MinihException(message) }
+    fun <T> notNullOnly(obj: T?, message: String = "") {
+        notNullOnly(obj) { MinihException(message, MinihErrorCode.ERR_CODE_ARGUMENT_ERROR) }
     }
-
 
     fun <T> isNull(obj: T?, fn: () -> Throwable) {
         if (obj != null) {
@@ -61,9 +72,18 @@ object Assert {
         }
     }
 
+    fun <T> isNull(obj: T?, message: String = "") {
+        isNull(obj) { MinihException(message, MinihErrorCode.ERR_CODE_ARGUMENT_ERROR) }
+    }
+
     fun isTrue(obj: Boolean?, fn: () -> Throwable) {
         if (obj == null || !obj) {
             throw fn()
         }
     }
+
+    fun isTrue(obj: Boolean?, message: String = "") {
+        isTrue(obj) { MinihException(message, MinihErrorCode.ERR_CODE_ARGUMENT_ERROR) }
+    }
+
 }
