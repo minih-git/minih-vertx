@@ -87,8 +87,8 @@ class RedisCacheImpl(private val cacheName: String, private val config: CacheCon
             args.addAll(valueRaw.map {
                 when {
                     it == null -> ""
-                    isBasicType(it::class.createType()) -> valueRaw.toString()
-                    else -> valueRaw.toJsonString()
+                    isBasicType(it::class.createType()) -> it.toString()
+                    else -> it.toJsonString()
                 }
             })
         }

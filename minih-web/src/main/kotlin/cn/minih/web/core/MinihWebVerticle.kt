@@ -3,6 +3,7 @@
 package cn.minih.web.core
 
 import cn.minih.common.util.getConfig
+import cn.minih.common.util.getProjectName
 import cn.minih.common.util.notNullAndExec
 import cn.minih.core.boot.MinihVerticle
 import cn.minih.web.config.WebConfig
@@ -71,7 +72,8 @@ abstract class MinihWebVerticle(private val port: Int = 8080) : MinihVerticle, C
             }
         }
         val server = vertx.createHttpServer()
-        val shareData = vertx.sharedData().getAsyncMap<String, Int>("share")
+        val projectName = getProjectName()
+        val shareData = vertx.sharedData().getAsyncMap<String, Int>("share-$projectName")
         shareData.await().put("port", port).await()
         server.requestHandler(routerInstance).listen(port)
     }

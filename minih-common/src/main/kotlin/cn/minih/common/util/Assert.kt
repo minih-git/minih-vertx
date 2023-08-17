@@ -46,7 +46,7 @@ object Assert {
     }
 
     fun <T> notNull(obj: T?, fn: () -> Throwable) {
-        notNullOnly(obj)
+        notNullOnly(obj, fn)
         if (isNullOrBlankOrZero(obj!!)) {
             throw fn()
         }

@@ -2,10 +2,7 @@
 
 package cn.minih.core.boot
 
-import cn.minih.common.util.getClassesByPath
-import cn.minih.common.util.getEnv
-import cn.minih.common.util.log
-import cn.minih.common.util.notNullAndExec
+import cn.minih.common.util.*
 import cn.minih.core.annotation.*
 import cn.minih.core.beans.BeanDefinitionBuilder
 import cn.minih.core.beans.BeanFactory
@@ -214,9 +211,10 @@ object MinihBootServiceRun {
     }
 
     private suspend fun log(vertx: Vertx, startTime: Long) {
-        val shareData = vertx.sharedData().getAsyncMap<String, Int>("share")
+        val projectName = getProjectName()
+        val shareData = vertx.sharedData().getAsyncMap<String, Int>("share-$projectName")
         val port = shareData.await().get("port").await()
-        var msg = "服务启动成功,当前环境：${getEnv()},"
+        var msg = "${projectName}服务启动成功,当前环境：${getEnv()},"
         port?.let { msg = msg.plus("端口:${it},") }
         var bd = BigDecimal((System.currentTimeMillis() - startTime) / 1000.00)
         bd = bd.setScale(2, RoundingMode.HALF_UP)

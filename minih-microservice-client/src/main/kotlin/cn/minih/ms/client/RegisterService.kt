@@ -22,13 +22,14 @@ import io.vertx.servicediscovery.types.HttpEndpoint
 class RegisterService : PostStartingProcess {
     override suspend fun exec(vertx: Vertx) {
         val ctx = MsClientContext.instance.initContext(vertx)
-        val shareData = vertx.sharedData().getAsyncMap<String, Any>("share").await()
-        val port = shareData.get("port").await()
+        val projectName = getProjectName()
         val ip = findFirstNonLoopBackAddress()
+        val shareData = vertx.sharedData().getAsyncMap<String, Any>("share-$projectName").await()
+        val port = shareData.get("port").await()
         val record =
-            HttpEndpoint.createRecord(getProjectName(), ip?.hostAddress ?: "", port as Int, ctx.config.rootPath)
+            HttpEndpoint.createRecord(projectName, ip?.hostAddress ?: "", port as Int, ctx.config.rootPath)
         val severId = SnowFlakeContext.instance.currentContext().nextId().toString()
-        shareData.put("serverId", severId).await()
+        shareData.put("serverId-${ip?.hostAddress}", severId).await()
         record.registration = severId
         record.setMetadata(jsonObjectOf("env" to getEnv()))
         ctx.discovery.publish(record) {

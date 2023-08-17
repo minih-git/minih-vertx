@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package cn.minih.database.mysql.enum
 
 /**
@@ -7,4 +9,15 @@ package cn.minih.database.mysql.enum
  * @desc
  */
 @Suppress("unused")
-enum class DataSwitchType { TRUE, FALSE }
+enum class DataStateType { Y, N }
+
+fun stateToBool(type: DataStateType): Boolean = type == DataStateType.Y
+fun boolToState(bl: Boolean): DataStateType = if (bl) DataStateType.Y else DataStateType.N
+
+operator fun DataStateType.not(): DataStateType {
+    return if (this == DataStateType.Y) {
+        DataStateType.N
+    } else {
+        DataStateType.Y
+    }
+}

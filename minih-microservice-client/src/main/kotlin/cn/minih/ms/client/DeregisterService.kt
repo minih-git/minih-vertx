@@ -1,5 +1,7 @@
 package cn.minih.ms.client
 
+import cn.minih.common.util.findFirstNonLoopBackAddress
+import cn.minih.common.util.getProjectName
 import cn.minih.common.util.log
 import cn.minih.core.annotation.Component
 import cn.minih.core.boot.PreStopProcess
@@ -26,8 +28,11 @@ class DeregisterService : PreStopProcess {
             )
         )
         val client = ConsulClient.create(vertx, opt)
-        val shareData = vertx.sharedData().getAsyncMap<String, Any>("share").await()
-        val serverId = shareData.get("serverId").await().toString()
+        val projectName = getProjectName()
+        val ip = findFirstNonLoopBackAddress()
+        log.info("projectName:$projectName,ip:${ip?.hostAddress}")
+        val shareData = vertx.sharedData().getAsyncMap<String, Any>("share-$projectName").await()
+        val serverId = shareData.get("serverId-${ip?.hostAddress}").await().toString()
         client.deregisterService(serverId).await()
         log.info("$serverId deregister done.")
     }

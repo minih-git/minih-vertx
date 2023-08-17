@@ -5,7 +5,7 @@ import cn.minih.common.util.Assert
 import cn.minih.database.mysql.annotation.LogicKey
 import cn.minih.database.mysql.annotation.TableId
 import cn.minih.database.mysql.config.DbConfig
-import cn.minih.database.mysql.enum.DataSwitchType
+import cn.minih.database.mysql.enum.DataStateType
 import cn.minih.database.mysql.operation.*
 import cn.minih.database.mysql.page.Page
 import cn.minih.database.mysql.page.PageType
@@ -100,7 +100,17 @@ object RepositoryManager {
 
     inline fun <reified T : Any> list(wrapper: Wrapper<T> = QueryWrapper()): Future<List<T>> {
         val tuple = Tuple.tuple()
-        wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
+        wrapper.condition.forEach {
+            it.value.forEach { v ->
+                if (v is List<*>) {
+                    v.forEach { v1 ->
+                        tuple.addValue(v1)
+                    }
+                } else {
+                    tuple.addValue(v)
+                }
+            }
+        }
         val sql = SqlBuilder.generateQuerySql(wrapper)
         return list(sql, tuple, wrapper)
     }
@@ -177,7 +187,9 @@ object RepositoryManager {
                         printLog(sql, tuple, listOf<T>())
                         future.complete(listOf())
                     } else {
-                        val result: List<T> = resultRaw.map { covert(it, wrapper) }
+                        val result: List<T> = resultRaw.map {
+                            covert(it, wrapper)
+                        }
                         printLog(sql, tuple, result)
                         future.complete(result)
                     }
@@ -330,9 +342,9 @@ object RepositoryManager {
             future.future()
         } else {
             val logicKeyType = logicKey.type.classifier as KClass<*>
-            Assert.isTrue(logicKeyType == DataSwitchType::class, "logic字段的类型必须是DataSwitchType")
+            Assert.isTrue(logicKeyType == DataStateType::class, "logic字段的类型必须是DataStateType")
             val logicKeyField = fields.find { field -> field.name == logicKey.name }
-            updateWrapper.set(logicKeyField!!.name, DataSwitchType.FALSE)
+            updateWrapper.set(logicKeyField!!.name, DataStateType.N)
             updateWrapper.condition.addAll(wrapper.condition)
             update(updateWrapper)
         }

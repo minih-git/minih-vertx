@@ -33,7 +33,7 @@ inline fun <reified T : Any> covert(row: Row, wrapper: Wrapper<T>): T {
             }
             var valueRaw: Any? = null
             if (wrapper.selectItems.isNotEmpty()) {
-                if (!wrapper.selectItems.contains(fieldName)) {
+                if (!wrapper.selectItems.contains(it.name)) {
                     return@forEach
                 }
             }
