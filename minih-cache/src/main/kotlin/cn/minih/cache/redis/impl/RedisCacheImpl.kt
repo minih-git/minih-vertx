@@ -64,12 +64,8 @@ class RedisCacheImpl(private val cacheName: String, private val config: CacheCon
     }
 
     override fun put(key: String, valueRaw: Any?, duration: Duration?): Future<Boolean> {
-        if (valueRaw is List<*>) return sAdd(key, valueRaw, duration)
-        val value = when {
-            valueRaw == null -> ""
-            isBasicType(valueRaw::class.createType()) -> valueRaw.toString()
-            else -> valueRaw.toJsonString()
-        }
+        if (valueRaw is List<*>) return rPush(key, valueRaw, duration)
+        val value = convertData(valueRaw)
         val args = mutableListOf(getCacheKey(key), value)
         if (duration != null || config.ttl.toSeconds() != 0L) {
             args.add("EX")
@@ -81,16 +77,12 @@ class RedisCacheImpl(private val cacheName: String, private val config: CacheCon
             .compose { Future.succeededFuture(true) }
     }
 
-    private fun sAdd(key: String, valueRaw: Any, duration: Duration?): Future<Boolean> {
+    override fun sAdd(key: String, valueRaw: Any?, duration: Duration?): Future<Boolean> {
         val args = mutableListOf(getCacheKey(key))
         if (valueRaw is List<*>) {
-            args.addAll(valueRaw.map {
-                when {
-                    it == null -> ""
-                    isBasicType(it::class.createType()) -> it.toString()
-                    else -> it.toJsonString()
-                }
-            })
+            args.addAll(valueRaw.map(::convertData))
+        } else {
+            args.add(convertData(valueRaw))
         }
         return RedisClient.instance.sadd(args)
             .onFailure { Future.succeededFuture(false) }
@@ -100,6 +92,59 @@ class RedisCacheImpl(private val cacheName: String, private val config: CacheCon
                 }
                 Future.succeededFuture(true)
             }
+    }
+
+    override fun lPush(key: String, valueRaw: Any?, duration: Duration?): Future<Boolean> {
+        val args = mutableListOf(getCacheKey(key))
+        if (valueRaw is List<*>) {
+            args.addAll(valueRaw.map(::convertData))
+        } else {
+            args.add(convertData(valueRaw))
+        }
+        return RedisClient.instance.lpush(args)
+            .onFailure { Future.succeededFuture(false) }
+            .compose {
+                if (duration != null || config.ttl.toSeconds() != 0L) {
+                    setExpire(key, duration ?: config.ttl)
+                }
+                Future.succeededFuture(true)
+            }
+    }
+
+    override fun rPush(key: String, valueRaw: Any?, duration: Duration?): Future<Boolean> {
+        val args = mutableListOf(getCacheKey(key))
+        if (valueRaw is List<*>) {
+            args.addAll(valueRaw.map(::convertData))
+        } else {
+            args.add(convertData(valueRaw))
+        }
+        return RedisClient.instance.rpush(args)
+            .onFailure { Future.succeededFuture(false) }
+            .compose {
+                if (duration != null || config.ttl.toSeconds() != 0L) {
+                    setExpire(key, duration ?: config.ttl)
+                }
+                Future.succeededFuture(true)
+            }
+    }
+
+    override fun lRange(key: String): Future<List<Cache.ValueWrapper>?> {
+        return RedisClient.instance.lrange(getCacheKey(key), "0", "-1").compose {
+            Future.succeededFuture(it?.let { it.map { v -> Cache.DefaultValueWrapper(v) } })
+        }
+    }
+
+    override fun <T : Any> lRange(key: String, clazz: KClass<T>): Future<List<T>?> {
+        return lRange(key).compose {
+            Future.succeededFuture(it?.let {
+                it.map { v ->
+                    when {
+                        isBasicType(clazz.createType()) -> covertBasic(v.get(), clazz)
+                        else -> v.get().toString().jsonConvertData(clazz)
+                    }
+                }
+            })
+        }
     }
 
 
@@ -147,20 +192,13 @@ class RedisCacheImpl(private val cacheName: String, private val config: CacheCon
 
     }
 
+    private fun convertData(data: Any?): String {
+        return when {
+            data == null -> ""
+            isBasicType(data::class.createType()) -> data.toString()
+            else -> data.toJsonString()
+        }
 
-}
-
-fun a(a: Any?) {
-    val ac = a!!::class
-
-    val b = getSuperClassRecursion(ac)
-    println(b)
-    println(a is List<*>)
-}
-
-fun main() {
-
-    a(listOf("aaa", "bbb"))
-
+    }
 
 }

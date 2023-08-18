@@ -18,6 +18,11 @@ interface Cache {
     fun members(key: String): Future<List<ValueWrapper>?>
     fun <T : Any> members(key: String, clazz: KClass<T>): Future<List<T>?>
     fun put(key: String, valueRaw: Any?, duration: Duration? = null): Future<Boolean>
+    fun sAdd(key: String, valueRaw: Any?, duration: Duration?): Future<Boolean>
+    fun lPush(key: String, valueRaw: Any?, duration: Duration?): Future<Boolean>
+    fun rPush(key: String, valueRaw: Any?, duration: Duration?): Future<Boolean>
+    fun lRange(key: String): Future<List<ValueWrapper>?>
+    fun <T : Any> lRange(key: String, clazz: KClass<T>): Future<List<T>?>
     fun incr(key: String): Future<Int>
     fun setExpire(key: String, duration: Duration): Future<Boolean>
     fun getExpire(key: String): Future<Duration>
