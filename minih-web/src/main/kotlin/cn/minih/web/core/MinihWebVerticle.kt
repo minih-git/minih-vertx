@@ -72,7 +72,7 @@ abstract class MinihWebVerticle(private val port: Int = 8080) : MinihVerticle, C
             }
         }
         val server = vertx.createHttpServer()
-        val projectName = getProjectName()
+        val projectName = getProjectName(vertx.orCreateContext)
         val shareData = vertx.sharedData().getAsyncMap<String, Int>("share-$projectName")
         shareData.await().put("port", port).await()
         server.requestHandler(routerInstance).listen(port)

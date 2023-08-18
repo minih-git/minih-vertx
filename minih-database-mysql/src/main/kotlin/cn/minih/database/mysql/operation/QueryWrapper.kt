@@ -2,6 +2,7 @@
 
 package cn.minih.database.mysql.operation
 
+import cn.minih.database.mysql.enum.OrderByType
 import kotlin.reflect.KProperty1
 
 /**

@@ -2,6 +2,7 @@
 
 package cn.minih.database.mysql.operation
 
+import cn.minih.database.mysql.enum.OrderByType
 import com.google.common.base.CaseFormat
 import kotlin.reflect.KProperty1
 
@@ -16,7 +17,6 @@ data class UpdateItem(val key: String, val value: Any?)
 data class QueryCondition(val key: String, val value: List<Any>, val type: QueryConditionType = QueryConditionType.EQ)
 data class OrderByItem(val key: String, val type: OrderByType = OrderByType.ASC)
 enum class QueryConditionType { EQ, IN, BETWEEN, GT, LT, GTE, LTE }
-enum class OrderByType { ASC, DESC }
 
 @Suppress("unused")
 abstract class AbstractWrapper<T, R, Children : AbstractWrapper<T, R, Children>> : Wrapper<T>() {

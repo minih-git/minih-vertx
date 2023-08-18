@@ -1,13 +1,13 @@
 package cn.minih.core.boot
 
-import io.vertx.core.Vertx
+import io.vertx.core.Context
 import kotlin.reflect.KClass
 
 /**
  * 初始化bean之前操作
  */
 interface ReplenishInitBeanProcess {
-    suspend fun exec(vertx: Vertx, clazz: List<KClass<*>>)
+    suspend fun exec(context: Context, clazz: List<KClass<*>>)
 }
 
 /**
@@ -17,7 +17,7 @@ interface ReplenishInitBeanProcess {
  * @desc
  */
 interface PreStartingProcess {
-    suspend fun exec(vertx: Vertx)
+    suspend fun exec(context: Context)
 }
 
 /**
@@ -27,7 +27,7 @@ interface PreStartingProcess {
  * @desc
  */
 interface PostStartingProcess {
-    suspend fun exec(vertx: Vertx)
+    suspend fun exec(context: Context)
 }
 
 /**
@@ -37,7 +37,7 @@ interface PostStartingProcess {
  * @desc
  */
 interface PostDeployingProcess {
-    suspend fun exec(vertx: Vertx, deployId: String)
+    suspend fun exec(context: Context, deployId: String)
 }
 
 /**
@@ -47,5 +47,5 @@ interface PostDeployingProcess {
  * @desc
  */
 interface PreStopProcess {
-    suspend fun exec(vertx: Vertx)
+    suspend fun exec(context: Context)
 }

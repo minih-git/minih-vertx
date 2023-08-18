@@ -20,9 +20,7 @@ class RedisCacheManagerImpl : CacheManager {
 
     private var defaultConfig: CacheConfig = RedisCacheConfig()
     override fun getCache(cacheName: String, config: CacheConfig?): Cache {
-        config?.let {
-            configMap[cacheName] = config
-        }
+        config?.let { configMap[cacheName] = config }
         return instanceMap[cacheName] ?: let {
             var cache: Cache = RedisCacheImpl(cacheName, getConfig(cacheName))
             instanceMap.putIfAbsent(cacheName, cache)?.let {

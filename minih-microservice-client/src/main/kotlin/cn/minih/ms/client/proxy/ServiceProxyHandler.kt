@@ -9,6 +9,7 @@ import cn.minih.ms.client.MsClient
 import cn.minih.ms.client.config.Config
 import cn.minih.web.annotation.*
 import cn.minih.web.service.Service
+import io.vertx.core.Context
 import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
@@ -79,14 +80,14 @@ class ServiceProxyHandler : InvocationHandler, Service {
         proxy: Any,
         method: Method,
         args: Array<out Any>?,
-        vertx: Vertx
+        context: Context
     ): Future<Any> {
         val proxied = getProxied(proxy, method)
         val address =
             getPath(proxied.first as KAnnotatedElement, proxied.second as KAnnotatedElement).replace("/", ".")
         val remoteServiceAnno = proxied.first!!.findAnnotation<RemoteService>()!!
         val args1 = buildArgs(proxied.second, args)
-        return vertx.eventBus()
+        return context.owner().eventBus()
             .request<JsonObject>(remoteServiceAnno.remote.plus(address), args1)
             .compose { Future.succeededFuture<Any>(it?.body()?.toJsonObject()?.covertTo(proxied.second.returnType)) }
 
@@ -107,7 +108,7 @@ class ServiceProxyHandler : InvocationHandler, Service {
         proxy: Any,
         method: Method,
         args: Array<out Any>?,
-        vertx: Vertx,
+        context: Context,
     ): Future<Any> {
         val proxied = getProxied(proxy, method)
         val path =
@@ -128,7 +129,7 @@ class ServiceProxyHandler : InvocationHandler, Service {
                 )
             }
             val args1 = buildArgs(proxied.second, args).toBuffer()
-            val httpClient = vertx.createHttpClient()
+            val httpClient = context.owner().createHttpClient()
             val requestOptions = RequestOptions()
             requestOptions.method = getHttpMethod(methodMapping.type)
             requestOptions.uri = path
@@ -137,7 +138,7 @@ class ServiceProxyHandler : InvocationHandler, Service {
             requestOptions.addHeader("Content-Length", args1.length().toString())
             requestOptions.addHeader(MICROSERVICE_INNER_REQUEST_HEADER, MICROSERVICE_INNER_REQUEST_HEADER_VALUE)
             requestOptions.addHeader("Content-Type", "application/json")
-            requestOptions.setTimeout(getConfig("ms", Config::class, vertx).timeout)
+            requestOptions.setTimeout(getConfig("ms", Config::class, context).timeout)
             httpClient.request(requestOptions).compose { req ->
                 req.write(args1)
                 req.response().compose { res -> res.body() }
@@ -159,12 +160,12 @@ class ServiceProxyHandler : InvocationHandler, Service {
             } else if (method.name.equals("equals") && args?.size == 1) {
                 return proxy == args[0]
             }
-            val vertx = Vertx.currentContext().owner()
+            val context = Vertx.currentContext()
             val proxied = getProxied(proxy, method)
             val remoteService = proxied.first?.findAnnotation<RemoteService>()
             return when (remoteService?.remoteType) {
-                RemoteType.EVENT_BUS -> invokeByEventBus(proxy, method, args, vertx)
-                else -> invokeByHttpClient(proxy, method, args, vertx)
+                RemoteType.EVENT_BUS -> invokeByEventBus(proxy, method, args, context)
+                else -> invokeByHttpClient(proxy, method, args, context)
             }
         } catch (e: Exception) {
             throw MinihException("远程服务执行错误!")

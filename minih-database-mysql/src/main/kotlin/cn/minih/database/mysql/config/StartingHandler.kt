@@ -4,7 +4,7 @@ import cn.minih.common.util.getConfig
 import cn.minih.core.annotation.Component
 import cn.minih.core.boot.PostStartingProcess
 import cn.minih.database.mysql.manager.RepositoryManager
-import io.vertx.core.Vertx
+import io.vertx.core.Context
 
 /**
  *  启动注入数据库连接池
@@ -13,7 +13,7 @@ import io.vertx.core.Vertx
  */
 @Component
 class PostStartingProcess : PostStartingProcess {
-    override suspend fun exec(vertx: Vertx) {
-        RepositoryManager.initDb(vertx, getConfig("db", DbConfig::class))
+    override suspend fun exec(context: Context) {
+        RepositoryManager.initDb(context.owner(), getConfig("db", DbConfig::class))
     }
 }

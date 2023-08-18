@@ -5,7 +5,7 @@ import cn.minih.common.util.Assert
 import cn.minih.common.util.getConfig
 import cn.minih.ms.client.config.Config
 import cn.minih.ms.client.constants.MICROSERVICE_ADDRESS
-import io.vertx.core.Vertx
+import io.vertx.core.Context
 import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.ServiceDiscoveryOptions
@@ -27,8 +27,8 @@ class MsClientContext {
         }
     }
 
-    fun initContext(vertx: Vertx): MsClientContext {
-        config = getConfig("ms", Config::class, vertx)
+    fun initContext(context: Context): MsClientContext {
+        config = getConfig("ms", Config::class, context)
         Assert.notBlank(config.rootPath) {
             throw MinihException("请设置根路径！")
         }
@@ -36,7 +36,7 @@ class MsClientContext {
             throw MinihException("请设置consul地址！")
         }
         discovery = ServiceDiscovery.create(
-            vertx, ServiceDiscoveryOptions().setBackendConfiguration(
+            context.owner(), ServiceDiscoveryOptions().setBackendConfiguration(
                 jsonObjectOf("host" to config.consulHost, "port" to config.consulPort, "dc" to config.dcName)
             ).setAnnounceAddress(MICROSERVICE_ADDRESS).setName("minih-ms")
         )

@@ -1,5 +1,6 @@
 package cn.minih.database.mysql.manager
 
+import cn.minih.common.util.Assert
 import cn.minih.common.util.log
 import cn.minih.common.util.toJsonObject
 import cn.minih.core.util.SnowFlakeContext
@@ -12,6 +13,7 @@ import io.vertx.sqlclient.Tuple
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KParameter
 import kotlin.reflect.full.*
 
 /**
@@ -131,4 +133,16 @@ fun getNextCursorByFieldName(name: String, data: Any): Long {
         is Long -> value
         else -> value.hashCode().toLong()
     }
+}
+
+inline fun <reified A : Annotation> getFieldByAnnotation(clazz: KClass<*>): KParameter? {
+    val params = clazz.primaryConstructor?.parameters
+    Assert.notNull(params, "未找到数据类字段！")
+    return params!!.firstOrNull { p -> p.hasAnnotation<A>() }
+}
+
+inline fun <reified A : Annotation> getFieldAnnotation(clazz: KClass<*>): A? {
+    val params = clazz.primaryConstructor?.parameters
+    Assert.notNull(params, "未找到数据类字段！")
+    return params!!.firstOrNull { p -> p.hasAnnotation<A>() }?.findAnnotation<A>()
 }

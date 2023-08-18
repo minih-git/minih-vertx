@@ -2,11 +2,16 @@ package cn.minih.database.mysql.manager
 
 import cn.minih.common.exception.MinihArgumentErrorException
 import cn.minih.common.util.Assert
+import cn.minih.common.util.log
+import cn.minih.database.mysql.annotation.CursorKey
 import cn.minih.database.mysql.annotation.LogicKey
 import cn.minih.database.mysql.annotation.TableId
 import cn.minih.database.mysql.config.DbConfig
 import cn.minih.database.mysql.enum.DataStateType
-import cn.minih.database.mysql.operation.*
+import cn.minih.database.mysql.operation.QueryWrapper
+import cn.minih.database.mysql.operation.SqlBuilder
+import cn.minih.database.mysql.operation.UpdateWrapper
+import cn.minih.database.mysql.operation.Wrapper
 import cn.minih.database.mysql.page.Page
 import cn.minih.database.mysql.page.PageType
 import com.google.common.base.CaseFormat
@@ -135,40 +140,55 @@ object RepositoryManager {
         return future.future()
     }
 
+    inline fun <reified T : Any> covertPageSql(
+        sql: String,
+        page: Page<T>,
+        wrapper: Wrapper<T> = QueryWrapper()
+    ): String {
+        if (page.pageType == PageType.CURSOR) {
+            if (wrapper.orderByItems.isEmpty()) {
+                val cursorKey = getFieldByAnnotation<CursorKey>(T::class) ?: getFieldByAnnotation<TableId>(T::class)
+                val cursorAnno = getFieldAnnotation<CursorKey>(T::class)
+                Assert.notNull(cursorKey, "未找到主键字段或分页排序cursor字段，请用@Cursor标记分页排序字段！")
+                val cursorKeyName = cursorKey!!.name!!
+                if (wrapper.selectItems.size > 0) {
+                    val cursorField1 = wrapper.selectItems.firstOrNull { p -> p == cursorKeyName }
+                    Assert.notNull(cursorField1, "结果字段中（${cursorKeyName}）未找到!")
+                }
+                val cursorName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, cursorKeyName)
+                val orderType = cursorAnno?.type?.name ?: ""
+                return sql.plus((if (sql.contains(" where ")) " and " else " where "))
+                    .plus(" $cursorName > ?")
+                    .plus(" order by  $cursorName $orderType").plus(" limit ${page.pageSize}")
+            }
+            log.debug("复杂sql分页查询，自动转换为offset模式！")
+            page.pageType = PageType.OFFSET
+        }
+        return "select * from ( ".plus(sql).plus(" ) page")
+            .plus("limit ${(page.nextCursor - 1) * page.pageSize},${page.pageSize}")
+    }
+
     inline fun <reified T : Any> page(page: Page<T>, wrapper: Wrapper<T> = QueryWrapper()): Future<Page<T>> {
         Assert.isTrue(page.nextCursor >= 0) {
             MinihArgumentErrorException("分页游标应该大于0！")
         }
         val tuple = Tuple.tuple()
-        if (page.pageType == PageType.CURSOR) {
-            wrapper.condition.add(
-                QueryCondition(
-                    CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, page.cursorName),
-                    listOf(page.nextCursor),
-                    QueryConditionType.GT
-                )
-            )
-        }
         wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
-
-        val sql = SqlBuilder.generateQuerySql(wrapper)
-            .plus(
-                when (page.pageType) {
-                    PageType.CURSOR -> "limit ${page.pageSize}"
-                    PageType.OFFSET -> "limit ${(page.nextCursor - 1) * page.pageSize},${page.pageSize}"
-                }
-            )
-
-
+        val sql = covertPageSql(SqlBuilder.generateQuerySql(wrapper), page, wrapper)
+        if (page.pageType == PageType.CURSOR) {
+            tuple.addValue(page.nextCursor)
+        }
         val future: Promise<Page<T>> = Promise.promise()
         list<T>(sql, tuple, wrapper).onComplete {
             val data = it.result()
             if (data.isEmpty() || data.size < page.pageSize) {
                 page.nextCursor = -1
             } else {
-
+                val cursorKey = getFieldByAnnotation<CursorKey>(T::class) ?: getFieldByAnnotation<TableId>(T::class)
+                Assert.notNull(cursorKey, "未找到主键字段或分页排序cursor字段，请用@Cursor标记分页排序字段！")
+                val cursorKeyName = cursorKey!!.name!!
                 page.nextCursor = when (page.pageType) {
-                    PageType.CURSOR -> getNextCursorByFieldName(page.cursorName, data.last())
+                    PageType.CURSOR -> getNextCursorByFieldName(cursorKeyName, data.last())
                     PageType.OFFSET -> page.nextCursor + 1
                 }
             }

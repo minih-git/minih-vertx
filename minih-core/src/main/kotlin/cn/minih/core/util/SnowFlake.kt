@@ -3,6 +3,7 @@ package cn.minih.core.util
 import cn.minih.common.util.SnowFlake
 import cn.minih.core.annotation.Component
 import cn.minih.core.boot.PostDeployingProcess
+import io.vertx.core.Context
 import io.vertx.core.Vertx
 
 /**
@@ -14,7 +15,7 @@ import io.vertx.core.Vertx
 @Suppress("unused")
 @Component
 class InitSnowFlake : PostDeployingProcess {
-    override suspend fun exec(vertx: Vertx, deployId: String) {
+    override suspend fun exec(context: Context, deployId: String) {
         SnowFlakeContext.instance.putContext(deployId, SnowFlake(deployId))
 
     }

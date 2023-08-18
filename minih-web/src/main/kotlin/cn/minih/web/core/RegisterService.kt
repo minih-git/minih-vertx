@@ -77,11 +77,7 @@ object RegisterService {
     }
 
     private fun registerEventBusConsumer(realPath: String, fn: KFunction<Any?>) {
-        val serverName = getProjectName()
-
-
-
-
+        val serverName = getProjectName(this.vertx.orCreateContext)
         vertx.eventBus().consumer(serverName.plus(realPath.replace("/", "."))) { p ->
             CoroutineScope(vertx.orCreateContext.dispatcher()).launch {
                 var rawResult: Any?

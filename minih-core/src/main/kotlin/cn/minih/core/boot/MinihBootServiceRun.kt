@@ -13,6 +13,7 @@ import io.vertx.config.ConfigRetriever
 import io.vertx.config.ConfigRetrieverOptions
 import io.vertx.config.ConfigStoreOptions
 import io.vertx.core.*
+import io.vertx.core.impl.ContextInternal
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
@@ -117,7 +118,7 @@ object MinihBootServiceRun {
             val promise = Promise.promise<Boolean>()
             val bean = BeanFactory.instance.getBean(process.beanName) as ReplenishInitBeanProcess
             CoroutineScope(vertx.orCreateContext.dispatcher()).launch {
-                bean.exec(vertx, allClazzList)
+                bean.exec(vertx.orCreateContext, allClazzList)
                 promise.complete()
             }
             promise.future()
@@ -138,7 +139,7 @@ object MinihBootServiceRun {
         val startingProcess = BeanFactory.instance.findBeanDefinitionByType(PreStartingProcess::class)
         return Future.all(startingProcess.map { process ->
             val bean = BeanFactory.instance.getBean(process.beanName) as PreStartingProcess
-            CoroutineScope(vertx.orCreateContext.dispatcher()).launch { bean.exec(vertx) }
+            CoroutineScope(vertx.orCreateContext.dispatcher()).launch { bean.exec(vertx.orCreateContext) }
             Future.succeededFuture(true)
         }).compose { Future.succeededFuture(true) }
     }
@@ -147,7 +148,7 @@ object MinihBootServiceRun {
         val startingProcess = BeanFactory.instance.findBeanDefinitionByType(PostStartingProcess::class)
         return Future.all(startingProcess.map { process ->
             val bean = BeanFactory.instance.getBean(process.beanName) as PostStartingProcess
-            CoroutineScope(vertx.orCreateContext.dispatcher()).launch { bean.exec(vertx) }
+            CoroutineScope(vertx.orCreateContext.dispatcher()).launch { bean.exec(vertx.orCreateContext) }
             Future.succeededFuture(true)
         }).compose { Future.succeededFuture(true) }
     }
@@ -156,24 +157,29 @@ object MinihBootServiceRun {
         val startingProcess = BeanFactory.instance.findBeanDefinitionByType(PostDeployingProcess::class)
         startingProcess.forEach { process ->
             val bean = BeanFactory.instance.getBean(process.beanName) as PostDeployingProcess
-            CoroutineScope(vertx.orCreateContext.dispatcher()).launch { bean.exec(vertx, deployId) }
+            CoroutineScope(vertx.orCreateContext.dispatcher()).launch {
+                bean.exec(
+                    vertx.orCreateContext,
+                    deployId
+                )
+            }
         }
     }
 
-    private fun registerCloseHandling(vertx: Vertx): Future<Boolean> {
+    private fun registerCloseHandling(context: Context): Future<Boolean> {
         log.info("开始执行关闭程序...")
         val stopProcess = BeanFactory.instance.findBeanDefinitionByType(PreStopProcess::class)
         return Future.all(stopProcess.map { process ->
             val bean = BeanFactory.instance.getBean(process.beanName) as PreStopProcess
             val future: Promise<Boolean> = Promise.promise()
-            CoroutineScope(vertx.orCreateContext.dispatcher()).launch {
-                bean.exec(vertx)
+            CoroutineScope(context.dispatcher()).launch {
+                bean.exec(context)
             }.invokeOnCompletion {
                 log.info("${process.beanName} 完成...")
                 future.complete()
             }
             future.future()
-        }).compose { vertx.close();Future.succeededFuture() }
+        }).compose { context.owner().close();Future.succeededFuture() }
     }
 
     private suspend fun getVertx(vararg args: String): Vertx {
@@ -204,14 +210,14 @@ object MinihBootServiceRun {
             log(vertx, currentTime)
         } catch (e: Exception) {
             successDeploy.forEach { vertx.undeploy(it) }
-            registerCloseHandling(vertx)
+            registerCloseHandling(vertx.orCreateContext)
             log.warn("部署服务出现错误,{}", e.message, e)
         }
 
     }
 
     private suspend fun log(vertx: Vertx, startTime: Long) {
-        val projectName = getProjectName()
+        val projectName = getProjectName(vertx.orCreateContext)
         val shareData = vertx.sharedData().getAsyncMap<String, Int>("share-$projectName")
         val port = shareData.await().get("port").await()
         var msg = "${projectName}服务启动成功,当前环境：${getEnv()},"
@@ -222,8 +228,9 @@ object MinihBootServiceRun {
     }
 
     private fun shutdownHook(vertx: Vertx) {
+        val context = vertx.orCreateContext as ContextInternal
         Runtime.getRuntime().addShutdownHook(Thread() {
-            val a = registerCloseHandling(vertx)
+            val a = registerCloseHandling(context)
             @Suppress("ControlFlowWithEmptyBody")
             while (!a.isComplete) {
             }

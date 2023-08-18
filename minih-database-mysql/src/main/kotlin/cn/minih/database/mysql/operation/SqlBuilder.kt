@@ -2,6 +2,7 @@ package cn.minih.database.mysql.operation
 
 import cn.minih.common.util.notNullAndExec
 import cn.minih.database.mysql.annotation.TableName
+import cn.minih.database.mysql.enum.OrderByType
 import com.google.common.base.CaseFormat
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.full.findAnnotation
@@ -89,25 +90,29 @@ object SqlBuilder {
         var sql = ""
         wrapper.condition.forEach {
             sql = sql.plus(" and  ${CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.key)} ").plus(
-                when (it.type) {
-                    QueryConditionType.EQ -> " = ?"
-                    QueryConditionType.IN -> {
-                        val perch = when {
-                            it.value.isEmpty() -> "?"
-                            else -> it.value.joinToString(",") { _ -> "?" }
-                        }
-                        " in (${perch})"
-                    }
-
-                    QueryConditionType.BETWEEN -> " between ? an ?"
-                    QueryConditionType.GT -> " > ? "
-                    QueryConditionType.LT -> " < ? "
-                    QueryConditionType.GTE -> " >= ? "
-                    QueryConditionType.LTE -> " =< ? "
-                }
+                getConditionSqlByType(it.type, it.value)
             )
         }
         return sql.replaceFirst("and", "where")
+    }
+
+    fun getConditionSqlByType(type: QueryConditionType, value: List<Any>): String {
+        return when (type) {
+            QueryConditionType.EQ -> " = ?"
+            QueryConditionType.IN -> {
+                val perch = when {
+                    value.isEmpty() -> "?"
+                    else -> value.joinToString(",") { _ -> "?" }
+                }
+                " in (${perch})"
+            }
+
+            QueryConditionType.BETWEEN -> " between ? an ?"
+            QueryConditionType.GT -> " > ? "
+            QueryConditionType.LT -> " < ? "
+            QueryConditionType.GTE -> " >= ? "
+            QueryConditionType.LTE -> " =< ? "
+        }
     }
 
     inline fun <reified T : Any> generateOderBySql(wrapper: Wrapper<T>): String {

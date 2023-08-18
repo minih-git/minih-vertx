@@ -8,7 +8,7 @@ import cn.minih.core.boot.ReplenishInitBeanProcess
 import cn.minih.ms.client.proxy.ServiceProxyFactory
 import cn.minih.web.annotation.RemoteService
 import cn.minih.web.service.Service
-import io.vertx.core.Vertx
+import io.vertx.core.Context
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
@@ -29,7 +29,7 @@ class InitRemoteService : ReplenishInitBeanProcess {
         return false
     }
 
-    override suspend fun exec(vertx: Vertx, clazz: List<KClass<*>>) {
+    override suspend fun exec(context: Context, clazz: List<KClass<*>>) {
         val remoteService = clazz.filter { hasRemoteAnnotation(it) }
         remoteService.forEach {
             if (it.simpleName != null) {

@@ -11,6 +11,7 @@ import cn.minih.web.annotation.*
 import com.google.gson.Gson
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.vertx.core.Context
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
@@ -84,12 +85,8 @@ fun <T : Any> String.jsonConvertData(clazz: KClass<T>): T {
     return Gson().fromJson(this, clazz.java)
 }
 
-fun getConfig(): CoreConfig {
-    return getRootConfig()
-}
-
-private fun getRootConfigRaw(vertx: Vertx = Vertx.currentContext().owner()): JsonObject {
-    val configRaw = vertx.orCreateContext.config()
+private fun getRootConfigRaw(context: Context = Vertx.currentContext()): JsonObject {
+    val configRaw = context.config()
     val c = configRaw.getValue(PROJECT_NAME)
     if (c is JsonObject) {
         return c
@@ -97,13 +94,18 @@ private fun getRootConfigRaw(vertx: Vertx = Vertx.currentContext().owner()): Jso
     return JsonObject()
 }
 
-fun getRootConfig(vertx: Vertx = Vertx.currentContext().owner()): CoreConfig {
-    val configRaw = getRootConfigRaw(vertx)
+fun getConfig(): CoreConfig {
+    return getRootConfig()
+}
+
+
+fun getRootConfig(context: Context = Vertx.currentContext()): CoreConfig {
+    val configRaw = getRootConfigRaw(context)
     return fillObject(configRaw, CoreConfig::class)
 }
 
-fun getProjectName(): String {
-    return getRootConfig().name
+fun getProjectName(context: Context = Vertx.currentContext()): String {
+    return getRootConfig(context).name
 }
 
 fun getEnv(): String {
@@ -113,9 +115,9 @@ fun getEnv(): String {
 fun <T : IConfig> getConfig(
     configName: String,
     configClass: KClass<T>,
-    vertx: Vertx = Vertx.currentContext().owner()
+    context: Context = Vertx.currentContext()
 ): T {
-    val config = getRootConfigRaw(vertx).getJsonObject(configName) ?: jsonObjectOf()
+    val config = getRootConfigRaw(context).getJsonObject(configName) ?: jsonObjectOf()
     return fillObject(config, configClass)
 }
 
