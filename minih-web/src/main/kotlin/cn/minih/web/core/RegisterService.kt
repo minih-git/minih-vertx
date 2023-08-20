@@ -20,6 +20,7 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.memberFunctions
+import kotlin.reflect.full.valueParameters
 
 /**
  * 注册服务
@@ -42,10 +43,10 @@ object RegisterService {
                 if (mapping.url.isNotBlank() && mapping.url != "/") {
                     realPath = realPath.plus(formatPath(mapping.url))
                 }
-                if (pathExists.contains(realPath)) {
+                if (pathExists.contains("${getHttpMethod(mapping.type)?.name()}_$realPath")) {
                     throw MinihException("路径重复！")
                 }
-                pathExists.add(realPath)
+                pathExists.add("${getHttpMethod(mapping.type)?.name()}_$realPath")
                 Triple(fn.name, realPath, mapping.type)
             }
 
@@ -120,7 +121,33 @@ object RegisterService {
             val serviceDef = serviceDefs.first()
             val bean = BeanFactory.instance.getBean(serviceDef.beanName)
             getNeedRegisterFunctions(iservice).filterNotNull().forEach {
-                val fn = bean::class.memberFunctions.first { fn -> fn.name == it.first }
+                val fns = bean::class.memberFunctions.filter { fn -> fn.name == it.first }
+                var fn = fns.first()
+                if (fns.size > 1) {
+                    val iFns = iservice.members.filterIsInstance<KFunction<*>>().filter { iFn -> iFn.name == it.first }
+                    iFns.forEach { fnTmp ->
+                        val requestType = findRequestMapping(fnTmp as KAnnotatedElement)
+                        requestType?.let { mapping ->
+                            if (getHttpMethod(mapping.type) == getHttpMethod(it.third)) {
+                                fn = fns.first { fnTmp1 ->
+                                    var flag =
+                                        fnTmp1.name == fnTmp.name
+                                                && fnTmp1.valueParameters.size == fnTmp.valueParameters.size
+                                                && fnTmp1.returnType::class == fnTmp.returnType::class
+                                    if (flag) {
+                                        for ((index, kParameter) in fnTmp1.valueParameters.withIndex()) {
+                                            val i1 = fnTmp.valueParameters[index]
+                                            if (kParameter.type != i1.type) {
+                                                flag = false
+                                            }
+                                        }
+                                    }
+                                    flag
+                                }
+                            }
+                        }
+                    }
+                }
                 handler(Triple(it.second, getHttpMethod(it.third), fn))
                 registerEventBusConsumer(it.second, fn)
             }

@@ -233,6 +233,11 @@ object RepositoryManager {
                 if (value is List<*>) {
                     value = value.joinToString(",")
                 }
+                if (value is String) {
+                    if (value.isBlank()) {
+                        value = null
+                    }
+                }
                 tuple.addValue(value)
             }
         }
@@ -263,6 +268,11 @@ object RepositoryManager {
                     if (value is List<*>) {
                         value = value.joinToString(",")
                     }
+                    if (value is String) {
+                        if (value.isBlank()) {
+                            value = null
+                        }
+                    }
                     tuple.addValue(value)
                 }
             }
@@ -291,6 +301,11 @@ object RepositoryManager {
             var value = it.value
             if (it.value is List<*>) {
                 value = it.value.joinToString(",")
+            }
+            if (value is String) {
+                if (value.isBlank()) {
+                    value = null
+                }
             }
             tuple.addValue(value)
         }
@@ -324,6 +339,11 @@ object RepositoryManager {
                     var value = field.get(entity)
                     if (value is List<*>) {
                         value = value.joinToString(",")
+                    }
+                    if (value is String) {
+                        if (value.isBlank()) {
+                            value = null
+                        }
                     }
                     updateWrapper.set(field.name, value)
                 }

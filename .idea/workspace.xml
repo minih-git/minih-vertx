@@ -6,15 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="优化">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/util/Assert.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/util/Assert.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/database/mysql/enum/DataSwitchType.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/database/mysql/enum/DataSwitchType.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/boot/MinihBootServiceRun.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/boot/MinihBootServiceRun.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/service/AbstractAuthService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/service/AbstractAuthService.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryManager.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryUtils.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/DeregisterService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/DeregisterService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/RegisterService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/RegisterService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/core/MinihWebVerticle.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/core/MinihWebVerticle.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/core/RegisterService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/core/RegisterService.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -170,77 +164,11 @@
       <recent name="cn.minih.core.boot" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.minih-vertx [publish]">
-    <configuration name="minih-vertx [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+  <component name="RunManager" selected="Gradle.minih-vertx:minih-web [publish]">
+    <configuration name="minih-vertx:minih-auth [publishToMavenLocal]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="publish" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="minih-vertx:minih-cache [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-cache" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="publish" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="minih-vertx:minih-common [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-common" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="publish" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="minih-vertx:minih-database-mysql [publishToMavenLocal]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-database-mysql" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-auth" />
         <option name="externalSystemIdString" value="GRADLE" />
         <option name="scriptParameters" />
         <option name="taskDescriptions">
@@ -249,6 +177,28 @@
         <option name="taskNames">
           <list>
             <option value="publishToMavenLocal" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="minih-vertx:minih-auth [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-auth" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="publish" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -281,13 +231,57 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
+    <configuration name="minih-vertx:minih-web [publishToMavenLocal]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-web" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="publishToMavenLocal" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="minih-vertx:minih-web [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-web" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="publish" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.minih-vertx [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-web [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-web [publishToMavenLocal]" />
         <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publish]" />
-        <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publishToMavenLocal]" />
-        <item itemvalue="Gradle.minih-vertx:minih-common [publish]" />
-        <item itemvalue="Gradle.minih-vertx:minih-cache [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-auth [publishToMavenLocal]" />
+        <item itemvalue="Gradle.minih-vertx:minih-auth [publish]" />
       </list>
     </recent_temporary>
   </component>
@@ -335,6 +329,12 @@
       <workItem from="1692169260811" duration="2708000" />
       <workItem from="1692235544267" duration="617000" />
       <workItem from="1692236830660" duration="9380000" />
+      <workItem from="1692356624021" duration="840000" />
+      <workItem from="1692360067870" duration="11000" />
+      <workItem from="1692415761529" duration="9000" />
+      <workItem from="1692415967231" duration="1789000" />
+      <workItem from="1692451328494" duration="7000" />
+      <workItem from="1692499063342" duration="5387000" />
     </task>
     <task id="LOCAL-00001" summary="提取组件">
       <option name="closed" value="true" />
@@ -541,7 +541,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheImpl.kt</url>
-          <line>157</line>
+          <line>202</line>
           <option name="timeStamp" value="11" />
         </line-breakpoint>
       </breakpoints>

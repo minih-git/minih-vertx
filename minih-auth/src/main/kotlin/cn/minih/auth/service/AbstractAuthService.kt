@@ -41,7 +41,7 @@ abstract class AbstractAuthService : AuthService {
 
     override suspend fun getLoginRole(loginId: String): List<String> {
         val cache = cacheManager.getCache(LOGIN_USER_ROLES_CACHE_KEY)
-        return cache.members(loginId, String::class).await() ?: emptyList()
+        return cache.lRange(loginId, String::class).await() ?: emptyList()
     }
 
 
