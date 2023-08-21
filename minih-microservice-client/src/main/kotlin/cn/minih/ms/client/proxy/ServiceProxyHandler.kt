@@ -89,7 +89,14 @@ class ServiceProxyHandler : InvocationHandler, Service {
         val args1 = buildArgs(proxied.second, args)
         return context.owner().eventBus()
             .request<JsonObject>(remoteServiceAnno.remote.plus(address), args1)
-            .compose { Future.succeededFuture<Any>(it?.body()?.toJsonObject()?.covertTo(proxied.second.returnType)) }
+            .compose {
+                val rType = proxied.second.returnType
+                if (isBasicType(rType)) {
+
+                    Future.succeededFuture(it?.body()?.let { it1 -> covertBasic(it1, rType) })
+                }
+                Future.succeededFuture<Any>(it?.body()?.toJsonObject()?.covertTo(proxied.second.returnType))
+            }
 
     }
 
@@ -146,7 +153,11 @@ class ServiceProxyHandler : InvocationHandler, Service {
         }.compose {
             val result = it.toJson().toJsonObject()
             val rType = proxied.second.returnType.arguments.first().type!!
-            Future.succeededFuture(result.getJsonObject("data").covertTo(rType))
+            if (isBasicType(rType)) {
+                Future.succeededFuture(covertBasic(result.getValue("data"), rType))
+            } else {
+                Future.succeededFuture(result.getJsonObject("data").covertTo(rType))
+            }
         }
 
     }
