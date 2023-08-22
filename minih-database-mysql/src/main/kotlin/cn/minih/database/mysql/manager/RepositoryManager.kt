@@ -135,7 +135,10 @@ object RepositoryManager {
                     }
                     printLog(sql, tuple, count)
                     future.complete(count)
-                }
+                }.onFailure {
+                    printWarningLog(sql, tuple, it.message)
+                    future.complete(0)
+                }.onComplete { conn.close() }
         }
         return future.future()
     }
