@@ -18,7 +18,15 @@ class SnowFlake(bid: String) {
 
     companion object {
         fun getBusinessId(id: Long): Long {
-            return (id shl 47 ushr 1) and (-1L shl 59 ushr 1) shr 58
+            return (id ushr 12) and (-1L shl 5).inv()
+        }
+
+        fun getTimeStamp(id: Long): Long {
+            return (id ushr 22) + sp
+        }
+
+        fun getDateCenter(id: Long): Long {
+            return (id ushr 17) and (-1L shl 5).inv()
         }
     }
 
