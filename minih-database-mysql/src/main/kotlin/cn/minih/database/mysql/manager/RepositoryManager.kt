@@ -131,11 +131,14 @@ object RepositoryManager {
                     val resultRaw = rowSet.result()
                     var count = 0L
                     if (resultRaw != null && resultRaw.size() != 0) {
-                        count = resultRaw.first().get(Long::class.java, "count")
+                        count = resultRaw.firstOrNull()?.getLong("count") ?: 0L
                     }
                     printLog(sql, tuple, count)
                     future.complete(count)
-                }
+                }.onFailure {
+                    printWarningLog(sql, tuple, it.message)
+                    future.complete(0)
+                }.onComplete { conn.close() }
         }
         return future.future()
     }
