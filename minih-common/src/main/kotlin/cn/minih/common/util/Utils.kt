@@ -9,6 +9,7 @@ import cn.minih.core.config.IConfig
 import cn.minih.core.config.PROJECT_NAME
 import cn.minih.web.annotation.*
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.vertx.core.Context
@@ -61,9 +62,12 @@ fun findFirstNonLoopBackAddress(): InetAddress? {
     return result
 }
 
+fun getGson(): Gson {
+    return GsonBuilder().serializeNulls().create()
+}
 
 fun <T : Any> JsonObject.covertTo(clazz: KClass<T>): T {
-    return Gson().fromJson(this.toString(), clazz.java)
+    return getGson().fromJson(this.toString(), clazz.java)
 }
 
 fun JsonObject.covertTo(kType: KType): Any {
@@ -74,15 +78,15 @@ fun Any.toJsonObject(): JsonObject {
     if (this is JsonObject) {
         return this
     }
-    return JsonObject(Gson().toJson(this))
+    return JsonObject(getGson().toJson(this))
 }
 
 fun Any.toJsonString(): String {
-    return Gson().toJson(this)
+    return getGson().toJson(this)
 }
 
 fun <T : Any> String.jsonConvertData(clazz: KClass<T>): T {
-    return Gson().fromJson(this, clazz.java)
+    return getGson().fromJson(this, clazz.java)
 }
 
 private fun getRootConfigRaw(context: Context = Vertx.currentContext()): JsonObject {
@@ -275,18 +279,24 @@ fun <T> T?.notNullAndExec(fn: (T) -> Unit) {
     }
 }
 
-fun <T : Any> T.updateData(source: Any, ignoredNull: Boolean = true): T {
+fun <T : Any> T.updateData(
+    source: Any,
+    ignoredNull: Boolean = true,
+    ignoredField: List<KProperty1<T, *>> = listOf()
+): T {
     val targetClazz = this::class.createType().classifier as KClass<*>
     val targetFields = targetClazz.memberProperties
     val sourceData = source.toJsonObject()
     targetFields.forEach {
-        if (it is KMutableProperty1<*, *>) {
-            val value = sourceData.getValue(it.name)
-
-            if ((value != null && !isNullOrBlankOrZero(value)) || !ignoredNull) {
-                setField(it, this, value)
+        if (ignoredField.isEmpty() || !ignoredField.contains(it)) {
+            if (it is KMutableProperty1<*, *>) {
+                val value = sourceData.getValue(it.name)
+                if ((value != null && !isNullOrBlankOrZero(value)) || !ignoredNull) {
+                    setField(it, this, value)
+                }
             }
         }
+
     }
     return this
 }
@@ -321,7 +331,15 @@ fun generateArgs(argsNeed: List<KParameter>, params: JsonObject): Array<Any?> {
                         else -> {
                             val childType = type.arguments.first().type?.classifier as KClass<*>
                             when {
-                                isBasicType(childType.createType()) -> covertBasic(params[it], childType.createType())
+                                isBasicType(childType.createType()) -> d.map { vt ->
+                                    vt?.let {
+                                        covertBasic(
+                                            vt,
+                                            childType.createType()
+                                        )
+                                    }
+                                }
+
                                 else -> d.map { vt -> vt?.let { fillObject(vt.toJsonObject(), childType) } }
                             }
                         }

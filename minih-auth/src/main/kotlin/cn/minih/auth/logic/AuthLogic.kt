@@ -11,9 +11,9 @@ import cn.minih.cache.core.CacheManager
 import cn.minih.cache.redis.impl.RedisCacheConfig
 import cn.minih.cache.redis.impl.RedisCacheManagerImpl
 import cn.minih.common.exception.IMinihErrorCode
+import cn.minih.common.util.SnowFlake
 import cn.minih.common.util.getConfig
 import cn.minih.common.util.notNullAndExecSuspend
-import cn.minih.core.util.SnowFlakeContext
 import io.vertx.core.Vertx
 import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.kotlin.coroutines.await
@@ -40,7 +40,7 @@ object AuthLogic {
             TOKEN_STYLE_RANDOM_64 -> getRandomString(64)
             TOKEN_STYLE_RANDOM_128 -> getRandomString(128)
             TOKEN_STYLE_TIK -> "${getRandomString(2)}_${getRandomString(14)}_${getRandomString(16)}__"
-            TOKEN_STYLE_SNOWFLAKE -> SnowFlakeContext.instance.currentContext().nextId().toString()
+            TOKEN_STYLE_SNOWFLAKE -> SnowFlake.instance.nextId(0).toString()
             else -> UUID.randomUUID().toString()
         }
         return token
@@ -62,15 +62,18 @@ object AuthLogic {
         loginId?.notNullAndExecSuspend {
             val sessionRaw = getSessionByLoginId(loginId)
             sessionRaw?.let { session ->
-                val tokenSign = session.tokenSignList.first { tokenSign -> tokenSign.token == token }
-                val cache = cacheManager.getCache(TOKEN_VALUE_CACHE_KEY)
-                cache.setExpire(token, Duration.ofSeconds(tokenSign.timeout))
-                val cache1 = cacheManager.getCache(LOGIN_SESSION_CACHE_KEY)
-                cache1.setExpire(session.loginId, Duration.ofSeconds(tokenSign.timeout))
-                val cache2 = cacheManager.getCache(SESSION_ACTIVE_CACHE_KEY)
-                cache2.put(session.loginId, Date().time, Duration.ofSeconds(tokenSign.timeout))
-                Vertx.currentContext().owner()?.eventBus()
-                    ?.publish(AUTH_SESSION_KEEP, jsonObjectOf("token" to token, "loginId" to loginId))
+                val tokenSign = session.tokenSignList.firstOrNull { tokenSign -> tokenSign.token == token }
+                tokenSign?.let {
+                    val cache = cacheManager.getCache(TOKEN_VALUE_CACHE_KEY)
+                    cache.setExpire(token, Duration.ofSeconds(it.timeout))
+                    val cache1 = cacheManager.getCache(LOGIN_SESSION_CACHE_KEY)
+                    cache1.setExpire(session.loginId, Duration.ofSeconds(it.timeout))
+                    val cache2 = cacheManager.getCache(SESSION_ACTIVE_CACHE_KEY)
+                    cache2.put(session.loginId, Date().time, Duration.ofSeconds(it.timeout))
+                    Vertx.currentContext().owner()?.eventBus()
+                        ?.publish(AUTH_SESSION_KEEP, jsonObjectOf("token" to token, "loginId" to loginId))
+                }
+
             }
         }
 

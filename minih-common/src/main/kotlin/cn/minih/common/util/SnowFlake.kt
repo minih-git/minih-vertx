@@ -14,9 +14,13 @@ const val datacenterIdShift = sequenceBits + businessIdBits
 const val timestampLeftShift = sequenceBits + businessIdBits + datacenterIdBits
 const val sequenceMask = -1L xor (-1L shl sequenceBits.toInt())
 
-class SnowFlake(bid: String) {
+class SnowFlake private constructor() {
 
     companion object {
+        val instance by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+            SnowFlake()
+        }
+
         fun getBusinessId(id: Long): Long {
             return (id ushr 12) and (-1L shl 5).inv()
         }
@@ -30,27 +34,24 @@ class SnowFlake(bid: String) {
         }
     }
 
-    private var businessId: Long
     private val datacenterId = getCenterId(InetAddress.getLocalHost().hostAddress)
     private var sequence = AtomicLong(0)
-
     private var lastTimestamp = AtomicLong(-1L)
 
-    init {
-        businessId = getBusinessId(bid)
+    @Synchronized
+    fun nextId(bid: String = ""): Long {
+        return nextId(covertBusinessId(bid))
     }
 
     @Synchronized
     fun nextId(bid: Long = 0L): Long {
-        if (bid != 0L) {
-            businessId = bid
-        }
+        val businessId = covertBusinessId(bid)
         var timestamp: Long = System.currentTimeMillis()
         if (timestamp < lastTimestamp.get()) {
             log.error { "系统时间不正确" }
             throw RuntimeException("系统时间不正确")
         }
-        if (lastTimestamp.get() == timestamp) {
+        if (lastTimestamp.get() == timestamp || lastTimestamp.get() <= timestamp) {
             sequence.set((sequence.incrementAndGet() and sequenceMask))
             if (sequence.get() == 0L) {
                 // 阻塞到下一个毫秒,获得新的时间戳
@@ -81,7 +82,11 @@ class SnowFlake(bid: String) {
                 (s[2].toLong() shl 8) + s[3].toLong())
     }
 
-    private fun getBusinessId(businessId: String): Long {
+    private fun covertBusinessId(businessId: String): Long {
         return (businessId.hashCode() and Int.MAX_VALUE).toLong() % 31L
+    }
+
+    private fun covertBusinessId(businessId: Long): Long {
+        return if (businessId <= 31L) businessId else businessId % 31L
     }
 }

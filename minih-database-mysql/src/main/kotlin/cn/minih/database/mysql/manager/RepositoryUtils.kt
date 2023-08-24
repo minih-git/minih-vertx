@@ -1,9 +1,9 @@
 package cn.minih.database.mysql.manager
 
 import cn.minih.common.util.Assert
+import cn.minih.common.util.SnowFlake
 import cn.minih.common.util.log
 import cn.minih.common.util.toJsonObject
-import cn.minih.core.util.SnowFlakeContext
 import cn.minih.database.mysql.annotation.TableId
 import cn.minih.database.mysql.enum.TableIdType
 import cn.minih.database.mysql.operation.Wrapper
@@ -70,8 +70,7 @@ fun <T : Any> insertPrimaryKey(entity: T) {
                         filed.setter.call(
                             entity, when (tableId.value) {
                                 TableIdType.INPUT -> System.currentTimeMillis()
-                                TableIdType.SNOWFLAKE -> SnowFlakeContext.instance.currentContext()
-                                    .nextId(tableId.sfBusId)
+                                TableIdType.SNOWFLAKE -> SnowFlake.instance.nextId(tableId.sfBusId)
 
                                 TableIdType.UUID -> UUID.randomUUID().toString()
                                 else -> ""

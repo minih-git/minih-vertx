@@ -35,7 +35,7 @@ class RedisClient private constructor() {
             val redisOption = RedisOptions()
                 .addConnectionString(connectionString)
                 .setMaxPoolSize(config.poolSize)
-                .setMaxPoolWaiting(config.poolSize * 10)
+                .setMaxPoolWaiting(config.poolSize * 100)
                 .setType(config.type)
             RedisAPI.api(Redis.createClient(Vertx.currentContext().owner(), redisOption))
         }
