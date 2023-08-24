@@ -11,6 +11,8 @@ import cn.minih.web.annotation.Post
 import cn.minih.web.annotation.Put
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
+import io.vertx.core.http.HttpServerRequest
+import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -19,6 +21,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.callSuspend
+import kotlin.reflect.full.createType
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.valueParameters
 
@@ -84,14 +87,17 @@ object RegisterService {
                 var rawResult: Any?
                 try {
                     val bean: Any? = getBeanCall(fn.parameters)
-                    val realArgs = bean?.let {
+                    val parameters = bean?.let {
                         fn.parameters.subList(1, fn.parameters.size)
                     } ?: fn.parameters
-                    val args = generateArgs(realArgs, p.body())
+                    val bodyParameters =
+                        parameters.filter { it.type == RoutingContext::class.createType() || it.type == HttpServerRequest::class.createType() }
+                    Assert.isNull(bodyParameters, "接口[${fn.name}]需要http请求参数，无法创建eventBusConsumer!")
+                    val args = generateArgs(parameters, p.body()).map { it.second }.toTypedArray()
                     rawResult = when {
-                        bean == null && realArgs.isEmpty() -> if (fn.isSuspend) fn.callSuspend() else fn.call()
+                        bean == null && parameters.isEmpty() -> if (fn.isSuspend) fn.callSuspend() else fn.call()
                         bean == null -> if (fn.isSuspend) fn.callSuspend(*args) else fn.call(*args)
-                        realArgs.isEmpty() -> if (fn.isSuspend) fn.callSuspend(bean) else fn.call(bean)
+                        parameters.isEmpty() -> if (fn.isSuspend) fn.callSuspend(bean) else fn.call(bean)
                         else -> if (fn.isSuspend) fn.callSuspend(bean, *args) else fn.call(bean, *args)
                     }
                 } catch (e: Exception) {

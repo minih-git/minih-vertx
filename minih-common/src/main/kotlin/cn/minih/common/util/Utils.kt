@@ -314,9 +314,8 @@ fun isNullOrBlankOrZero(v: Any): Boolean {
     }
 }
 
-fun generateArgs(argsNeed: List<KParameter>, params: JsonObject): Array<Any?> {
-    val args = mutableListOf<Any?>()
-    argsNeed.forEach { argsType ->
+fun generateArgs(argsNeed: List<KParameter>, params: JsonObject): List<Pair<KParameter, Any?>> {
+    return argsNeed.map { argsType ->
         val type = argsType.type
         val typeClass = type.classifier as KClass<*>
         val isMarkedNullable = type.isMarkedNullable
@@ -346,10 +345,12 @@ fun generateArgs(argsNeed: List<KParameter>, params: JsonObject): Array<Any?> {
                     }
                 }
 
+                typeClass.superclasses.contains(Enum::class) -> typeClass.functions.first { it.name == "valueOf" }
+                    .call(params[it])!!
+
                 else -> params.covertTo(type)
             }
         }
-
         if (isBasicType(type)) {
             if (!isMarkedNullable && param == null) {
                 throw MinihArgumentErrorException("参数：${argsType.name} 不能为空！")
@@ -363,10 +364,8 @@ fun generateArgs(argsNeed: List<KParameter>, params: JsonObject): Array<Any?> {
                 }
             }
         }
-
-        args.add(param)
+        Pair(argsType, param)
     }
-    return args.toTypedArray()
 }
 
 fun getClassesByPath(path: String): MutableSet<KClass<*>> {

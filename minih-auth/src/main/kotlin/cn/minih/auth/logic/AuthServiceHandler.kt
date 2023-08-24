@@ -26,6 +26,7 @@ import cn.minih.web.service.Service
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.http.Cookie
+import io.vertx.core.http.HttpServerRequest
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Route
 import io.vertx.ext.web.RoutingContext
@@ -37,6 +38,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.callSuspend
+import kotlin.reflect.full.createType
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 
@@ -60,15 +62,34 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
             try {
                 authCheckRole(fn, ctx)
                 val bean: Any? = getBeanCall(fn.parameters)
-                val realArgs = bean?.let {
+                val parameters = bean?.let {
                     fn.parameters.subList(1, fn.parameters.size)
                 } ?: fn.parameters
-                val args = generateArgs(realArgs, getRequestBody(ctx))
+                val bodyParameters =
+                    parameters.filter { it.type != RoutingContext::class.createType() && it.type != HttpServerRequest::class.createType() }
+                val args = generateArgs(bodyParameters, getRequestBody(ctx))
+                val realArgs = mutableListOf<Any?>()
+                parameters.forEach {
+                    if (it.type == RoutingContext::class.createType()) {
+                        realArgs.add(ctx)
+                        return@forEach
+                    }
+                    if (it.type == HttpServerRequest::class.createType()) {
+                        realArgs.add(ctx.request())
+                        return@forEach
+                    }
+                    if (args.isNotEmpty()) {
+                        realArgs.add(args.first { a -> a.first == it }.second)
+                    }
+                }
                 val rawResult = when {
-                    bean == null && realArgs.isEmpty() -> if (fn.isSuspend) fn.callSuspend() else fn.call()
-                    bean == null -> if (fn.isSuspend) fn.callSuspend(*args) else fn.call(*args)
-                    realArgs.isEmpty() -> if (fn.isSuspend) fn.callSuspend(bean) else fn.call(bean)
-                    else -> if (fn.isSuspend) fn.callSuspend(bean, *args) else fn.call(bean, *args)
+                    bean == null && parameters.isEmpty() -> if (fn.isSuspend) fn.callSuspend() else fn.call()
+                    bean == null -> if (fn.isSuspend) fn.callSuspend(*realArgs.toTypedArray()) else fn.call(*realArgs.toTypedArray())
+                    parameters.isEmpty() -> if (fn.isSuspend) fn.callSuspend(bean) else fn.call(bean)
+                    else -> if (fn.isSuspend) fn.callSuspend(bean, *realArgs.toTypedArray()) else fn.call(
+                        bean,
+                        *realArgs.toTypedArray()
+                    )
                 }
                 val config = getConfig("auth", AuthConfig::class)
                 if (config.encryptData) {
