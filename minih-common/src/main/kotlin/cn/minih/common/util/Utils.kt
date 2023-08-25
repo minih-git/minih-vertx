@@ -174,6 +174,28 @@ fun fillObjectHandleList(value: Any, it: KProperty<*>): Any {
     return value
 }
 
+fun covertTypeData(value: Any, type: KType): Any {
+    val clazz = type.classifier as KClass<*>
+    return when {
+        isBasicType(type) -> covertBasic(value, type)
+        clazz.simpleName === List::class.simpleName -> covertListData(value)
+        clazz.superclasses.contains(Enum::class) -> clazz.functions.first { f -> f.name == "valueOf" }.call(value)!!
+        else -> value.toJsonObject().covertTo(type)
+    }
+}
+
+fun covertListData(value: Any): Any {
+    if (value is List<*> && value.isNotEmpty()) {
+        val first = value.firstOrNull() ?: return value
+        return if (isBasicType(first::class.createType())) {
+            value.map { vt -> vt?.let { covertBasic(vt, first::class.createType()) } }
+        } else {
+            value.map { vt -> vt?.let { fillObject(vt.toJsonObject(), first::class) } }
+        }
+    }
+    return value
+}
+
 
 fun covertBasic(value: Any, typeTmp: KType, tryString: Boolean = true): Any {
     var type = typeTmp

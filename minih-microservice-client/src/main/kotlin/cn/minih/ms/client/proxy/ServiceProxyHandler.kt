@@ -20,7 +20,10 @@ import java.lang.reflect.Method
 import kotlin.reflect.KAnnotatedElement
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
-import kotlin.reflect.full.*
+import kotlin.reflect.full.createType
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.hasAnnotation
+import kotlin.reflect.full.valueParameters
 
 
 /**
@@ -150,14 +153,7 @@ class ServiceProxyHandler : InvocationHandler, Service {
         }.compose {
             val result = it.toJson().toJsonObject()
             val rType = proxied.second.returnType.arguments.first().type!!
-            if (isBasicType(rType)) {
-                Future.succeededFuture(covertBasic(result.getValue("data"), rType))
-            } else if (rType::class.superclasses.contains(Enum::class)) {
-                Future.succeededFuture(rType::class.functions.first { f -> f.name == "valueOf" }
-                    .call(result.getValue("data"))!!)
-            } else {
-                Future.succeededFuture(result.getJsonObject("data").covertTo(rType))
-            }
+            Future.succeededFuture(covertTypeData(result.getValue("data"), rType))
         }
 
     }
