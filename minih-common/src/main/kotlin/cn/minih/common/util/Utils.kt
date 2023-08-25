@@ -184,19 +184,19 @@ fun covertBasic(value: Any, typeTmp: KType, tryString: Boolean = true): Any {
         String::class.createType() -> value.toString()
         Int::class.createType() -> when {
             value is Int -> value
-            tryString && value is String -> value.toString().toInt()
+            tryString && value is String -> if (value.isBlank()) 0 else value.toString().toInt()
             else -> throw MinihDataCovertException("非string类数据")
         }
 
         Short::class.createType() -> when {
             value is Short -> value
-            tryString && value is String -> value.toString().toShort()
+            tryString && value is String -> if (value.isBlank()) 0 else value.toString().toShort()
             else -> throw MinihDataCovertException("非short类数据")
         }
 
         Long::class.createType() -> when {
             value is Long -> value
-            tryString && value is String -> value.toString().toLong()
+            tryString && value is String -> if (value.isBlank()) 0 else value.toString().toLong()
             else -> throw MinihDataCovertException("非long类数据")
         }
 
@@ -208,19 +208,19 @@ fun covertBasic(value: Any, typeTmp: KType, tryString: Boolean = true): Any {
 
         Float::class.createType() -> when {
             value is Float -> value
-            tryString && value is String -> value.toString().toFloat()
+            tryString && value is String -> if (value.isBlank()) 0.0F else value.toString().toFloat()
             else -> throw MinihDataCovertException("非float类数据")
         }
 
         Double::class.createType() -> when {
             value is Double -> value
-            tryString && value is String -> value.toString().toDouble()
+            tryString && value is String -> if (value.isBlank()) 0.0 else value.toString().toDouble()
             else -> throw MinihDataCovertException("非double类数据")
         }
 
         Boolean::class.createType() -> when {
             value is Boolean -> value
-            tryString && value is String -> value.toString().toBoolean()
+            tryString && value is String -> if (value.isBlank()) false else value.toString().toBoolean()
             value is Int -> value == 1
             value is Long -> value == 1L
             else -> throw MinihDataCovertException("非boolean类数据")
