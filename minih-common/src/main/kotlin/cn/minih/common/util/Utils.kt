@@ -178,20 +178,41 @@ fun covertTypeData(value: Any, type: KType): Any {
     val clazz = type.classifier as KClass<*>
     return when {
         isBasicType(type) -> covertBasic(value, type)
-        clazz.simpleName === List::class.simpleName -> covertListData(value)
+        clazz.simpleName === List::class.simpleName -> covertListData(
+            value,
+            type.arguments.first().type!!.classifier as KClass<*>
+        )
+
         clazz.superclasses.contains(Enum::class) -> clazz.functions.first { f -> f.name == "valueOf" }.call(value)!!
         else -> value.toJsonObject().covertTo(type)
     }
 }
 
-fun covertListData(value: Any): Any {
-    if (value is List<*> && value.isNotEmpty()) {
-        val first = value.firstOrNull() ?: return value
-        return if (isBasicType(first::class.createType())) {
-            value.map { vt -> vt?.let { covertBasic(vt, first::class.createType()) } }
-        } else {
-            value.map { vt -> vt?.let { fillObject(vt.toJsonObject(), first::class) } }
+fun covertListData(value: Any, clazz: KClass<*>? = null): Any {
+    if ((value is Iterable<*>)) {
+        if (value.iterator().hasNext()) {
+            val first = value.firstOrNull() ?: return value
+            var firstClass = first::class
+            clazz?.let {
+                if (!getSuperClassRecursion(it).contains(Iterable::class)) {
+                    firstClass = clazz
+                }
+            }
+            return when {
+                isBasicType(firstClass.createType()) -> value.map { vt ->
+                    vt?.let {
+                        covertBasic(
+                            vt,
+                            firstClass.createType()
+                        )
+                    }
+                }
+
+                firstClass == JsonObject::class -> value
+                else -> value.map { vt -> vt?.let { fillObject(vt.toJsonObject(), firstClass) } }
+            }
         }
+        return emptyList<Any>()
     }
     return value
 }

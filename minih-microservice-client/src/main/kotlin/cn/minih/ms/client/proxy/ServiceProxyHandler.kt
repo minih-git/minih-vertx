@@ -67,10 +67,18 @@ class ServiceProxyHandler : InvocationHandler, Service {
             }
 
             for ((index, parameter) in method.valueParameters.withIndex()) {
+                val value = args[index]
+                val typeClass = args[index]::class
+
                 params.put(
                     parameter.name,
-                    if (isBasicType(args[index]::class.createType())) args[index] else args[index].toJsonObject()
+                    when {
+                        typeClass.simpleName!!.contains("List") -> value
+                        isBasicType(typeClass.createType()) -> value
+                        else -> value.toJsonObject()
+                    }
                 )
+
             }
         }
         return params
