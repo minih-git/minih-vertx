@@ -8,6 +8,7 @@ import cn.minih.database.mysql.annotation.LogicKey
 import cn.minih.database.mysql.annotation.TableId
 import cn.minih.database.mysql.config.DbConfig
 import cn.minih.database.mysql.enum.DataStateType
+import cn.minih.database.mysql.enum.OrderByType
 import cn.minih.database.mysql.operation.QueryWrapper
 import cn.minih.database.mysql.operation.SqlBuilder
 import cn.minih.database.mysql.operation.UpdateWrapper
@@ -160,8 +161,14 @@ object RepositoryManager {
                 }
                 val cursorName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, cursorKeyName)
                 val orderType = cursorAnno?.type?.name ?: ""
+                if (page.nextCursor == 0L || page.nextCursor == -1L) {
+                    return sql.plus(" order by  $cursorName $orderType").plus(" limit ${page.pageSize}")
+                }
                 return sql.plus((if (sql.contains(" where ")) " and " else " where "))
-                    .plus(" $cursorName > ?")
+                    .plus(" $cursorName ")
+                    .plus(
+                        if (cursorAnno == null || cursorAnno.type == OrderByType.ASC) " > ? " else " < ? "
+                    )
                     .plus(" order by  $cursorName $orderType").plus(" limit ${page.pageSize}")
             }
             log.debug("复杂sql分页查询，自动转换为offset模式！")
@@ -180,7 +187,9 @@ object RepositoryManager {
         wrapper.condition.forEach { it.value.forEach { v -> tuple.addValue(v) } }
         val sql = covertPageSql(SqlBuilder.generateQuerySql(wrapper), page, wrapper)
         if (page.pageType == PageType.CURSOR) {
-            tuple.addValue(page.nextCursor)
+            if (page.nextCursor != 0L && page.nextCursor != -1L) {
+                tuple.addValue(page.nextCursor)
+            }
         }
         val future: Promise<Page<T>> = Promise.promise()
         list<T>(sql, tuple, wrapper).onComplete {
