@@ -215,6 +215,7 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
             ctx.response().addCookie(Cookie.cookie(config.tokenName, URLUtil.encode(tokenValue)))
             ctx.response().putHeader(config.tokenName, tokenValue)
             ctx.put(CONTEXT_LOGIN_ID, tokenInfo.loginId)
+            ctx.put(CONTEXT_LOGIN_TOKEN, tokenValue)
             ctx.json(R.ok(tokenInfo).toJsonObject())
         } catch (e: Exception) {
             var key = ""
@@ -270,17 +271,6 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         var tokenValue: String? = ""
         val config = getConfig("auth", AuthConfig::class)
         val request = ctx.request()
-        if (AntPathMatcher().match("/ws/**", request.path())
-            || config.ignoreAuthUri.any {
-                AntPathMatcher().match(
-                    it,
-                    request.path()
-                )
-            }
-            || request.getHeader(MICROSERVICE_INNER_REQUEST_HEADER) == MICROSERVICE_INNER_REQUEST_HEADER_VALUE
-        ) {
-            return
-        }
         if (tokenValue.isNullOrBlank() && config.isReadHeader) {
             tokenValue = request.getHeader(config.tokenName)
         }
@@ -290,9 +280,18 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         if (tokenValue.isNullOrBlank() && config.isReadParams) {
             tokenValue = request.getParam(config.tokenName)
         }
+        if (tokenValue.isNullOrBlank() &&
+            (AntPathMatcher().match("/ws/**", request.path()) ||
+                    config.ignoreAuthUri.any { AntPathMatcher().match(it, request.path()) } ||
+                    request.getHeader(MICROSERVICE_INNER_REQUEST_HEADER) == MICROSERVICE_INNER_REQUEST_HEADER_VALUE)
+        ) {
+            return
+        }
         val loginId = AuthUtil.checkLogin(tokenValue)
         Vertx.currentContext().put(CONTEXT_LOGIN_ID, loginId)
+        Vertx.currentContext().put(CONTEXT_LOGIN_TOKEN, tokenValue)
         ctx.put(CONTEXT_LOGIN_ID, loginId)
+        ctx.put(CONTEXT_LOGIN_TOKEN, tokenValue)
         val roleTags = authService.getLoginRole(loginId)
         val isSystemAdmin = roleTags.isNotEmpty() && roleTags.contains(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)
         Vertx.currentContext().put(CONTEXT_IS_SYSTEM_ADMIN, isSystemAdmin)

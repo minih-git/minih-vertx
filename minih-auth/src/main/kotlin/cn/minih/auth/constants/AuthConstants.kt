@@ -24,6 +24,7 @@ const val DEFAULT_LOGOUT_PATH = "/auth/logout"
 const val TOKEN_CONNECTOR_CHAT = " "
 const val NEVER_EXPIRE = -1L
 const val CONTEXT_LOGIN_ID = "loginId"
+const val CONTEXT_LOGIN_TOKEN = "loginIToken"
 const val CONTEXT_IS_SYSTEM_ADMIN = "isSystemAdmin"
 const val CONTEXT_SYSTEM_ADMIN_ROLE_TAG = "role_system_admin"
 const val AUTH_SESSION_OFFLINE = "cn.minih.auth.session.offline"

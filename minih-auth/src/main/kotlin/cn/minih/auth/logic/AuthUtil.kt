@@ -98,6 +98,15 @@ object AuthUtil {
         }
     }
 
+    fun getCurrentLoginToken(): String {
+        return try {
+            Vertx.currentContext().get(CONTEXT_LOGIN_TOKEN)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_NO_TOKEN)
+        }
+    }
+
     fun currentIsSysAdmin(): Boolean {
         return Vertx.currentContext().get(CONTEXT_IS_SYSTEM_ADMIN)
     }

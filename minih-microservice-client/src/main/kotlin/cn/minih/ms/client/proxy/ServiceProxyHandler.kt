@@ -58,30 +58,40 @@ class ServiceProxyHandler : InvocationHandler, Service {
         return formatPath(path)
     }
 
-    private fun buildArgs(method: KCallable<*>, args: Array<out Any>?): JsonObject {
+    private fun buildArgs(method: KCallable<*>, args: Array<out Any>?): Pair<JsonObject, JsonObject> {
         val params = JsonObject()
-
+        val headers = JsonObject()
         if (method.valueParameters.isNotEmpty()) {
             if (args == null) {
                 throw MinihException("参数数量错误")
             }
-
             for ((index, parameter) in method.valueParameters.withIndex()) {
+                val header = parameter.findAnnotation<HttpHeader>()
                 val value = args[index]
                 val typeClass = args[index]::class
-
-                params.put(
-                    parameter.name,
-                    when {
-                        typeClass.simpleName!!.contains("List") -> value
-                        isBasicType(typeClass.createType()) -> value
-                        else -> value.toJsonObject()
-                    }
-                )
-
+                if (header == null) {
+                    params.put(
+                        parameter.name,
+                        when {
+                            typeClass.simpleName!!.contains("List") -> value
+                            isBasicType(typeClass.createType()) -> value
+                            else -> value.toJsonObject()
+                        }
+                    )
+                } else {
+                    headers.put(
+                        header.name.ifBlank { parameter.name },
+                        when {
+                            typeClass.simpleName!!.contains("List") -> value
+                            isBasicType(typeClass.createType()) -> covertBasic(value, typeClass.createType())
+                            value is Map<*, *> -> value.forEach { headers.put(it.key.toString(), it.value) }
+                            else -> value.toJsonObject().forEach { headers.put(it.key.toString(), it.value) }
+                        }
+                    )
+                }
             }
         }
-        return params
+        return Pair(params, headers)
     }
 
     private fun invokeByEventBus(
@@ -94,7 +104,7 @@ class ServiceProxyHandler : InvocationHandler, Service {
         val address =
             getPath(proxied.first as KAnnotatedElement, proxied.second as KAnnotatedElement).replace("/", ".")
         val remoteServiceAnno = proxied.first!!.findAnnotation<RemoteService>()!!
-        val args1 = buildArgs(proxied.second, args)
+        val args1 = buildArgs(proxied.second, args).first
         return context.owner().eventBus()
             .request<JsonObject>(remoteServiceAnno.remote.plus(address), args1)
             .compose {
@@ -143,7 +153,11 @@ class ServiceProxyHandler : InvocationHandler, Service {
                     errorCode = MinihErrorCode.ERR_CODE_NOT_FOUND_ERROR
                 )
             }
-            val args1 = buildArgs(proxied.second, args).toBuffer()
+            val argsRaw = buildArgs(proxied.second, args)
+            val args1 = argsRaw.first.toBuffer()
+            val header = argsRaw.second
+
+
             val httpClient = context.owner().createHttpClient()
             val requestOptions = RequestOptions()
             requestOptions.method = getHttpMethod(methodMapping.type)
@@ -153,6 +167,11 @@ class ServiceProxyHandler : InvocationHandler, Service {
             requestOptions.addHeader("Content-Length", args1.length().toString())
             requestOptions.addHeader(MICROSERVICE_INNER_REQUEST_HEADER, MICROSERVICE_INNER_REQUEST_HEADER_VALUE)
             requestOptions.addHeader("Content-Type", "application/json")
+            if (!header.isEmpty) {
+                header.forEach { h ->
+                    requestOptions.addHeader(h.key, h.value.toString())
+                }
+            }
             requestOptions.setTimeout(getConfig("ms", Config::class, context).timeout)
             httpClient.request(requestOptions).compose { req ->
                 req.write(args1)

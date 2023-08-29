@@ -1,2 +1,1 @@
 # minih-vertx
-minih-vertx
