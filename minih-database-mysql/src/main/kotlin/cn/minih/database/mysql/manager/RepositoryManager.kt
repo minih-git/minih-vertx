@@ -174,7 +174,7 @@ object RepositoryManager {
             log.debug("复杂sql分页查询，自动转换为offset模式！")
             page.pageType = PageType.OFFSET
         }
-        val pageStart = if (page.nextCursor - 1 < 0) 0 else page.nextCursor - 1
+        val pageStart = if (page.nextCursor < 1) 0 else page.nextCursor
         return "select * from ( ".plus(sql).plus(" ) page ")
             .plus(" limit ${pageStart * page.pageSize},${page.pageSize}")
     }

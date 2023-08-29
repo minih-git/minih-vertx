@@ -107,6 +107,15 @@ object AuthUtil {
         }
     }
 
+    fun getCurrentLoginDevice(): String {
+        return try {
+            Vertx.currentContext().get(CONTEXT_LOGIN_DEVICE)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            DEFAULT_DEVICE
+        }
+    }
+
     fun currentIsSysAdmin(): Boolean {
         return Vertx.currentContext().get(CONTEXT_IS_SYSTEM_ADMIN)
     }

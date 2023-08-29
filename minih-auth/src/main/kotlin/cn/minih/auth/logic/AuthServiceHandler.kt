@@ -216,6 +216,7 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
             ctx.response().putHeader(config.tokenName, tokenValue)
             ctx.put(CONTEXT_LOGIN_ID, tokenInfo.loginId)
             ctx.put(CONTEXT_LOGIN_TOKEN, tokenValue)
+            ctx.put(CONTEXT_LOGIN_DEVICE, tokenInfo.loginDevice)
             ctx.json(R.ok(tokenInfo).toJsonObject())
         } catch (e: Exception) {
             var key = ""
@@ -290,6 +291,15 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         val loginId = AuthUtil.checkLogin(tokenValue)
         Vertx.currentContext().put(CONTEXT_LOGIN_ID, loginId)
         Vertx.currentContext().put(CONTEXT_LOGIN_TOKEN, tokenValue)
+        val session = AuthLogic.getSessionByLoginId(loginId)
+        session?.tokenSignList?.let {
+            val realToken = tokenValue!!.substring(config.tokenPrefix.length + TOKEN_CONNECTOR_CHAT.length)
+            val sign = it.firstOrNull { s -> s.token == realToken }
+            sign?.let { s ->
+                Vertx.currentContext().put(CONTEXT_LOGIN_DEVICE, s.device)
+                ctx.put(CONTEXT_LOGIN_DEVICE, s.device)
+            }
+        }
         ctx.put(CONTEXT_LOGIN_ID, loginId)
         ctx.put(CONTEXT_LOGIN_TOKEN, tokenValue)
         val roleTags = authService.getLoginRole(loginId)

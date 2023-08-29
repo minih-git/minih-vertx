@@ -4,11 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="解决一个mysql链接池用完的bug">
+    <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="服务间调用 增加header">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/constants/AuthConstants.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/constants/AuthConstants.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthServiceHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthServiceHandler.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/util/Utils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/util/Utils.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/core/RegisterService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/core/RegisterService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthUtil.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthUtil.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryManager.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -130,6 +131,7 @@
   },
   &quot;keyToStringList&quot;: {
     &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
+      &quot;JSON&quot;,
       &quot;TEXT&quot;
     ]
   }
@@ -165,10 +167,10 @@
     </key>
   </component>
   <component name="RunManager" selected="Gradle.minih-vertx:minih-auth [publish]">
-    <configuration name="minih-vertx [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="minih-vertx:minih-auth [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-auth" />
         <option name="externalSystemIdString" value="GRADLE" />
         <option name="scriptParameters" />
         <option name="taskDescriptions">
@@ -187,10 +189,10 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="minih-vertx:minih-auth [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="minih-vertx:minih-cache [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-auth" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-cache" />
         <option name="externalSystemIdString" value="GRADLE" />
         <option name="scriptParameters" />
         <option name="taskDescriptions">
@@ -231,7 +233,7 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="minih-vertx:minih-database-mysql [publishToMavenLocal]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="minih-vertx:minih-database-mysql [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/minih-database-mysql" />
@@ -242,7 +244,7 @@
         </option>
         <option name="taskNames">
           <list>
-            <option value="publishToMavenLocal" />
+            <option value="publish" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -253,20 +255,35 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="SnowFlakeKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="cn.minih.common.util.SnowFlakeKt" />
-      <module name="minih-vertx.minih-common.main" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
+    <configuration name="minih-vertx:minih-microservice-client [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-microservice-client" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="publish" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Gradle.minih-vertx:minih-auth [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-microservice-client [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-common [publish]" />
-        <item itemvalue="Gradle.minih-vertx [publish]" />
-        <item itemvalue="Kotlin.SnowFlakeKt" />
-        <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publishToMavenLocal]" />
+        <item itemvalue="Gradle.minih-vertx:minih-cache [publish]" />
       </list>
     </recent_temporary>
   </component>
@@ -324,7 +341,10 @@
       <workItem from="1692674008314" duration="493000" />
       <workItem from="1692676083843" duration="14697000" />
       <workItem from="1692839586398" duration="9553000" />
-      <workItem from="1692868751336" duration="4243000" />
+      <workItem from="1692868751336" duration="4858000" />
+      <workItem from="1692948235091" duration="6559000" />
+      <workItem from="1693213001137" duration="6189000" />
+      <workItem from="1693295412680" duration="2730000" />
     </task>
     <task id="LOCAL-00001" summary="提取组件">
       <option name="closed" value="true" />
@@ -502,7 +522,55 @@
       <option name="project" value="LOCAL" />
       <updated>1692863024933</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="优化 新增接口传入ctx或request">
+      <option name="closed" value="true" />
+      <created>1692873138816</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1692873138816</updated>
+    </task>
+    <task id="LOCAL-00024" summary="优化 新增接口传入ctx或request">
+      <option name="closed" value="true" />
+      <created>1692957645195</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1692957645195</updated>
+    </task>
+    <task id="LOCAL-00025" summary="优化">
+      <option name="closed" value="true" />
+      <created>1692958405073</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1692958405074</updated>
+    </task>
+    <task id="LOCAL-00026" summary="优化">
+      <option name="closed" value="true" />
+      <created>1692960617583</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1692960617583</updated>
+    </task>
+    <task id="LOCAL-00027" summary="优化分页代码">
+      <option name="closed" value="true" />
+      <created>1693216922183</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1693216922183</updated>
+    </task>
+    <task id="LOCAL-00028" summary="服务间调用 增加header">
+      <option name="closed" value="true" />
+      <created>1693275342955</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1693275342955</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -534,10 +602,13 @@
     <MESSAGE value="新增rocketmq消费客户端" />
     <MESSAGE value="完善缓存组件，将鉴权组件的缓存切换至缓存组件" />
     <MESSAGE value="优化数据库连接" />
-    <MESSAGE value="优化" />
     <MESSAGE value="缓存新增数据类型" />
     <MESSAGE value="解决一个mysql链接池用完的bug" />
-    <option name="LAST_COMMIT_MESSAGE" value="解决一个mysql链接池用完的bug" />
+    <MESSAGE value="优化 新增接口传入ctx或request" />
+    <MESSAGE value="优化" />
+    <MESSAGE value="优化分页代码" />
+    <MESSAGE value="服务间调用 增加header" />
+    <option name="LAST_COMMIT_MESSAGE" value="服务间调用 增加header" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
