@@ -364,6 +364,7 @@ fun generateArgs(argsNeed: List<KParameter>, params: JsonObject): List<Pair<KPar
         val isMarkedNullable = type.isMarkedNullable
         val param = argsType.name?.let {
             when {
+                isBasicType(type) && !params.containsKey(it) -> null
                 isBasicType(type) -> covertBasic(params[it], type)
                 typeClass.simpleName === List::class.simpleName -> {
                     val d = params.getJsonArray(it)
@@ -400,10 +401,12 @@ fun generateArgs(argsNeed: List<KParameter>, params: JsonObject): List<Pair<KPar
             }
         } else {
             val c = type.classifier as KClass<*>
-            c.primaryConstructor?.parameters?.forEach {
-                if (!it.type.isMarkedNullable) {
-                    val field = c.memberProperties.find { p -> p.name == it.name }
-                    field?.getter?.call(param) ?: throw MinihArgumentErrorException("参数：${it.name} 不能为空！")
+            if (c.isData) {
+                c.primaryConstructor?.parameters?.forEach {
+                    if (!it.type.isMarkedNullable) {
+                        val field = c.memberProperties.find { p -> p.name == it.name }
+                        field?.getter?.call(param) ?: throw MinihArgumentErrorException("参数：${it.name} 不能为空！")
+                    }
                 }
             }
         }

@@ -32,7 +32,8 @@ dependencyResolutionManagement {
             library("jackson", "com.fasterxml.jackson.core:jackson-databind:2.15.2")
             library("bcrypt", "org.mindrot:jbcrypt:0.4")
             library("kotlin-reflect", "org.jetbrains.kotlin:kotlin-reflect:1.9.0")
-            library("cglib", "cglib:cglib:3.3.0")
+//            library("cglib", "cglib:cglib:3.3.0")
+            library("buddy", "net.bytebuddy:byte-buddy-dep:1.14.7")
 
             library("minih-common", "cn.minih", "minih-common").versionRef("minih-vertx")
             library("minih-core", "cn.minih", "minih-core").versionRef("minih-vertx")

@@ -48,9 +48,11 @@ suspend fun generateAesSecret(): String {
 
 fun Any.jsToJsonString(): JsonObject {
     return JsonObject(
-        Gson().newBuilder().setLongSerializationPolicy(LongSerializationPolicy.STRING).create().toJson(this)
+        Gson().newBuilder().serializeNulls().setLongSerializationPolicy(LongSerializationPolicy.STRING).create()
+            .toJson(this)
     )
 }
+
 
 fun encrypt(strToEncrypt: String, secret: String): String {
     try {

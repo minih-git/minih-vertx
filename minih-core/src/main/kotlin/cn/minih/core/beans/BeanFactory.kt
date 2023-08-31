@@ -6,11 +6,9 @@ import cn.minih.common.exception.MinihException
 import cn.minih.common.util.Assert
 import cn.minih.common.util.log
 import kotlin.reflect.KClass
-import kotlin.reflect.KParameter
 import kotlin.reflect.KType
-import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.createType
-import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.full.superclasses
 
 /**
  * @author hubin
@@ -44,7 +42,7 @@ class BeanFactory {
         this.singletonObjects[beanName] = bean
     }
 
-    private fun getBeanDefinitionByType(type: KType): BeanDefinition {
+    fun getBeanDefinitionByType(type: KType): BeanDefinition {
         val filters = this.beanDefinitionMap.filter { it.value.type == type || it.value.supertypes.contains(type) }
         Assert.notBlank(filters) { MinihException("未找到bean定义，$type") }
         return filters.firstNotNullOf { it.value }
@@ -74,19 +72,11 @@ class BeanFactory {
         val beanDefinition = beanDefinitionMap[beanName]
         beanDefinition?.let { it ->
             val clazz = it.clazz
-            val beanConstructor = clazz.primaryConstructor ?: clazz.constructors.first()
-            if (beanConstructor.parameters.isEmpty()) {
-                val bean = clazz.createInstance()
-                this.singletonObjects[beanName] = bean
-                return bean
+            val superClass = clazz.superclasses.firstOrNull { it.java.isInterface }
+            val bean = when {
+                superClass != null -> ServiceProxyFactory.getSuperProxy(superClass, clazz)
+                else -> ServiceProxyFactory.getCglibProxy(clazz)
             }
-            val params = mutableMapOf<KParameter, Any?>()
-            beanConstructor.parameters.forEach { it1 ->
-                val type = getBeanDefinitionByType(it1.type)
-                Assert.notNull(type) { MinihException("未找到实例${it1.name},请检查") }
-                params[it1] = getBean(type.beanName)
-            }
-            val bean = beanConstructor.callBy(params)
             this.singletonObjects[beanName] = bean
             return bean
         }
