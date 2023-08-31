@@ -1,10 +1,15 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package cn.minih.core.beans
 
+import cn.minih.common.exception.MinihException
+import cn.minih.common.util.Assert
 import net.bytebuddy.ByteBuddy
 import net.bytebuddy.implementation.InvocationHandlerAdapter
 import net.bytebuddy.matcher.ElementMatchers.isDeclaredBy
 import java.lang.reflect.Proxy
 import kotlin.reflect.KClass
+import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
 
 /**
@@ -23,8 +28,16 @@ object ServiceProxyFactory {
     }
 
     fun <T : Any> getCglibProxy(service: KClass<T>): T {
+        val parameters = service.primaryConstructor?.parameters
         val params = mutableListOf<KClass<*>>()
-        service.primaryConstructor?.parameters?.map { it::class }?.let { params.addAll(it) }
+        val paramsMap = getParams(service)
+        val args = mutableListOf<Any?>()
+        parameters?.let {
+            it.forEach { i ->
+                params.add(i.type.classifier as KClass<*>)
+                args.add(paramsMap[i])
+            }
+        }
         return ByteBuddy()
             .subclass(service.java)
             .method(isDeclaredBy(service.java))
@@ -33,6 +46,18 @@ object ServiceProxyFactory {
             .load(service.java.classLoader)
             .loaded
             .getDeclaredConstructor(*params.map { it.java }.toTypedArray())
-            .newInstance()
+            .newInstance(*args.toTypedArray()) as T
+    }
+
+
+    fun getParams(clazz: KClass<*>): MutableMap<KParameter, Any?> {
+        val beanConstructor = clazz.primaryConstructor ?: clazz.constructors.first()
+        val params = mutableMapOf<KParameter, Any?>()
+        beanConstructor.parameters.forEach { it1 ->
+            val type = BeanFactory.instance.getBeanDefinitionByType(it1.type)
+            Assert.notNull(type) { MinihException("未找到实例${it1.name},请检查") }
+            params[it1] = BeanFactory.instance.getBean(type.beanName)
+        }
+        return params
     }
 }

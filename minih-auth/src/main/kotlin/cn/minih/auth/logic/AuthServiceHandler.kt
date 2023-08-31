@@ -34,6 +34,7 @@ import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.lang.reflect.Proxy
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -45,7 +46,7 @@ fun getBeanCall(params: List<KParameter>): Any? {
         val clazz = p1.type.classifier as KClass<*>
         val superClasses = getSuperClassRecursion(clazz)
         if (superClasses.contains(Service::class)) {
-            return BeanFactory.instance.getBeanFromType(p1.type)
+            return BeanFactory.instance.getBeanFromType(clazz.supertypes.first { it != Proxy::class.createType() })
         }
     }
     return null
@@ -84,10 +85,10 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
                     }
                 }
                 bean?.let {
-                    realArgs.put(parameters.first(), it)
+                    realArgs.put(fn.parameters.first(), it)
                 }
                 val rawResult = when {
-                    parameters.isEmpty() -> if (fn.isSuspend) fn.callSuspend() else fn.call()
+                    realArgs.isEmpty() -> if (fn.isSuspend) fn.callSuspend() else fn.call()
                     else -> if (fn.isSuspend) fn.callSuspendBy(realArgs) else fn.call(realArgs)
                 }
                 val config = getConfig("auth", AuthConfig::class)

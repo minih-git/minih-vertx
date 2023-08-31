@@ -16,6 +16,7 @@ import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.lang.reflect.Proxy
 import kotlin.reflect.KAnnotatedElement
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -74,7 +75,7 @@ object RegisterService {
             val clazz = p1.type.classifier as KClass<*>
             val superClasses = getSuperClassRecursion(clazz)
             if (superClasses.contains(cn.minih.web.service.Service::class)) {
-                return BeanFactory.instance.getBeanFromType(p1.type)
+                return BeanFactory.instance.getBeanFromType(clazz.supertypes.first { it != Proxy::class.createType() })
             }
         }
         return null

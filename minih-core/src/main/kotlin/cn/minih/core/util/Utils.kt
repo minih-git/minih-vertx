@@ -4,8 +4,10 @@ package cn.minih.core.util
 
 import cn.minih.common.util.getSuperClassRecursion
 import cn.minih.core.beans.BeanFactory
+import java.lang.reflect.Proxy
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
+import kotlin.reflect.full.createType
 
 /**
  * 工具类
@@ -19,7 +21,7 @@ fun getBeanCall(params: List<KParameter>): Any? {
         val clazz = p1.type.classifier as KClass<*>
         val superClasses = getSuperClassRecursion(clazz)
         if (superClasses.contains(cn.minih.web.service.Service::class)) {
-            return BeanFactory.instance.getBeanFromType(p1.type)
+            return BeanFactory.instance.getBeanFromType(clazz.supertypes.first { it != Proxy::class.createType() })
         }
     }
     return null
