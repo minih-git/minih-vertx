@@ -34,7 +34,6 @@ import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.lang.reflect.Proxy
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -46,7 +45,7 @@ fun getBeanCall(params: List<KParameter>): Any? {
         val clazz = p1.type.classifier as KClass<*>
         val superClasses = getSuperClassRecursion(clazz)
         if (superClasses.contains(Service::class)) {
-            return BeanFactory.instance.getBeanFromType(clazz.supertypes.first { it != Proxy::class.createType() })
+            return BeanFactory.instance.getBeanFromType(clazz.createType())
         }
     }
     return null
@@ -78,7 +77,7 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
                     }
                     if (args.isNotEmpty()) {
                         val v = args.first { a -> a.first == it }.second
-                        if (it.isOptional && v != null) {
+                        if (it.isOptional && v == null) {
                             return@forEach
                         }
                         realArgs[it] = v
@@ -89,8 +88,10 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
                 }
                 val rawResult = when {
                     realArgs.isEmpty() -> if (fn.isSuspend) fn.callSuspend() else fn.call()
-                    else -> if (fn.isSuspend) fn.callSuspendBy(realArgs) else fn.call(realArgs)
+                    else -> if (fn.isSuspend) fn.callSuspendBy(realArgs) else fn.callBy(realArgs)
                 }
+
+
                 val config = getConfig("auth", AuthConfig::class)
                 if (config.encryptData) {
                     val se = generateAesSecret()
@@ -100,14 +101,23 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
                     ctx.json(R.ok(rawResult).jsToJsonString())
                 }
             } catch (e: Exception) {
-                if (e.cause is MinihException) {
-                    ctx.fail(e.cause)
-                } else {
-                    ctx.fail(e)
-                }
+                ctx.fail(getMinihException(e))
             }
         }
     }
+}
+
+fun getMinihException(e: Exception): Exception {
+    var me = e
+    for (i in 0..5) {
+        if (me is MinihException) {
+            break
+        }
+        me.cause?.let {
+            me = me.cause as Exception
+        }
+    }
+    return me
 }
 
 
@@ -134,11 +144,7 @@ fun Route.coroutineFileUploadHandler(fn: KFunction<Any?>) {
                 }
                 ctx.json(R.ok(result).jsToJsonString())
             } catch (e: Exception) {
-                if (e.cause is MinihException) {
-                    ctx.fail(e.cause)
-                } else {
-                    ctx.fail(e)
-                }
+                ctx.fail(getMinihException(e))
             }
         }
     }

@@ -75,7 +75,7 @@ class BeanFactory {
             val superClass = clazz.superclasses.firstOrNull { it.java.isInterface }
             val bean = when {
                 superClass != null -> ServiceProxyFactory.getSuperProxy(superClass, clazz)
-                else -> ServiceProxyFactory.getCglibProxy(clazz)
+                else -> ServiceProxyFactory.getProxy(clazz)
             }
             this.singletonObjects[beanName] = bean
             return bean

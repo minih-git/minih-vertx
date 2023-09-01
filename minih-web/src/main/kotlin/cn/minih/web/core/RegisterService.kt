@@ -127,8 +127,9 @@ object RegisterService {
             }
             val serviceDef = serviceDefs.first()
             val bean = BeanFactory.instance.getBean(serviceDef.beanName)
+            val sClazz = bean::class.supertypes.first { s -> s != Proxy::class.createType() }.classifier as KClass<*>
             getNeedRegisterFunctions(iservice).filterNotNull().forEach {
-                val fns = bean::class.memberFunctions.filter { fn -> fn.name == it.first }
+                val fns = sClazz.memberFunctions.filter { fn -> fn.name == it.first }
                 var fn = fns.first()
                 if (fns.size > 1) {
                     val iFns = iservice.members.filterIsInstance<KFunction<*>>().filter { iFn -> iFn.name == it.first }

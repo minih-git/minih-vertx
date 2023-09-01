@@ -6,7 +6,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             version("vertx", "4.4.4")
-            version("minih-vertx", "1.0.3")
+            version("minih-vertx", "1.0.4")
             library("vertx-core", "io.vertx", "vertx-core").versionRef("vertx")
             library("vertx-web", "io.vertx", "vertx-web").versionRef("vertx")
             library("vertx-kotlin", "io.vertx", "vertx-lang-kotlin").versionRef("vertx")

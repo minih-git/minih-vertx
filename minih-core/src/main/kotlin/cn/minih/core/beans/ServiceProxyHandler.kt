@@ -25,7 +25,7 @@ class ServiceProxyHandler(clazz: KClass<*>) : InvocationHandler {
     }
 
 
-    override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {
+    override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any? {
         if (method.name.equals("toString")) {
             return proxy::class.simpleName + "@" + Integer.toHexString(System.identityHashCode(proxy))
         } else if (method.name.equals("hashCode")) {

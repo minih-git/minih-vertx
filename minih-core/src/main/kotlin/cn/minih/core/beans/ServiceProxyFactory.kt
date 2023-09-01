@@ -27,7 +27,7 @@ object ServiceProxyFactory {
         ) as T
     }
 
-    fun <T : Any> getCglibProxy(service: KClass<T>): T {
+    fun <T : Any> getProxy(service: KClass<T>): T {
         val parameters = service.primaryConstructor?.parameters
         val params = mutableListOf<KClass<*>>()
         val paramsMap = getParams(service)

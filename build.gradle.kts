@@ -10,7 +10,7 @@ plugins {
 allprojects {
 
     group = "cn.minih"
-    version = "1.0.3"
+    version = "1.0.4"
 
 
     apply {
