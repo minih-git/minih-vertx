@@ -2,7 +2,7 @@
 
 ![license](https://img.shields.io/badge/license-Apache--2.0-green)
 ![stars](https://img.shields.io/github/stars/minih-git/minih-vertx)
-![maven-central](https://img.shields.io/github/v/release/minih-git/minih-vertx?include_prereleases)
+![maven-central](https://img.shields.io/github/v/release/minih-git/minih-vertx)
 
 ### 有什么功能？
 
