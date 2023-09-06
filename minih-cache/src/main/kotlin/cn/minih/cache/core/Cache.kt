@@ -28,8 +28,8 @@ interface Cache {
     fun getExpire(key: String): Future<Duration>
     fun evict(key: String): Future<Boolean>
     fun clear(): Future<Void>
-    fun lock(duration: Duration? = null): Future<Boolean>
-    fun unlock(): Future<Response?>
+    fun lock(key: String = "", duration: Duration? = null): Future<Boolean>
+    fun unlock(key: String = ""): Future<Response?>
 
     fun putIfAbsent(key: String, value: Any?): Future<Void> {
         return this.get(key).compose {

@@ -91,7 +91,6 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
                     else -> if (fn.isSuspend) fn.callSuspendBy(realArgs) else fn.callBy(realArgs)
                 }
 
-
                 val config = getConfig("auth", AuthConfig::class)
                 if (config.encryptData) {
                     val se = generateAesSecret()

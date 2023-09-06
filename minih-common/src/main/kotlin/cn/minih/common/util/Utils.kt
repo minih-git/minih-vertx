@@ -310,6 +310,9 @@ private fun isWrapper(cs: KType?): Boolean {
             cs == Char::class.createType()
 }
 
+val <T>T?.notNull: Boolean get() = this != null && !isNullOrBlankOrZero(this)
+val <T>T?.isNull: Boolean get() = this == null || isNullOrBlankOrZero(this)
+
 suspend fun <T> T?.notNullAndExecSuspend(fn: suspend (T) -> Unit) {
     if (this != null && !isNullOrBlankOrZero(this)) {
         fn(this)
@@ -527,4 +530,11 @@ fun formatPath(pathTmp: String): String {
         path = path.substring(0, path.length - 1)
     }
     return path
+}
+
+fun getIpLong(ip: String): Long {
+    val s: List<String> = ip.split(".")
+    return ((s[0].toLong() shl 24)
+            + (s[1].toLong() shl 16) +
+            (s[2].toLong() shl 8) + s[3].toLong())
 }
