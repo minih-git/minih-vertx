@@ -181,7 +181,7 @@ class RedisCacheImpl(private val cacheName: String, private val config: CacheCon
     override fun lock(key: String, duration: Duration?): Future<Boolean> {
         return RedisClient.instance.setnx(getCacheKey("$key~lock"), "1").compose {
             if (duration != null || config.ttl.toSeconds() != 0L) {
-                setExpire("~lock", duration ?: config.ttl)
+                setExpire("$key~lock", duration ?: config.ttl)
             }
             Future.succeededFuture(it.toBoolean())
         }

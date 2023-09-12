@@ -31,13 +31,12 @@ object AuthUtil {
 
     suspend fun login(
         id: String,
-        device: String? = DEFAULT_DEVICE,
-        timeout: Long = -1L,
         loginConfig: AuthLoginModel = AuthLoginModel()
     ): TokenInfo {
         val config = getConfig("auth", AuthConfig::class)
-        loginConfig.device = device ?: DEFAULT_DEVICE
-        loginConfig.timeout = if (timeout == -1L) config.timeout else timeout
+        if (loginConfig.timeout == -1L) {
+            loginConfig.timeout = config.timeout
+        }
         val tokenValue = AuthLogic.createLoginSession(id, loginConfig)
         return TokenInfo(
             tokenValue = tokenValue,
