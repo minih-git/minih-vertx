@@ -112,6 +112,7 @@ object SqlBuilder {
             QueryConditionType.LT -> " < ? "
             QueryConditionType.GTE -> " >= ? "
             QueryConditionType.LTE -> " =< ? "
+            QueryConditionType.LIKE -> " like ? "
         }
     }
 

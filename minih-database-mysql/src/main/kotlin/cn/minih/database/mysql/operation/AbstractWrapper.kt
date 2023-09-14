@@ -16,7 +16,7 @@ import kotlin.reflect.KProperty1
 data class UpdateItem(val key: String, val value: Any?)
 data class QueryCondition(val key: String, val value: List<Any>, val type: QueryConditionType = QueryConditionType.EQ)
 data class OrderByItem(val key: String, val type: OrderByType = OrderByType.ASC)
-enum class QueryConditionType { EQ, IN, BETWEEN, GT, LT, GTE, LTE }
+enum class QueryConditionType { EQ, IN, BETWEEN, GT, LT, GTE, LTE, LIKE }
 
 @Suppress("unused")
 abstract class AbstractWrapper<T, R, Children : AbstractWrapper<T, R, Children>> : Wrapper<T>() {
@@ -48,6 +48,39 @@ abstract class AbstractWrapper<T, R, Children : AbstractWrapper<T, R, Children>>
                 CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, key.name),
                 value,
                 QueryConditionType.IN
+            )
+        )
+        return this as Children
+    }
+
+    fun like(key: KProperty1<T, Any>, value: Any): Children {
+        condition.add(
+            QueryCondition(
+                CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, key.name),
+                listOf("%$value%"),
+                QueryConditionType.LIKE
+            )
+        )
+        return this as Children
+    }
+
+    fun likeRight(key: KProperty1<T, Any>, value: Any): Children {
+        condition.add(
+            QueryCondition(
+                CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, key.name),
+                listOf("$value%"),
+                QueryConditionType.LIKE
+            )
+        )
+        return this as Children
+    }
+
+    fun likeLeft(key: KProperty1<T, Any>, value: Any): Children {
+        condition.add(
+            QueryCondition(
+                CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, key.name),
+                listOf("%$value"),
+                QueryConditionType.LIKE
             )
         )
         return this as Children

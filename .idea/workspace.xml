@@ -6,8 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="优化">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthUtil.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthUtil.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-cache/src/main/kotlin/cn/minih/cache/redis/impl/RedisCacheImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/operation/AbstractWrapper.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/operation/AbstractWrapper.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/operation/SqlBuilder.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/operation/SqlBuilder.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -107,34 +107,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "master",
-    "jdk.selected.JAVA_MODULE": "17",
-    "last_opened_file_path": "D:/IdeaProjects/rocketmq-clients",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.254023",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;jdk.selected.JAVA_MODULE&quot;: &quot;17&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/IdeaProjects/rocketmq-clients&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.254023&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
-      "yaml",
-      "JSON",
-      "TEXT"
+  &quot;keyToStringList&quot;: {
+    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
+      &quot;yaml&quot;,
+      &quot;JSON&quot;,
+      &quot;TEXT&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\minih-vertx\minih-common\src\main\kotlin\cn\minih\database\mysql\enum" />
@@ -165,7 +165,7 @@
       <recent name="cn.minih.core.boot" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.minih-vertx:minih-auth [publish]">
+  <component name="RunManager" selected="Gradle.minih-vertx:minih-rocketmq [publish]">
     <configuration name="minih-vertx:minih-auth [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -232,10 +232,10 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="minih-vertx:minih-core [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="minih-vertx:minih-database-mysql [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-core" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-database-mysql" />
         <option name="externalSystemIdString" value="GRADLE" />
         <option name="scriptParameters" />
         <option name="taskDescriptions">
@@ -254,10 +254,10 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="minih-vertx:minih-web [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="minih-vertx:minih-rocketmq [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-web" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-rocketmq" />
         <option name="externalSystemIdString" value="GRADLE" />
         <option name="scriptParameters" />
         <option name="taskDescriptions">
@@ -278,11 +278,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.minih-vertx:minih-rocketmq [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-auth [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-cache [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-common [publish]" />
-        <item itemvalue="Gradle.minih-vertx:minih-core [publish]" />
-        <item itemvalue="Gradle.minih-vertx:minih-web [publish]" />
       </list>
     </recent_temporary>
   </component>
@@ -350,7 +350,8 @@
       <workItem from="1693797398480" duration="242000" />
       <workItem from="1693811791479" duration="7000" />
       <workItem from="1693988423926" duration="12065000" />
-      <workItem from="1694394477333" duration="8868000" />
+      <workItem from="1694394477333" duration="9529000" />
+      <workItem from="1694504016433" duration="2490000" />
     </task>
     <task id="LOCAL-00001" summary="提取组件">
       <option name="closed" value="true" />
@@ -624,7 +625,15 @@
       <option name="project" value="LOCAL" />
       <updated>1693994283481</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="优化">
+      <option name="closed" value="true" />
+      <created>1694493374313</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1694493374313</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
