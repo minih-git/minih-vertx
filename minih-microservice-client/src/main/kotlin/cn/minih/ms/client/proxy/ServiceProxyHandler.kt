@@ -11,6 +11,7 @@ import cn.minih.web.annotation.*
 import cn.minih.web.service.Service
 import io.vertx.core.Context
 import io.vertx.core.Future
+import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.RequestOptions
@@ -20,10 +21,7 @@ import java.lang.reflect.Method
 import kotlin.reflect.KAnnotatedElement
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
-import kotlin.reflect.full.createType
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.hasAnnotation
-import kotlin.reflect.full.valueParameters
+import kotlin.reflect.full.*
 
 
 /**
@@ -146,7 +144,19 @@ class ServiceProxyHandler : InvocationHandler, Service {
             "未找到远程服务配置！",
             errorCode = MinihErrorCode.ERR_CODE_NOT_FOUND_ERROR
         )
-        return MsClient.getAvailableServiceNoSuspend(remoteServiceAnno.remote).compose {
+
+
+        val promise = Promise.promise<Any>()
+        val hasErrorBack = remoteServiceAnno.errorCallBack != Any::class
+        var result: Any? = null
+        if (hasErrorBack) {
+            val ins = remoteServiceAnno.errorCallBack.createInstance()
+            result = when {
+                args == null -> method.invoke(ins)
+                else -> method.invoke(ins, *args)
+            }
+        }
+        MsClient.getAvailableServiceNoSuspend(remoteServiceAnno.remote).compose {
             if (it == null) {
                 throw MinihException(
                     "未找到服务器！",
@@ -156,8 +166,6 @@ class ServiceProxyHandler : InvocationHandler, Service {
             val argsRaw = buildArgs(proxied.second, args)
             val args1 = argsRaw.first.toBuffer()
             val header = argsRaw.second
-
-
             val httpClient = context.owner().createHttpClient()
             val requestOptions = RequestOptions()
             requestOptions.method = getHttpMethod(methodMapping.type)
@@ -177,12 +185,25 @@ class ServiceProxyHandler : InvocationHandler, Service {
                 req.write(args1)
                 req.response().compose { res -> res.body() }
             }
-        }.compose {
-            val result = it.toJson().toJsonObject()
+        }.onSuccess {
+            val result1 = it.toJson().toJsonObject()
             val rType = proxied.second.returnType.arguments.first().type!!
-            Future.succeededFuture(covertTypeData(result.getValue("data"), rType))
+            promise.complete(covertTypeData(result1.getValue("data"), rType))
+        }.onFailure {
+            if (hasErrorBack && result != null) {
+                if (result is Future<*>) {
+                    promise.complete(result.result())
+                } else {
+                    promise.complete(result)
+                }
+            } else {
+                throw MinihException(
+                    it.message,
+                    errorCode = MinihErrorCode.ERR_CODE_REMOTE_CALL_ERROR
+                )
+            }
         }
-
+        return promise.future()
     }
 
     override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {

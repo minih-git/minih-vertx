@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package cn.minih.web.annotation
 
 import kotlin.reflect.KClass
@@ -14,7 +16,7 @@ annotation class RemoteService(
     val name: String = "",
     val remote: String = "",
     val remoteType: RemoteType = RemoteType.EVENT_BUS,
-    val errorCallBack: KClass<Any> = Any::class
+    val errorCallBack: KClass<*> = Any::class
 )
 
 enum class RemoteType {

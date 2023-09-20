@@ -82,6 +82,7 @@ object RepositoryManager {
                 }
                 .onFailure {
                     printWarningLog(sql, tuple, it.message)
+                    conn.close()
                     Future.succeededFuture(null)
                 }.onComplete { conn.close() }
         }
@@ -138,6 +139,7 @@ object RepositoryManager {
                     future.complete(count)
                 }.onFailure {
                     printWarningLog(sql, tuple, it.message)
+                    conn.close()
                     future.complete(0)
                 }.onComplete { conn.close() }
         }
@@ -228,6 +230,7 @@ object RepositoryManager {
                     }
                 }.onFailure {
                     printWarningLog(sql, tuple, it.message)
+                    conn.close()
                     future.complete(listOf())
                 }.onComplete { conn.close() }
         }
@@ -262,6 +265,7 @@ object RepositoryManager {
                 }
                 .onFailure {
                     printWarningLog(sql, tuple, it.message)
+                    conn.close()
                     future.complete(null)
                 }.onComplete { conn.close() }
         }
@@ -300,6 +304,7 @@ object RepositoryManager {
                 }
                 .onFailure {
                     printWarningLog(sql, batchTuple, it.message)
+                    conn.close()
                     future.complete(false)
                 }.onComplete { conn.close() }
         }
@@ -332,6 +337,7 @@ object RepositoryManager {
                 }
                 .onFailure {
                     printWarningLog(sql, tuple, it.message)
+                    conn.close()
                     future.complete(false)
                 }.onComplete { conn.close() }
         }
@@ -389,6 +395,7 @@ object RepositoryManager {
                     }
                     .onFailure {
                         printWarningLog(sql, tuple, it.message)
+                        conn.close()
                         future.complete(false)
                     }.onComplete { conn.close() }
             }

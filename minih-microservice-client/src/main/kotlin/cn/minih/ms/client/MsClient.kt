@@ -2,6 +2,7 @@
 
 package cn.minih.ms.client
 
+import cn.minih.common.exception.MinihException
 import io.vertx.core.Future
 import io.vertx.core.http.HttpClient
 import io.vertx.kotlin.coroutines.await
@@ -52,12 +53,19 @@ object MsClient {
 
     fun getAvailableServiceNoSuspend(name: String): Future<Record?> {
         return getServiceFromCacheNoSuspend(name).compose {
-            var r: Record? = null
-            it?.let {
-                val number = ThreadLocalRandom.current().nextInt(it.size)
-                r = it[number % it.size]
+            if (it.isNullOrEmpty()) {
+                Future.failedFuture<Record>(MinihException("未找到远程服务！"))
             }
-            Future.succeededFuture(r)
+            try {
+                var r: Record? = null
+                it?.let {
+                    val number = ThreadLocalRandom.current().nextInt(it.size)
+                    r = it[number % it.size]
+                }
+                Future.succeededFuture(r)
+            } catch (e: Exception) {
+                Future.failedFuture<Record>(MinihException("未找到远程服务！"))
+            }
         }
     }
 
