@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="优化">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/operation/AbstractWrapper.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/operation/AbstractWrapper.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryUtils.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/operation/SqlBuilder.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/operation/SqlBuilder.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -165,7 +165,7 @@
       <recent name="cn.minih.core.boot" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.minih-vertx:minih-rocketmq [publish]">
+  <component name="RunManager" selected="Gradle.minih-vertx:minih-database-mysql [publish]">
     <configuration name="minih-vertx:minih-auth [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -278,8 +278,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.minih-vertx:minih-rocketmq [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-rocketmq [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-auth [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-cache [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-common [publish]" />
@@ -351,7 +351,10 @@
       <workItem from="1693811791479" duration="7000" />
       <workItem from="1693988423926" duration="12065000" />
       <workItem from="1694394477333" duration="9529000" />
-      <workItem from="1694504016433" duration="2490000" />
+      <workItem from="1694504016433" duration="2765000" />
+      <workItem from="1694684386638" duration="1053000" />
+      <workItem from="1694755228401" duration="1533000" />
+      <workItem from="1695195352146" duration="579000" />
     </task>
     <task id="LOCAL-00001" summary="提取组件">
       <option name="closed" value="true" />
@@ -633,7 +636,15 @@
       <option name="project" value="LOCAL" />
       <updated>1694493374313</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="优化">
+      <option name="closed" value="true" />
+      <created>1694675234092</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1694675234092</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

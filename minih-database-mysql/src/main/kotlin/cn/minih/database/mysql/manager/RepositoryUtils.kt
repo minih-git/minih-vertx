@@ -85,18 +85,18 @@ fun <T : Any> insertPrimaryKey(entity: T) {
 }
 
 fun printLog(sql: String, tuple: Tuple, resultRaw: Any?) {
-    log.info("====>sql:${sql}")
-    log.info("====>参数:${tuple.deepToString()}")
+    log.debug("====>sql:${sql}")
+    log.debug("====>参数:${tuple.deepToString()}")
     var result = resultRaw
     if (resultRaw is List<*>) {
         result = resultRaw.map { it?.toJsonObject() }
     }
-    log.info("====>结果:${result}")
+    log.debug("====>结果:${result}")
 }
 
 fun printLog(sql: String, tuples: List<Tuple>, resultRaw: Any?) {
-    log.info("====>sql:${sql}")
-    log.info("====>参数:${tuples.map { it.deepToString() }}")
+    log.debug("====>sql:${sql}")
+    log.debug("====>参数:${tuples.map { it.deepToString() }}")
     var result = resultRaw
     if (resultRaw is List<*>) {
         result = resultRaw.map { it?.toJsonObject() }

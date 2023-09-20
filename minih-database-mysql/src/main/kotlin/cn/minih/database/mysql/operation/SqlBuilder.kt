@@ -118,16 +118,14 @@ object SqlBuilder {
 
     inline fun <reified T : Any> generateOderBySql(wrapper: Wrapper<T>): String {
         if (wrapper.orderByItems.isEmpty()) return ""
-        var sql = "order by "
-        wrapper.orderByItems.forEach {
-            sql = sql.plus("${CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.key)} ").plus(
+        return "order by ".plus(wrapper.orderByItems.map {
+            "${CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.key)} ".plus(
                 when (it.type) {
                     OrderByType.ASC -> " "
                     OrderByType.DESC -> " desc "
                 }
             )
-        }
-        return sql
+        }.joinToString(","))
     }
 
 
