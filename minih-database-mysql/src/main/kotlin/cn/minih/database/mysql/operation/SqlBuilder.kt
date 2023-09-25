@@ -65,7 +65,7 @@ object SqlBuilder {
             tableName = T::class.simpleName?.let { CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it) }
         }
         val sql = """
-                delete $tableName  
+                delete from  $tableName  
             """
         return sql.plus("  ${generateConditionSql(wrapper)}")
     }

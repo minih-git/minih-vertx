@@ -101,7 +101,7 @@ fun printLog(sql: String, tuples: List<Tuple>, resultRaw: Any?) {
     if (resultRaw is List<*>) {
         result = resultRaw.map { it?.toJsonObject() }
     }
-    log.info("====>结果:${result}")
+    log.debug("====>结果:${result}")
 }
 
 fun printWarningLog(sql: String, tuple: Tuple, resultRaw: Any?) {
