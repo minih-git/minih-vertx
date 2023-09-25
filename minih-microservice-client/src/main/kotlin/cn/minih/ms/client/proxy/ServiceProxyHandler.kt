@@ -16,6 +16,7 @@ import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.RequestOptions
 import io.vertx.core.json.JsonObject
+import io.vertx.ext.web.client.WebClient
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import kotlin.reflect.KAnnotatedElement
@@ -166,7 +167,7 @@ class ServiceProxyHandler : InvocationHandler, Service {
             val argsRaw = buildArgs(proxied.second, args)
             val args1 = argsRaw.first.toBuffer()
             val header = argsRaw.second
-            val httpClient = context.owner().createHttpClient()
+            val client = WebClient.create(context.owner())
             val requestOptions = RequestOptions()
             requestOptions.method = getHttpMethod(methodMapping.type)
             requestOptions.uri = path
@@ -181,12 +182,10 @@ class ServiceProxyHandler : InvocationHandler, Service {
                 }
             }
             requestOptions.setTimeout(getConfig("ms", Config::class, context).timeout)
-            httpClient.request(requestOptions).compose { req ->
-                req.write(args1)
-                req.response().compose { res -> res.body() }
-            }
+            client.request(requestOptions.method, requestOptions).sendBuffer(args1)
+
         }.onSuccess {
-            val result1 = it.toJson().toJsonObject()
+            val result1 = it.body().toJsonObject()
             val rType = proxied.second.returnType.arguments.first().type!!
             promise.complete(covertTypeData(result1.getValue("data"), rType))
         }.onFailure {
