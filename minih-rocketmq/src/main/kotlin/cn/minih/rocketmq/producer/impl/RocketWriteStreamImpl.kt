@@ -27,7 +27,6 @@ class RocketWriteStreamImpl<T : Any>(private val vertx: Vertx, private val produ
         try {
             val future = producer.sendAsync(message)
             future.whenComplete { v, e ->
-                e.printStackTrace()
                 ctx.runOnContext {
                     synchronized(this) {
                         pending -= 1

@@ -4,6 +4,7 @@ dependencies {
     implementation(libs.minih.common)
 
     implementation(libs.logback)
+    implementation(libs.logging)
     implementation(libs.gson)
     api(libs.vertx.web)
 

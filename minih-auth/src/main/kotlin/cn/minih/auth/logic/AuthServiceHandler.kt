@@ -13,7 +13,6 @@ import cn.minih.auth.exception.MinihAuthException
 import cn.minih.auth.service.AbstractAuthService
 import cn.minih.auth.service.AuthService
 import cn.minih.auth.utils.*
-import cn.minih.common.exception.MinihException
 import cn.minih.common.util.*
 import cn.minih.core.annotation.AuthCheckRole
 import cn.minih.core.annotation.CheckRoleType
@@ -100,23 +99,11 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
                     ctx.json(R.ok(rawResult).jsToJsonString())
                 }
             } catch (e: Exception) {
+                log.warn("接口调用出现错误:${getMinihException(e).message}")
                 ctx.fail(getMinihException(e))
             }
         }
     }
-}
-
-fun getMinihException(e: Exception): Exception {
-    var me = e
-    for (i in 0..5) {
-        if (me is MinihException) {
-            break
-        }
-        me.cause?.let {
-            me = me.cause as Exception
-        }
-    }
-    return me
 }
 
 
@@ -143,6 +130,7 @@ fun Route.coroutineFileUploadHandler(fn: KFunction<Any?>) {
                 }
                 ctx.json(R.ok(result).jsToJsonString())
             } catch (e: Exception) {
+                log.warn("接口调用出现错误:${e.message}")
                 ctx.fail(getMinihException(e))
             }
         }
@@ -206,7 +194,8 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
                     }
                 }
             } catch (e: Exception) {
-                ctx.fail(e)
+                log.warn("接口调用出现错误:${getMinihException(e).message}")
+                ctx.fail(getMinihException(e))
             }
         }
     }
@@ -246,23 +235,34 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
     }
 
     private suspend fun kickOut(ctx: RoutingContext) {
-        checkLogin(ctx)
-        val self: String = ctx.get(CONTEXT_LOGIN_ID)
-        checkRole(self, listOf(CONTEXT_SYSTEM_ADMIN_ROLE_TAG))
-        val request = getRequestBody(ctx)
-        val beKick = request.getString("loginId")
-        Assert.notBlank(beKick) { MinihAuthException("loginId 不能为空！") }
-        Assert.isTrue(beKick != self) { MinihAuthException("不能踢自己下线！") }
-        AuthLogic.kickOut(beKick)
-        ctx.json(R.ok<String>().toJsonObject())
+        try {
+            checkLogin(ctx)
+            val self: String = ctx.get(CONTEXT_LOGIN_ID)
+            checkRole(self, listOf(CONTEXT_SYSTEM_ADMIN_ROLE_TAG))
+            val request = getRequestBody(ctx)
+            val beKick = request.getString("loginId")
+            Assert.notBlank(beKick) { MinihAuthException("loginId 不能为空！") }
+            Assert.isTrue(beKick != self) { MinihAuthException("不能踢自己下线！") }
+            AuthLogic.kickOut(beKick)
+            ctx.json(R.ok<String>().toJsonObject())
+        } catch (e: Exception) {
+            log.warn("接口调用出现错误:${getMinihException(e).message}")
+            ctx.fail(getMinihException(e))
+        }
+
     }
 
     private suspend fun logout(ctx: RoutingContext) {
-        checkLogin(ctx)
-        val self: String = ctx.get(CONTEXT_LOGIN_ID)
-        Assert.notBlank(self) { MinihAuthException("loginId 不能为空！") }
-        AuthLogic.logout(self)
-        ctx.json(R.ok<String>().toJsonObject())
+        try {
+            checkLogin(ctx)
+            val self: String = ctx.get(CONTEXT_LOGIN_ID)
+            Assert.notBlank(self) { MinihAuthException("loginId 不能为空！") }
+            AuthLogic.logout(self)
+            ctx.json(R.ok<String>().toJsonObject())
+        } catch (e: Exception) {
+            log.warn("接口调用出现错误:${getMinihException(e).message}")
+            ctx.fail(getMinihException(e))
+        }
     }
 
     private suspend fun login(params: JsonObject): TokenInfo {

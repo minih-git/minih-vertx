@@ -4,6 +4,7 @@ package cn.minih.common.util
 
 import cn.minih.common.exception.MinihArgumentErrorException
 import cn.minih.common.exception.MinihDataCovertException
+import cn.minih.common.exception.MinihException
 import cn.minih.core.config.CoreConfig
 import cn.minih.core.config.IConfig
 import cn.minih.core.config.PROJECT_NAME
@@ -132,7 +133,6 @@ fun <T : Any> fillObject(jsonObject: JsonObject, clazz: KClass<T>): T {
         val values = cons.parameters.filterNot { it.isOptional }.associateWith { null }
         pojo = cons.callBy(values)
     } catch (e: Exception) {
-        e.printStackTrace()
         log.warn("创建${clazz.simpleName}对象失败，未设置的默认数据将被覆盖为null，请给所有字段赋予默认值,或提供无参数构造方法！")
     }
     val fields = clazz.memberProperties
@@ -537,4 +537,17 @@ fun getIpLong(ip: String): Long {
     return ((s[0].toLong() shl 24)
             + (s[1].toLong() shl 16) +
             (s[2].toLong() shl 8) + s[3].toLong())
+}
+
+fun getMinihException(e: Throwable): Throwable {
+    var me = e
+    for (i in 0..5) {
+        if (me is MinihException) {
+            break
+        }
+        me.cause?.let {
+            me = me.cause as Exception
+        }
+    }
+    return me
 }

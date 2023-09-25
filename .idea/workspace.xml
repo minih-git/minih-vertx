@@ -6,8 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="新增远程接口调用错误回调">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/manager/RepositoryUtils.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/operation/SqlBuilder.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database-mysql/src/main/kotlin/cn/minih/database/mysql/operation/SqlBuilder.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthServiceHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthServiceHandler.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthUtil.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthUtil.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/util/Utils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-common/src/main/kotlin/cn/minih/common/util/Utils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketWriteStreamImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-rocketmq/src/main/kotlin/cn/minih/rocketmq/producer/impl/RocketWriteStreamImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-web/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/minih-web/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/handler/RouteFailureHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/handler/RouteFailureHandler.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -165,7 +169,29 @@
       <recent name="cn.minih.core.boot" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.minih-vertx:minih-database-mysql [publish]">
+  <component name="RunManager" selected="Gradle.minih-vertx [publish]">
+    <configuration name="minih-vertx [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="publish" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
     <configuration name="minih-vertx:minih-common [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -232,28 +258,6 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="minih-vertx:minih-rocketmq [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/minih-rocketmq" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="publish" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
     <configuration name="minih-vertx:minih-web [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -278,11 +282,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.minih-vertx [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-common [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-microservice-client [publish]" />
-        <item itemvalue="Gradle.minih-vertx:minih-common [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-web [publish]" />
-        <item itemvalue="Gradle.minih-vertx:minih-rocketmq [publish]" />
       </list>
     </recent_temporary>
   </component>
@@ -355,7 +359,7 @@
       <workItem from="1694684386638" duration="1053000" />
       <workItem from="1694755228401" duration="1533000" />
       <workItem from="1695195352146" duration="7072000" />
-      <workItem from="1695603940515" duration="215000" />
+      <workItem from="1695603940515" duration="1954000" />
     </task>
     <task id="LOCAL-00001" summary="提取组件">
       <option name="closed" value="true" />
@@ -661,7 +665,15 @@
       <option name="project" value="LOCAL" />
       <updated>1695204074736</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL-00039" summary="新增远程接口调用错误回调">
+      <option name="closed" value="true" />
+      <created>1695605339948</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1695605339948</updated>
+    </task>
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
