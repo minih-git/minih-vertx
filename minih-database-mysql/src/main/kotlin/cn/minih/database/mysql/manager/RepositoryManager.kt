@@ -420,8 +420,8 @@ object RepositoryManager {
         val primaryField = fields.first { field -> field.name == primaryKey.name }
         Assert.notNull(primaryField) { MinihArgumentErrorException("未找到主键字段！") }
         val primaryValue = primaryField.getter.call(entity)
-        Assert.notNull(primaryValue) { MinihArgumentErrorException("未找到主键字段！") }
-        wrapper.eq(primaryField.name, primaryField)
+        Assert.notNull(primaryValue) { MinihArgumentErrorException("未找到主键数据！") }
+        wrapper.eq(primaryField.name, primaryValue!!)
         return delete(wrapper)
     }
 

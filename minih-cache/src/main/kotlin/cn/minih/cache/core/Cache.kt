@@ -31,16 +31,14 @@ interface Cache {
     fun lock(key: String = "", duration: Duration? = null): Future<Boolean>
     fun unlock(key: String = ""): Future<Response?>
 
-    fun putIfAbsent(key: String, value: Any?): Future<Void> {
+    fun putIfAbsent(key: String, value: Any?, duration: Duration? = null): Future<Void> {
         return this.get(key).compose {
-            if (it != null) {
-                getExpire(key).compose { d ->
-                    put(key, value, d).compose {
-                        Future.succeededFuture()
-                    }
+            if (it == null) {
+                put(key, value, duration).compose {
+                    Future.succeededFuture()
                 }
             } else {
-                Future.succeededFuture()
+                Future.failedFuture("exist")
             }
         }
     }

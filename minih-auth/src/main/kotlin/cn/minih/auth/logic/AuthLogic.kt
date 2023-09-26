@@ -173,7 +173,7 @@ object AuthLogic {
             }
             updateSession(it)
             tokenSigns.forEach { tokenSign ->
-                cache.putIfAbsent(tokenSign.token, offlineType.code)
+                cache.updateOrPut(tokenSign.token, offlineType.code)
                 Vertx.currentContext().owner()?.eventBus()?.publish(
                     AUTH_SESSION_OFFLINE, jsonObjectOf(
                         "token" to tokenSign.token,

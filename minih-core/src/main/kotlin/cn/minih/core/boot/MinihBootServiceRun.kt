@@ -194,8 +194,7 @@ object MinihBootServiceRun {
         }
     }
 
-
-    suspend fun run(clazz: KClass<*>, vararg args: String) {
+    suspend fun run(clazz: KClass<*>, vararg args: String): Vertx {
         val vertx = getVertx(*args)
         try {
             log.info("服务开始启动...")
@@ -213,7 +212,7 @@ object MinihBootServiceRun {
             registerCloseHandling(vertx.orCreateContext)
             log.warn("部署服务出现错误,{}", e.message, e)
         }
-
+        return vertx
     }
 
     private suspend fun log(vertx: Vertx, startTime: Long) {
@@ -296,6 +295,5 @@ object MinihBootServiceRun {
         }
         return false
     }
-
 
 }

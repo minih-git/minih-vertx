@@ -183,11 +183,11 @@ class ServiceProxyHandler : InvocationHandler, Service {
             }
             requestOptions.setTimeout(getConfig("ms", Config::class, context).timeout)
             client.request(requestOptions.method, requestOptions).sendBuffer(args1)
-
         }.onSuccess {
             val result1 = it.body().toJsonObject()
             val rType = proxied.second.returnType.arguments.first().type!!
-            promise.complete(covertTypeData(result1.getValue("data"), rType))
+            val rValue = result1.getValue("data")
+            promise.complete(rValue?.let { covertTypeData(rValue, rType) })
         }.onFailure {
             if (hasErrorBack && result != null) {
                 if (result is Future<*>) {
