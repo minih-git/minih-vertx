@@ -25,7 +25,7 @@ class RouteFailureHandler private constructor() : Handler<RoutingContext>, Error
         var r: R<String>
         val ex = ctx.failure()
         if (ctx.statusCode() == 200 || ex != null) {
-            log.warn("接口调用出现错误:${getMinihException(ex).message}")
+            log.warn("接口调用出现错误:${getMinihException(ex).message}", ex)
             r = R.err(ex.message)
             if (ex is MinihException) {
                 r = R.err(ex.msg, ex.errorCode)

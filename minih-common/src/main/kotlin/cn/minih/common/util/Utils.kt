@@ -239,6 +239,7 @@ fun covertBasic(value: Any, typeTmp: KType, tryString: Boolean = true): Any {
 
         Long::class.createType() -> when {
             value is Long -> value
+            value is Int -> value.toLong()
             tryString && value is String -> if (value.isBlank()) 0 else value.toString().toLong()
             else -> throw MinihDataCovertException("非long类数据")
         }
