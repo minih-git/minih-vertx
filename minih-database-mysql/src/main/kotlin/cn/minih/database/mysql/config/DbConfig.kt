@@ -10,6 +10,7 @@ import cn.minih.core.config.IConfig
  */
 data class DbConfig(
     var host: String = "",
+    var port: Int = 3306,
     var db: String = "",
     var user: String = "",
     var password: String = "",

@@ -22,6 +22,8 @@ import io.vertx.core.Vertx
 import io.vertx.mysqlclient.MySQLConnectOptions
 import io.vertx.mysqlclient.MySQLPool
 import io.vertx.sqlclient.PoolOptions
+import io.vertx.sqlclient.Row
+import io.vertx.sqlclient.RowSet
 import io.vertx.sqlclient.Tuple
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
@@ -44,7 +46,7 @@ object RepositoryManager {
 
     fun initDb(vertx: Vertx, config: DbConfig) {
         val connectOptions = MySQLConnectOptions()
-            .setPort(3306)
+            .setPort(config.port)
             .setHost(config.host)
             .setDatabase(config.db)
             .setUser(config.user)
@@ -425,5 +427,22 @@ object RepositoryManager {
         return delete(wrapper)
     }
 
+    inline fun <reified T : Any> execSqlAndResult(sql: String, tuple: Tuple = Tuple.tuple()): Future<RowSet<Row>> {
+        val future: Promise<RowSet<Row>> = Promise.promise()
+        getPool().connection.compose { conn ->
+            conn.preparedQuery(sql)
+                .execute(tuple)
+                .onComplete {
+                    printLog(sql, tuple, true)
+                    future.complete(it.result())
+                }
+                .onFailure {
+                    printWarningLog(sql, tuple, it.message)
+                    conn.close()
+                    future.complete(null)
+                }.onComplete { conn.close() }
+        }
+        return future.future()
+    }
 
 }

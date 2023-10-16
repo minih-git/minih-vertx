@@ -7,6 +7,7 @@ import cn.minih.core.config.MICROSERVICE_INNER_REQUEST_HEADER
 import cn.minih.core.config.MICROSERVICE_INNER_REQUEST_HEADER_VALUE
 import cn.minih.ms.client.MsClient
 import cn.minih.ms.client.config.Config
+import cn.minih.ms.client.config.MsEnv
 import cn.minih.web.annotation.*
 import cn.minih.web.service.Service
 import io.vertx.core.Context
@@ -17,6 +18,10 @@ import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.RequestOptions
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.client.WebClient
+import io.vertx.kotlin.coroutines.await
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import kotlin.reflect.KAnnotatedElement
@@ -93,29 +98,6 @@ class ServiceProxyHandler : InvocationHandler, Service {
         return Pair(params, headers)
     }
 
-    private fun invokeByEventBus(
-        proxy: Any,
-        method: Method,
-        args: Array<out Any>?,
-        context: Context
-    ): Future<Any> {
-        val proxied = getProxied(proxy, method)
-        val address =
-            getPath(proxied.first as KAnnotatedElement, proxied.second as KAnnotatedElement).replace("/", ".")
-        val remoteServiceAnno = proxied.first!!.findAnnotation<RemoteService>()!!
-        val args1 = buildArgs(proxied.second, args).first
-        return context.owner().eventBus()
-            .request<JsonObject>(remoteServiceAnno.remote.plus(address), args1)
-            .compose {
-                val rType = proxied.second.returnType
-                if (isBasicType(rType)) {
-
-                    Future.succeededFuture(it?.body()?.let { it1 -> covertBasic(it1, rType) })
-                }
-                Future.succeededFuture<Any>(it?.body()?.toJsonObject()?.covertTo(proxied.second.returnType))
-            }
-
-    }
 
     private fun getHttpMethod(n: Annotation): HttpMethod? {
         return when (n) {
@@ -134,75 +116,102 @@ class ServiceProxyHandler : InvocationHandler, Service {
         args: Array<out Any>?,
         context: Context,
     ): Future<Any> {
-        val proxied = getProxied(proxy, method)
+        val promise = Promise.promise<Any>()
+        CoroutineScope(Dispatchers.IO).launch {
+            val proxied = getProxied(proxy, method)
+            val remoteServiceAnno = proxied.first?.findAnnotation<RemoteService>() ?: throw MinihException(
+                "未找到远程服务配置！",
+                errorCode = MinihErrorCode.ERR_CODE_NOT_FOUND_ERROR
+            )
+
+            val hasErrorBack = remoteServiceAnno.errorCallBack != Any::class
+            var result: Any? = null
+            if (hasErrorBack) {
+                val ins = remoteServiceAnno.errorCallBack.createInstance()
+                result = when {
+                    args == null -> method.invoke(ins)
+                    else -> method.invoke(ins, *args)
+                }
+            }
+            val config = getConfig("ms", Config::class, context)
+
+            var host = ""
+            var port = ""
+            if (remoteServiceAnno.url.isNotBlank()) {
+                host = remoteServiceAnno.url
+            } else {
+                when (config.msEnv) {
+                    MsEnv.CONSUL -> {
+                        val record = MsClient.getAvailableServiceNoSuspend(remoteServiceAnno.remote).await()
+                        host = record?.location?.getString("host") ?: ""
+                        port = record?.location?.getString("port") ?: ""
+                    }
+
+                    MsEnv.K8S -> {
+                        host = remoteServiceAnno.remote
+                    }
+                }
+            }
+            Assert.notBlank(host) { MinihException("未找到服务器", MinihErrorCode.ERR_CODE_NOT_FOUND_ERROR) }
+            val argsRaw = buildArgs(proxied.second, args)
+            val argsBuffer = argsRaw.first.toBuffer()
+            val client = WebClient.create(context.owner())
+            val requestOptions = buildRequestOption(proxied, host, port, argsRaw.second, config.timeout)
+            requestOptions.addHeader("Content-Length", argsBuffer.length().toString())
+            log.info("远程服务调用: ${requestOptions.method.name()}  ${requestOptions.host} ${requestOptions.uri}")
+            client.request(requestOptions.method, requestOptions).sendBuffer(argsBuffer).onSuccess {
+                val result1 = it.body().toJsonObject()
+                val rType = proxied.second.returnType.arguments.first().type!!
+                val rValue = result1.getValue("data")
+                log.info("远程服务调用返回结果: $result1")
+
+                promise.complete(rValue?.let { covertTypeData(rValue, rType) })
+            }.onFailure {
+                Assert.isTrue(hasErrorBack && result != null) {
+                    MinihException(it.message, MinihErrorCode.ERR_CODE_REMOTE_CALL_ERROR)
+                }
+                promise.complete(
+                    when (result) {
+                        is Future<*> -> result.result()
+                        else -> result
+                    }
+                )
+            }
+        }
+        return promise.future()
+    }
+
+    private fun buildRequestOption(
+        proxied: Pair<KClass<*>?, KCallable<*>>,
+        host: String,
+        port: String,
+        header: JsonObject,
+        timeout: Long
+    ): RequestOptions {
         val path =
             getPath(proxied.first as KAnnotatedElement, proxied.second as KAnnotatedElement)
         val methodMapping = findRequestMapping(proxied.second) ?: throw MinihException(
             "未找到远程服务配置！",
             errorCode = MinihErrorCode.ERR_CODE_NOT_FOUND_ERROR
         )
-        val remoteServiceAnno = proxied.first?.findAnnotation<RemoteService>() ?: throw MinihException(
-            "未找到远程服务配置！",
-            errorCode = MinihErrorCode.ERR_CODE_NOT_FOUND_ERROR
-        )
+        val requestOptions = RequestOptions()
+        requestOptions.method = getHttpMethod(methodMapping.type)
+        requestOptions.uri = path
+        requestOptions.host = host
+        if (port.isNotBlank()) {
+            requestOptions.port = port.toInt()
+        }
 
-
-        val promise = Promise.promise<Any>()
-        val hasErrorBack = remoteServiceAnno.errorCallBack != Any::class
-        var result: Any? = null
-        if (hasErrorBack) {
-            val ins = remoteServiceAnno.errorCallBack.createInstance()
-            result = when {
-                args == null -> method.invoke(ins)
-                else -> method.invoke(ins, *args)
+        requestOptions.addHeader(MICROSERVICE_INNER_REQUEST_HEADER, MICROSERVICE_INNER_REQUEST_HEADER_VALUE)
+        requestOptions.addHeader("Content-Type", "application/json")
+        if (!header.isEmpty) {
+            header.forEach { h ->
+                requestOptions.addHeader(h.key, h.value.toString())
             }
         }
-        MsClient.getAvailableServiceNoSuspend(remoteServiceAnno.remote).compose {
-            if (it == null) {
-                throw MinihException(
-                    "未找到服务器！",
-                    errorCode = MinihErrorCode.ERR_CODE_NOT_FOUND_ERROR
-                )
-            }
-            val argsRaw = buildArgs(proxied.second, args)
-            val args1 = argsRaw.first.toBuffer()
-            val header = argsRaw.second
-            val client = WebClient.create(context.owner())
-            val requestOptions = RequestOptions()
-            requestOptions.method = getHttpMethod(methodMapping.type)
-            requestOptions.uri = path
-            requestOptions.host = it.location.getString("host")
-            requestOptions.port = it.location.getInteger("port")
-            requestOptions.addHeader("Content-Length", args1.length().toString())
-            requestOptions.addHeader(MICROSERVICE_INNER_REQUEST_HEADER, MICROSERVICE_INNER_REQUEST_HEADER_VALUE)
-            requestOptions.addHeader("Content-Type", "application/json")
-            if (!header.isEmpty) {
-                header.forEach { h ->
-                    requestOptions.addHeader(h.key, h.value.toString())
-                }
-            }
-            requestOptions.setTimeout(getConfig("ms", Config::class, context).timeout)
-            client.request(requestOptions.method, requestOptions).sendBuffer(args1)
-        }.onSuccess {
-            val result1 = it.body().toJsonObject()
-            val rType = proxied.second.returnType.arguments.first().type!!
-            val rValue = result1.getValue("data")
-            promise.complete(rValue?.let { covertTypeData(rValue, rType) })
-        }.onFailure {
-            if (hasErrorBack && result != null) {
-                if (result is Future<*>) {
-                    promise.complete(result.result())
-                } else {
-                    promise.complete(result)
-                }
-            } else {
-                throw MinihException(
-                    it.message,
-                    errorCode = MinihErrorCode.ERR_CODE_REMOTE_CALL_ERROR
-                )
-            }
-        }
-        return promise.future()
+        requestOptions.setTimeout(timeout)
+
+        return requestOptions
     }
 
     override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {
@@ -216,11 +225,7 @@ class ServiceProxyHandler : InvocationHandler, Service {
             }
             val context = Vertx.currentContext()
             val proxied = getProxied(proxy, method)
-            val remoteService = proxied.first?.findAnnotation<RemoteService>()
-            return when (remoteService?.remoteType) {
-                RemoteType.EVENT_BUS -> invokeByEventBus(proxy, method, args, context)
-                else -> invokeByHttpClient(proxy, method, args, context)
-            }
+            return invokeByHttpClient(proxy, method, args, context)
         } catch (e: Exception) {
             throw MinihException("远程服务执行错误!")
         }

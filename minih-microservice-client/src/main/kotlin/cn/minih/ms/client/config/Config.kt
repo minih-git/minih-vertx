@@ -8,7 +8,12 @@ import cn.minih.core.config.IConfig
  * @author hubin
  * @since 2023-07-31 11:28:31
  */
+enum class MsEnv {
+    CONSUL, K8S
+}
+
 class Config(
+    var msEnv: MsEnv = MsEnv.CONSUL,
     var rootPath: String = "",
     var consulHost: String = "",
     var consulPort: Int = 8500,

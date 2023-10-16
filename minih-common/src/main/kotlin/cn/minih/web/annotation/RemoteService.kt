@@ -15,10 +15,11 @@ import kotlin.reflect.KClass
 annotation class RemoteService(
     val name: String = "",
     val remote: String = "",
-    val remoteType: RemoteType = RemoteType.EVENT_BUS,
-    val errorCallBack: KClass<*> = Any::class
+    val errorCallBack: KClass<*> = Any::class,
+    val remoteType: RemoteType = RemoteType.HTTP_CLIENT,
+    val url: String = "",
 )
 
 enum class RemoteType {
-    HTTP_CLIENT, EVENT_BUS
+    HTTP_CLIENT
 }

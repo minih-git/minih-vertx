@@ -99,7 +99,13 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
                     ctx.json(R.ok(rawResult).jsToJsonString())
                 }
             } catch (e: Exception) {
-                log.warn("接口调用出现错误:${getMinihException(e).message}")
+                val config = getConfig("auth", AuthConfig::class)
+
+                log.warn(
+                    "接口调用出现错误:${getMinihException(e).message},${ctx.request().path()},${
+                        ctx.request().getHeader(config.tokenName)
+                    }"
+                )
                 ctx.fail(getMinihException(e))
             }
         }
@@ -255,7 +261,7 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
     private suspend fun logout(ctx: RoutingContext) {
         try {
             checkLogin(ctx)
-            val self: String = ctx.get(CONTEXT_LOGIN_ID)
+            val self: String = ctx.get(CONTEXT_LOGIN_TOKEN)
             Assert.notBlank(self) { MinihAuthException("loginId 不能为空！") }
             AuthLogic.logout(self)
             ctx.json(R.ok<String>().toJsonObject())

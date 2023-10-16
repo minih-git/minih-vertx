@@ -173,7 +173,7 @@ object AuthLogic {
             }
             updateSession(it)
             tokenSigns.forEach { tokenSign ->
-                cache.updateOrPut(tokenSign.token, offlineType.code)
+                cache.updateOrPut(tokenSign.token, offlineType.code, Duration.ofMinutes(5))
                 Vertx.currentContext().owner()?.eventBus()?.publish(
                     AUTH_SESSION_OFFLINE, jsonObjectOf(
                         "token" to tokenSign.token,
@@ -194,8 +194,18 @@ object AuthLogic {
         offline(id, MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_KICK_OUT)
     }
 
-    suspend fun logout(id: String) {
-        offline(id, MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_LOGOUT)
+    suspend fun logout(token: String) {
+        val loginId = getLoginIdByToken(token)
+        if (loginId.isNullOrBlank()) {
+            return
+        }
+        val session = getSessionByLoginId(loginId)
+        session?.let {
+            val tokenSigns = it.tokenSignList.filter { tokenSign -> tokenSign.token == token }
+            tokenSigns.forEach { sign ->
+                offline(session.id, MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_LOGOUT, sign.device)
+            }
+        }
     }
 
     private suspend fun getTokenValueByLoginId(id: String, device: String): String? {
