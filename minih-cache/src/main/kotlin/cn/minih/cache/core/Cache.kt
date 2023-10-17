@@ -47,7 +47,7 @@ interface Cache {
         return this.get(key).compose {
             if (it != null) {
                 getExpire(key).compose { d ->
-                    put(key, value, d).compose {
+                    put(key, value, duration ?: d).compose {
                         Future.succeededFuture()
                     }
                 }
