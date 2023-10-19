@@ -101,7 +101,7 @@ object RegisterService {
                         parameters.isEmpty() -> if (fn.isSuspend) fn.callSuspend(bean) else fn.call(bean)
                         else -> if (fn.isSuspend) fn.callSuspend(bean, *args) else fn.call(bean, *args)
                     }
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     rawResult =
                         MinihException(
                             "远程接口调用出现错误,${e.cause}",

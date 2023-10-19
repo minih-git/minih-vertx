@@ -60,7 +60,7 @@ fun encrypt(strToEncrypt: String, secret: String): String {
         val secretKey = SecretKeySpec(secret.toByteArray(), "AES")
         cipher.init(Cipher.ENCRYPT_MODE, secretKey)
         return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.toByteArray(Charsets.UTF_8)))
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         println("Error while encrypting: $e")
     }
     return ""
@@ -72,7 +72,7 @@ fun decrypt(strToDecrypt: String, secret: String): String {
         val secretKey = SecretKeySpec(secret.toByteArray(), "AES")
         cipher.init(Cipher.DECRYPT_MODE, secretKey)
         return String(cipher.doFinal(Base64.getDecoder().decode(strToDecrypt)))
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         log.warn("解密密钥错误,secret:$secret")
         throw MinihDataDecryptionException("秘钥错误，请刷新页面重试")
     }
@@ -97,7 +97,7 @@ fun Route.coroutineHandler(fn: suspend (RoutingContext) -> Unit) {
         CoroutineScope(v).launch {
             try {
                 fn(ctx)
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 ctx.fail(e)
             }
         }
@@ -111,7 +111,7 @@ fun Route.coroutineVoidHandler(fn: suspend (Any?) -> Unit) {
             try {
                 fn(null)
                 ctx.end()
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 ctx.fail(e)
             }
         }
@@ -129,7 +129,7 @@ fun Route.neeRole(vararg role: String, type: CheckRoleType = CheckRoleType.AND):
                         type == CheckRoleType.AND
                     )
                     ctx.next()
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     ctx.fail(e)
                 }
             }

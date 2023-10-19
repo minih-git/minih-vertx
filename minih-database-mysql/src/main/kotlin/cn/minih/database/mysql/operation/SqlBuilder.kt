@@ -99,6 +99,7 @@ object SqlBuilder {
     fun getConditionSqlByType(type: QueryConditionType, value: List<Any>): String {
         return when (type) {
             QueryConditionType.EQ -> " = ?"
+            QueryConditionType.NOT_EQ -> " != ?"
             QueryConditionType.IN -> {
                 val perch = when {
                     value.isEmpty() -> "?"
@@ -107,12 +108,21 @@ object SqlBuilder {
                 " in (${perch})"
             }
 
+            QueryConditionType.NOT_IN -> {
+                val perch = when {
+                    value.isEmpty() -> "?"
+                    else -> value.joinToString(",") { _ -> "?" }
+                }
+                " not in (${perch})"
+            }
+
             QueryConditionType.BETWEEN -> " between ? an ?"
             QueryConditionType.GT -> " > ? "
             QueryConditionType.LT -> " < ? "
             QueryConditionType.GTE -> " >= ? "
             QueryConditionType.LTE -> " =< ? "
             QueryConditionType.LIKE -> " like ? "
+
         }
     }
 

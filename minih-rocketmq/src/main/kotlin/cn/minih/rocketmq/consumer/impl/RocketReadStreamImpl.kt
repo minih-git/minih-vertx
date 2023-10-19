@@ -103,7 +103,7 @@ class RocketReadStreamImpl<T : Any>(
                             submitted = true
                             context.runOnContext { polling.set(false);handler.handle(messages) }
                         }
-                    } catch (e: Exception) {
+                    } catch (e: Throwable) {
                         errorHandler?.handle(e)
                     } finally {
                         if (!submitted) {

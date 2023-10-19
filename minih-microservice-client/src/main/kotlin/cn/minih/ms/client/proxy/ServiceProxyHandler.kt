@@ -224,9 +224,8 @@ class ServiceProxyHandler : InvocationHandler, Service {
                 return proxy == args[0]
             }
             val context = Vertx.currentContext()
-            val proxied = getProxied(proxy, method)
             return invokeByHttpClient(proxy, method, args, context)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             throw MinihException("远程服务执行错误!")
         }
     }

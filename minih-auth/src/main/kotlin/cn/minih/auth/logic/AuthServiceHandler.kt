@@ -98,7 +98,7 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
                 } else {
                     ctx.json(R.ok(rawResult).jsToJsonString())
                 }
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 val config = getConfig("auth", AuthConfig::class)
 
                 log.warn(
@@ -135,7 +135,7 @@ fun Route.coroutineFileUploadHandler(fn: KFunction<Any?>) {
                     else -> fn.callSuspend(bean, files)
                 }
                 ctx.json(R.ok(result).jsToJsonString())
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 log.warn("接口调用出现错误:${e.message}")
                 ctx.fail(getMinihException(e))
             }
@@ -199,7 +199,7 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
                         ctx.next()
                     }
                 }
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 log.warn("接口调用出现错误:${getMinihException(e).message}")
                 ctx.fail(getMinihException(e))
             }
@@ -218,7 +218,7 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
             ctx.put(CONTEXT_LOGIN_TOKEN, tokenValue)
             ctx.put(CONTEXT_LOGIN_DEVICE, tokenInfo.loginDevice)
             ctx.json(R.ok(tokenInfo).toJsonObject())
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             var key = ""
             if (config.loginMaxTryLockType == LockType.ACCOUNT) {
                 if (body.containsKey("username")) {
@@ -251,7 +251,7 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
             Assert.isTrue(beKick != self) { MinihAuthException("不能踢自己下线！") }
             AuthLogic.kickOut(beKick)
             ctx.json(R.ok<String>().toJsonObject())
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             log.warn("接口调用出现错误:${getMinihException(e).message}")
             ctx.fail(getMinihException(e))
         }
@@ -265,7 +265,7 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
             Assert.notBlank(self) { MinihAuthException("loginId 不能为空！") }
             AuthLogic.logout(self)
             ctx.json(R.ok<String>().toJsonObject())
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             log.warn("接口调用出现错误:${getMinihException(e).message}")
             ctx.fail(getMinihException(e))
         }

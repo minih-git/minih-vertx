@@ -63,7 +63,7 @@ object MsClient {
                     r = it[number % it.size]
                 }
                 Future.succeededFuture(r)
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 Future.failedFuture<Record>(MinihException("未找到远程服务！"))
             }
         }

@@ -132,7 +132,7 @@ fun <T : Any> fillObject(jsonObject: JsonObject, clazz: KClass<T>): T {
         val cons = clazz.primaryConstructor!!
         val values = cons.parameters.filterNot { it.isOptional }.associateWith { null }
         pojo = cons.callBy(values)
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         log.warn("创建${clazz.simpleName}对象失败，未设置的默认数据将被覆盖为null，请给所有字段赋予默认值,或提供无参数构造方法！")
     }
     val fields = clazz.memberProperties
@@ -223,61 +223,65 @@ fun covertBasic(value: Any, typeTmp: KType, tryString: Boolean = true): Any {
     if (typeTmp.isMarkedNullable) {
         type = typeTmp.classifier?.createType()!!
     }
-    return when (type) {
-        String::class.createType() -> value.toString()
-        Int::class.createType() -> when {
-            value is Int -> value
-            tryString && value is String -> if (value.isBlank()) 0 else value.toString().toInt()
-            else -> throw MinihDataCovertException("非string类数据")
-        }
+    return try {
+        when (type) {
+            String::class.createType() -> value.toString()
+            Int::class.createType() -> when {
+                value is Int -> value
+                tryString -> if (value.toString().isBlank()) 0 else value.toString().toInt()
+                else -> throw MinihDataCovertException("非Int类数据")
+            }
 
-        Short::class.createType() -> when {
-            value is Short -> value
-            tryString && value is String -> if (value.isBlank()) 0 else value.toString().toShort()
-            else -> throw MinihDataCovertException("非short类数据")
-        }
+            Short::class.createType() -> when {
+                value is Short -> value
+                tryString -> if (value.toString().isBlank()) 0 else value.toString().toShort()
+                else -> throw MinihDataCovertException("非short类数据")
+            }
 
-        Long::class.createType() -> when {
-            value is Long -> value
-            value is Int -> value.toLong()
-            tryString && value is String -> if (value.isBlank()) 0 else value.toString().toLong()
-            else -> throw MinihDataCovertException("非long类数据")
-        }
+            Long::class.createType() -> when {
+                value is Long -> value
+                value is Int -> value.toLong()
+                tryString -> if (value.toString().isBlank()) 0 else value.toString().toLong()
+                else -> throw MinihDataCovertException("非long类数据")
+            }
 
-        Byte::class.createType() -> when {
-            value is Byte -> value
-            tryString && value is String -> value.toString().toByte()
-            else -> throw MinihDataCovertException("非byte类数据")
-        }
+            Byte::class.createType() -> when {
+                value is Byte -> value
+                tryString -> value.toString().toString().toByte()
+                else -> throw MinihDataCovertException("非byte类数据")
+            }
 
-        Float::class.createType() -> when {
-            value is Float -> value
-            tryString && value is String -> if (value.isBlank()) 0.0F else value.toString().toFloat()
-            else -> throw MinihDataCovertException("非float类数据")
-        }
+            Float::class.createType() -> when {
+                value is Float -> value
+                tryString -> if (value.toString().isBlank()) 0.0F else value.toString().toFloat()
+                else -> throw MinihDataCovertException("非float类数据")
+            }
 
-        Double::class.createType() -> when {
-            value is Double -> value
-            tryString && value is String -> if (value.isBlank()) 0.0 else value.toString().toDouble()
-            else -> throw MinihDataCovertException("非double类数据")
-        }
+            Double::class.createType() -> when {
+                value is Double -> value
+                tryString -> if (value.toString().isBlank()) 0.0 else value.toString().toDouble()
+                else -> throw MinihDataCovertException("非double类数据")
+            }
 
-        Boolean::class.createType() -> when {
-            value is Boolean -> value
-            tryString && value is String -> if (value.isBlank()) false else value.toString().toBoolean()
-            value is Int -> value == 1
-            value is Long -> value == 1L
-            else -> throw MinihDataCovertException("非boolean类数据")
-        }
+            Boolean::class.createType() -> when {
+                value is Boolean -> value
+                tryString -> if (value.toString().isBlank()) false else value.toString().toBoolean()
+                value is Int -> value == 1
+                value is Long -> value == 1L
+                else -> throw MinihDataCovertException("非boolean类数据")
+            }
 
-        Char::class.createType() -> when (value) {
-            is Char -> value
-            else -> throw MinihDataCovertException("非char类数据")
-        }
+            Char::class.createType() -> when (value) {
+                is Char -> value
+                else -> throw MinihDataCovertException("非char类数据")
+            }
 
-        else -> throw MinihDataCovertException("非基础数据类型")
+            else -> throw MinihDataCovertException("非基础数据类型")
+        }
+    } catch (e: Exception) {
+        log.warn("${e.message}，${value},$tryString")
+        throw e
     }
-
 }
 
 fun <T : Any> covertBasic(value: Any, clazz: KClass<T>, tryString: Boolean = true): T {

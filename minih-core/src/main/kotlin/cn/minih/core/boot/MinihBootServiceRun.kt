@@ -207,7 +207,7 @@ object MinihBootServiceRun {
             postStartHandling(vertx).await()
             shutdownHook(vertx)
             log(vertx, currentTime)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             successDeploy.forEach { vertx.undeploy(it) }
             registerCloseHandling(vertx.orCreateContext)
             log.warn("部署服务出现错误,{}", e.message, e)

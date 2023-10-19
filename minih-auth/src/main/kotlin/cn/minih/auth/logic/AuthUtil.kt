@@ -91,7 +91,7 @@ object AuthUtil {
     fun getCurrentLoginId(): String {
         return try {
             Vertx.currentContext().get(CONTEXT_LOGIN_ID)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_NO_TOKEN)
         }
     }
@@ -99,7 +99,7 @@ object AuthUtil {
     fun getCurrentLoginToken(): String {
         return try {
             Vertx.currentContext().get(CONTEXT_LOGIN_TOKEN)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_NO_TOKEN)
         }
     }
@@ -107,7 +107,7 @@ object AuthUtil {
     fun getCurrentLoginDevice(): String {
         return try {
             Vertx.currentContext().get(CONTEXT_LOGIN_DEVICE)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             DEFAULT_DEVICE
         }
     }

@@ -37,7 +37,7 @@ class RocketConsumerImpl<T : Any>(private val vertx: Vertx, private val msgClazz
                 .setSubscriptionExpressions(mapOf(topic to filterExpression)).build()
             this.stream = RocketReadStream.create(vertx, consumer, msgClazz)
             return this
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             throw e
         }
     }
