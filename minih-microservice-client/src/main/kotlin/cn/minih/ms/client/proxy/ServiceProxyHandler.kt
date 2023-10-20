@@ -158,13 +158,12 @@ class ServiceProxyHandler : InvocationHandler, Service {
             val client = WebClient.create(context.owner())
             val requestOptions = buildRequestOption(proxied, host, port, argsRaw.second, config.timeout)
             requestOptions.addHeader("Content-Length", argsBuffer.length().toString())
-            log.info("远程服务调用: ${requestOptions.method.name()}  ${requestOptions.host} ${requestOptions.uri}")
+            log.debug("远程服务调用: ${requestOptions.method.name()}  ${requestOptions.host} ${requestOptions.uri}")
             client.request(requestOptions.method, requestOptions).sendBuffer(argsBuffer).onSuccess {
                 val result1 = it.body().toJsonObject()
                 val rType = proxied.second.returnType.arguments.first().type!!
                 val rValue = result1.getValue("data")
-                log.info("远程服务调用返回结果: $result1")
-
+                log.debug("远程服务调用返回结果: $result1")
                 promise.complete(rValue?.let { covertTypeData(rValue, rType) })
             }.onFailure {
                 Assert.isTrue(hasErrorBack && result != null) {

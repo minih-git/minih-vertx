@@ -113,6 +113,6 @@ object AuthUtil {
     }
 
     fun currentIsSysAdmin(): Boolean {
-        return Vertx.currentContext().get(CONTEXT_IS_SYSTEM_ADMIN)
+        return Vertx.currentContext().get(CONTEXT_IS_SYSTEM_ADMIN) ?: false
     }
 }
