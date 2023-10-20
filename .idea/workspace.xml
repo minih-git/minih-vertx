@@ -6,10 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="优化">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/constants/AuthConstants.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/constants/AuthConstants.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthServiceHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthServiceHandler.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthUtil.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthUtil.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/proxy/ServiceProxyHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/proxy/ServiceProxyHandler.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -167,7 +164,7 @@
       <recent name="cn.minih.core.boot" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.minih-vertx:minih-auth [publish]">
+  <component name="RunManager" selected="Gradle.minih-vertx [publish]">
     <configuration name="minih-vertx [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -280,8 +277,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.minih-vertx:minih-auth [publish]" />
         <item itemvalue="Gradle.minih-vertx [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-auth [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-cache [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-microservice-client [publish]" />
@@ -368,6 +365,8 @@
       <workItem from="1697530062370" duration="1621000" />
       <workItem from="1697593463065" duration="587000" />
       <workItem from="1697681610849" duration="11484000" />
+      <workItem from="1697780259460" duration="281000" />
+      <workItem from="1697782494917" duration="1574000" />
     </task>
     <task id="LOCAL-00001" summary="提取组件">
       <option name="closed" value="true" />
@@ -737,7 +736,15 @@
       <option name="project" value="LOCAL" />
       <updated>1697707300816</updated>
     </task>
-    <option name="localTasksCounter" value="47" />
+    <task id="LOCAL-00047" summary="优化">
+      <option name="closed" value="true" />
+      <created>1697780292387</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1697780292387</updated>
+    </task>
+    <option name="localTasksCounter" value="48" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -797,11 +804,6 @@
           <url>jar://$USER_HOME$/gradle-8.0.2/caches/modules-2/files-2.1/org.apache.rocketmq/rocketmq-client-java/5.0.5/86762955ac78739192ad5a878d557bf6129090ab/rocketmq-client-java-5.0.5-sources.jar!/org/apache/rocketmq/client/java/impl/ClientImpl.java</url>
           <line>189</line>
           <option name="timeStamp" value="6" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/proxy/ServiceProxyHandler.kt</url>
-          <line>118</line>
-          <option name="timeStamp" value="7" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

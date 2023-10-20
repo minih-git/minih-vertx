@@ -26,6 +26,7 @@ import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.http.Cookie
 import io.vertx.core.http.HttpServerRequest
+import io.vertx.core.impl.ContextInternal
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Route
 import io.vertx.ext.web.RoutingContext
@@ -113,6 +114,8 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
                             "用户token:${ctx.request().getHeader(config.tokenName) ?: ""}"
                 )
                 ctx.fail(getMinihException(e))
+            } finally {
+                (Vertx.currentContext() as ContextInternal).contextData().clear()
             }
         }
     }
@@ -144,6 +147,8 @@ fun Route.coroutineFileUploadHandler(fn: KFunction<Any?>) {
             } catch (e: Throwable) {
                 log.warn("接口调用出现错误:${e.message}")
                 ctx.fail(getMinihException(e))
+            } finally {
+                (Vertx.currentContext() as ContextInternal).contextData().clear()
             }
         }
     }
@@ -258,6 +263,8 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
                 AuthLogic.checkLoginState(key)
             }
             throw e
+        } finally {
+            (Vertx.currentContext() as ContextInternal).contextData().clear()
         }
 
     }
@@ -276,6 +283,8 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         } catch (e: Throwable) {
             log.warn("接口调用出现错误:${getMinihException(e).message}")
             ctx.fail(getMinihException(e))
+        } finally {
+            (Vertx.currentContext() as ContextInternal).contextData().clear()
         }
 
     }
@@ -290,6 +299,8 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         } catch (e: Throwable) {
             log.warn("接口调用出现错误:${getMinihException(e).message}")
             ctx.fail(getMinihException(e))
+        } finally {
+            (Vertx.currentContext() as ContextInternal).contextData().clear()
         }
     }
 
