@@ -285,8 +285,9 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
     private suspend fun kickOut(ctx: RoutingContext) {
         try {
             checkLogin(ctx)
+            val config = getConfig("auth", AuthConfig::class)
             val self: String = ctx.get(CONTEXT_LOGIN_ID)
-            checkRole(self, listOf(CONTEXT_SYSTEM_ADMIN_ROLE_TAG))
+            checkRole(self, listOf(config.authManagerRoleTag))
             val request = getRequestBody(ctx)
             val beKick = request.getString("loginId")
             Assert.notBlank(beKick) { MinihAuthException("loginId 不能为空！") }
@@ -366,12 +367,16 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
     }
 
     suspend fun checkRole(loginId: String, needRoles: List<String>, and: Boolean = false) {
-        if (needRoles.isEmpty() || loginId.isBlank()) {
+        if (needRoles.isEmpty()) {
             return
         }
+        Assert.notBlank(loginId) { AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_NO_AUTH) }
         val roleTags = authService.getLoginRole(loginId)
         if (roleTags.isEmpty()) {
             throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_TOKEN_NO_AUTH)
+        }
+        if (roleTags.contains(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)) {
+            return
         }
         if (and) {
             if (!needRoles.all { roleTags.contains(it) }) {

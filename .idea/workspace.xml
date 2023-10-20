@@ -6,9 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="优化">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/core/MinihAuthVerticle.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/core/MinihAuthVerticle.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthLogic.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthLogic.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/config/AuthConfig.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/config/AuthConfig.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/constants/AuthConstants.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/constants/AuthConstants.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthServiceHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthServiceHandler.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/service/AbstractAuthService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/service/AbstractAuthService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/service/AuthService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/service/AuthService.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -166,7 +168,7 @@
       <recent name="cn.minih.core.boot" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.minih-vertx:minih-auth [publish]">
+  <component name="RunManager" selected="Gradle.minih-vertx [publish]">
     <configuration name="minih-vertx [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -279,8 +281,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.minih-vertx:minih-auth [publish]" />
         <item itemvalue="Gradle.minih-vertx [publish]" />
+        <item itemvalue="Gradle.minih-vertx:minih-auth [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-cache [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-database-mysql [publish]" />
         <item itemvalue="Gradle.minih-vertx:minih-microservice-client [publish]" />
@@ -368,7 +370,9 @@
       <workItem from="1697593463065" duration="587000" />
       <workItem from="1697681610849" duration="11484000" />
       <workItem from="1697780259460" duration="281000" />
-      <workItem from="1697782494917" duration="3957000" />
+      <workItem from="1697782494917" duration="4035000" />
+      <workItem from="1697786982871" duration="3237000" />
+      <workItem from="1697792281579" duration="2578000" />
     </task>
     <task id="LOCAL-00001" summary="提取组件">
       <option name="closed" value="true" />
@@ -754,7 +758,15 @@
       <option name="project" value="LOCAL" />
       <updated>1697784121098</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="优化">
+      <option name="closed" value="true" />
+      <created>1697786895497</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1697786895497</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

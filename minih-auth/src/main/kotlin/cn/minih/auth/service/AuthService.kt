@@ -11,7 +11,7 @@ import cn.minih.common.util.getConfig
  */
 interface AuthService {
     suspend fun login(params: MutableMap<String, Any>): AuthLoginModel
-    suspend fun setLoginRole(loginId: String)
+    suspend fun setLoginRole(loginId: String): List<String>
     suspend fun getLoginRole(loginId: String): List<String>
 
     suspend fun getLoginRoleKey(): String {

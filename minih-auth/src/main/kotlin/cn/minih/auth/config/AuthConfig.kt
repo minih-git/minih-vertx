@@ -31,6 +31,7 @@ data class AuthConfig(
     var isReadParams: Boolean = true,
     var autoKeepSign: Boolean = true,
     var ignoreAuthUri: List<String> = listOf(),
+    var authManagerRoleTag: String = CONTEXT_AUTH_ADMIN_ROLE_TAG
 ) : IConfig
 
 data class AuthCacheConfig(

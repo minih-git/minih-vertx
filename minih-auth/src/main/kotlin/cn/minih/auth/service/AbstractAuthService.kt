@@ -4,9 +4,11 @@ import cn.minih.auth.constants.LOGIN_USER_ROLES_CACHE_KEY
 import cn.minih.auth.data.AuthLoginModel
 import cn.minih.auth.exception.AuthLoginException
 import cn.minih.cache.core.CacheManager
+import cn.minih.cache.redis.impl.RedisCacheConfig
 import cn.minih.cache.redis.impl.RedisCacheManagerImpl
 import cn.minih.common.util.Assert
 import io.vertx.kotlin.coroutines.await
+import java.time.Duration
 
 /**
  * 权限服务
@@ -32,16 +34,21 @@ abstract class AbstractAuthService : AuthService {
     }
 
 
-    override suspend fun setLoginRole(loginId: String) {
+    override suspend fun setLoginRole(loginId: String): List<String> {
         val roles = getUserRoles(loginId)
-        val cache = cacheManager.getCache(LOGIN_USER_ROLES_CACHE_KEY)
+        val cache = cacheManager.getCache(LOGIN_USER_ROLES_CACHE_KEY, RedisCacheConfig(Duration.ofDays(30)))
+        if (roles.isEmpty()) {
+            cache.put(loginId, listOf("role_null"))
+            return roles
+        }
         cache.evict(loginId).await()
         cache.put(loginId, roles)
+        return roles
     }
 
     override suspend fun getLoginRole(loginId: String): List<String> {
         val cache = cacheManager.getCache(LOGIN_USER_ROLES_CACHE_KEY)
-        return cache.lRange(loginId, String::class).await() ?: emptyList()
+        return cache.lRange(loginId, String::class).await() ?: return setLoginRole(loginId)
     }
 
 
