@@ -60,8 +60,9 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
                 val request = ctx.request()
                 log.info(
                     "路径:${request.path()},方式:${request.method()},ip:${ctx.get<String>(CONTEXT_REQUEST_IP)}," +
-                            "Mac:${ctx.get<String>(CONTEXT_REQUEST_MAC)},设备:${ctx.get<String>(CONTEXT_REQUEST_DEVICE)}," +
-                            "用户:${ctx.get<String>(CONTEXT_LOGIN_ID)}"
+                            "Mac:${ctx.get<String>(CONTEXT_REQUEST_MAC) ?: "未知"}," +
+                            "设备:${ctx.get<String>(CONTEXT_REQUEST_DEVICE) ?: "未知设备"}," +
+                            "用户:${ctx.get<String>(CONTEXT_LOGIN_ID) ?: "未登录用户"}"
                 )
                 authCheckRole(fn, ctx)
                 val bean: Any? = getBeanCall(fn.parameters)
@@ -145,7 +146,13 @@ fun Route.coroutineFileUploadHandler(fn: KFunction<Any?>) {
                 }
                 ctx.json(R.ok(result).jsToJsonString())
             } catch (e: Throwable) {
-                log.warn("接口调用出现错误:${e.message}")
+                val config = getConfig("auth", AuthConfig::class)
+                log.warn(
+                    "接口调用出现错误:" +
+                            "错误信息:${getMinihException(e).message}," +
+                            "接口路径:${ctx.request().path()}," +
+                            "用户token:${ctx.request().getHeader(config.tokenName) ?: ""}"
+                )
                 ctx.fail(getMinihException(e))
             } finally {
                 (Vertx.currentContext() as ContextInternal).contextData().clear()
@@ -202,10 +209,10 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
                 val request = ctx.request()
                 val path = request.path()
                 val ip = getRemoteIp(request)
-                val mac = request.getHeader("x-request-mac") ?: ""
-                val deviceId = request.getHeader("x-request-device") ?: ""
-                val appVersion = request.getHeader("x-request-app-version") ?: ""
-                val deviceModel = request.getHeader("x-request-device-model") ?: ""
+                val mac = request.getHeader("x-request-mac") ?: "未知"
+                val deviceId = request.getHeader("x-request-device") ?: "未知设备"
+                val appVersion = request.getHeader("x-request-app-version") ?: "未知版本"
+                val deviceModel = request.getHeader("x-request-device-model") ?: "未知设备"
                 Vertx.currentContext().put(CONTEXT_REQUEST_IP, ip)
                 Vertx.currentContext().put(CONTEXT_REQUEST_MAC, mac)
                 Vertx.currentContext().put(CONTEXT_REQUEST_DEVICE_ID, deviceId)
@@ -227,7 +234,13 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
                     }
                 }
             } catch (e: Throwable) {
-                log.warn("接口调用出现错误:${getMinihException(e).message}")
+                val config = getConfig("auth", AuthConfig::class)
+                log.warn(
+                    "接口调用出现错误:" +
+                            "错误信息:${getMinihException(e).message}," +
+                            "接口路径:${ctx.request().path()}," +
+                            "用户token:${ctx.request().getHeader(config.tokenName) ?: ""}"
+                )
                 ctx.fail(getMinihException(e))
             }
         }
@@ -256,13 +269,13 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
                     key = body.getString("mobile")
                 }
             }
-            if (config.loginMaxTryLockType == LockType.IP) {
+            if (config.loginMaxTryLockType == LockType.IP || key.isBlank()) {
                 key = getRemoteIp(ctx.request())
             }
             if (key.isNotBlank()) {
                 AuthLogic.checkLoginState(key)
             }
-            throw e
+            ctx.fail(getMinihException(e))
         } finally {
             (Vertx.currentContext() as ContextInternal).contextData().clear()
         }

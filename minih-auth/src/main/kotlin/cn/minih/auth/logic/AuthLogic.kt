@@ -80,11 +80,11 @@ object AuthLogic {
     }
 
     suspend fun checkLoginState(key: String) {
+        val config = getConfig("auth", AuthConfig::class)
         val cache = cacheManager.getCache(LOGIN_ERR_COUNT_CACHE_KEY)
         val count = cache.incr(key).await()
-        val config = getConfig("auth", AuthConfig::class)
+        cache.setExpire(key, Duration.ofSeconds(config.loginMaxTryLockTimes))
         if (count > config.loginMaxTryTimes) {
-            cache.setExpire(key, Duration.ofSeconds(config.loginMaxTryLockTimes))
             throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_TRY_MAX_TIMES)
         }
     }
