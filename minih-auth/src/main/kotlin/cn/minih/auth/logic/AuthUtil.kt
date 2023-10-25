@@ -115,4 +115,9 @@ object AuthUtil {
     fun currentIsSysAdmin(): Boolean {
         return Vertx.currentContext().get(CONTEXT_IS_SYSTEM_ADMIN) ?: false
     }
+
+    fun hasRole(roleTag: String): Boolean {
+        val roles = Vertx.currentContext().get<List<String>>(CONTEXT_USER_ROLES) ?: return false
+        return roles.contains(roleTag)
+    }
 }

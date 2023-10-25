@@ -361,6 +361,8 @@ class AuthServiceHandler private constructor() : Handler<RoutingContext> {
         ctx.put(CONTEXT_LOGIN_ID, loginId)
         ctx.put(CONTEXT_LOGIN_TOKEN, tokenValue)
         val roleTags = authService.getLoginRole(loginId)
+        Vertx.currentContext().put(CONTEXT_USER_ROLES, roleTags)
+        ctx.put(CONTEXT_USER_ROLES, roleTags)
         val isSystemAdmin = roleTags.isNotEmpty() && roleTags.contains(CONTEXT_SYSTEM_ADMIN_ROLE_TAG)
         Vertx.currentContext().put(CONTEXT_IS_SYSTEM_ADMIN, isSystemAdmin)
         ctx.put(CONTEXT_IS_SYSTEM_ADMIN, isSystemAdmin)
