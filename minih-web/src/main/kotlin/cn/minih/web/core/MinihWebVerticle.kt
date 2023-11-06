@@ -57,6 +57,7 @@ abstract class MinihWebVerticle(private val port: Int = 8080) : MinihVerticle, C
             .handler(ResponseContentTypeHandler.create())
             .handler(bodyHandler)
             .failureHandler(RouteFailureHandler.instance)
+        routerInstance.route("/healthCheck").handler { it.end("ok") }
         routerInstance.route("/ws/minihEventbus/*").subRouter(sockJSHandler.bridge(options))
     }
 
