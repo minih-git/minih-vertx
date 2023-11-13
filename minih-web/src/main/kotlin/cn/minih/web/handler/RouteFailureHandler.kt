@@ -1,8 +1,6 @@
 package cn.minih.web.handler
 
 import cn.minih.common.exception.MinihException
-import cn.minih.common.util.getMinihException
-import cn.minih.common.util.log
 import cn.minih.common.util.toJsonObject
 import cn.minih.web.response.R
 import io.vertx.core.Handler
@@ -25,7 +23,6 @@ class RouteFailureHandler private constructor() : Handler<RoutingContext>, Error
         var r: R<String>
         val ex = ctx.failure()
         if (ctx.statusCode() == 200 || ex != null) {
-            log.warn("接口调用出现错误:${getMinihException(ex).message}", ex)
             r = R.err(ex.message)
             if (ex is MinihException) {
                 r = R.err(ex.msg, ex.errorCode)

@@ -4,9 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="优化">
+    <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="新增一个健康检查接口">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/core/MinihWebVerticle.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/core/MinihWebVerticle.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/handler/RouteFailureHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/handler/RouteFailureHandler.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -373,15 +373,8 @@
       <workItem from="1698212795155" duration="1218000" />
       <workItem from="1698214915988" duration="156000" />
       <workItem from="1698215103351" duration="66000" />
-      <workItem from="1699250365252" duration="1703000" />
-    </task>
-    <task id="LOCAL-00003" summary="优化服务注册">
-      <option name="closed" value="true" />
-      <created>1690900795700</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1690900795700</updated>
+      <workItem from="1699250365252" duration="1744000" />
+      <workItem from="1699838083713" duration="744000" />
     </task>
     <task id="LOCAL-00004" summary="优化代码 解决一些bug">
       <option name="closed" value="true" />
@@ -767,7 +760,15 @@
       <option name="project" value="LOCAL" />
       <updated>1698214032612</updated>
     </task>
-    <option name="localTasksCounter" value="52" />
+    <task id="LOCAL-00052" summary="新增一个健康检查接口">
+      <option name="closed" value="true" />
+      <created>1699256705844</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1699256705844</updated>
+    </task>
+    <option name="localTasksCounter" value="53" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -785,7 +786,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="提取组件" />
     <MESSAGE value="优化服务注册" />
     <MESSAGE value="优化代码 解决一些bug" />
     <MESSAGE value="优化唯一id算法" />
@@ -810,7 +810,8 @@
     <MESSAGE value="新增远程接口调用错误回调" />
     <MESSAGE value="优化错误信息" />
     <MESSAGE value="优化" />
-    <option name="LAST_COMMIT_MESSAGE" value="优化" />
+    <MESSAGE value="新增一个健康检查接口" />
+    <option name="LAST_COMMIT_MESSAGE" value="新增一个健康检查接口" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
