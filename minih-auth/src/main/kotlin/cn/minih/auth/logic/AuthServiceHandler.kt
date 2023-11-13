@@ -56,14 +56,9 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
     handler { ctx ->
         val dispatcher: CoroutineDispatcher = Vertx.currentContext().dispatcher()
         CoroutineScope(dispatcher).launch {
+            val request = ctx.request()
+            val t = System.currentTimeMillis()
             try {
-                val request = ctx.request()
-                log.info(
-                    "路径:${request.path()},方式:${request.method()},ip:${ctx.get<String>(CONTEXT_REQUEST_IP)}," +
-                            "Mac:${ctx.get<String>(CONTEXT_REQUEST_MAC) ?: "未知"}," +
-                            "设备:${ctx.get<String>(CONTEXT_REQUEST_DEVICE) ?: "未知设备"}," +
-                            "用户:${ctx.get<String>(CONTEXT_LOGIN_ID) ?: "未登录用户"}"
-                )
                 authCheckRole(fn, ctx)
                 val bean: Any? = getBeanCall(fn.parameters)
                 val parameters = bean?.let {
@@ -116,6 +111,14 @@ fun Route.coroutineJsonHandlerHasAuth(fn: KFunction<Any?>) {
                 )
                 ctx.fail(getMinihException(e))
             } finally {
+                log.info(
+                    "路径:${request.path()},方式:${request.method()},ip:${ctx.get<String>(CONTEXT_REQUEST_IP)}," +
+                            "Mac:${ctx.get<String>(CONTEXT_REQUEST_MAC) ?: "未知"}," +
+                            "设备:${ctx.get<String>(CONTEXT_REQUEST_DEVICE) ?: "未知设备"}," +
+                            "版本:${ctx.get<String>(CONTEXT_REQUEST_VERSION) ?: "未知版本"}," +
+                            "用户:${ctx.get<String>(CONTEXT_LOGIN_ID) ?: "未登录用户"}," +
+                            "耗时: ${System.currentTimeMillis() - t}ms"
+                )
                 (Vertx.currentContext() as ContextInternal).contextData().clear()
             }
         }
@@ -128,6 +131,14 @@ fun Route.coroutineFileUploadHandler(fn: KFunction<Any?>) {
         val v: CoroutineDispatcher = Vertx.currentContext().dispatcher()
         CoroutineScope(v).launch {
             try {
+                val request = ctx.request()
+                log.info(
+                    "路径:${request.path()},方式:${request.method()},ip:${ctx.get<String>(CONTEXT_REQUEST_IP)}," +
+                            "Mac:${ctx.get<String>(CONTEXT_REQUEST_MAC) ?: "未知"}," +
+                            "设备:${ctx.get<String>(CONTEXT_REQUEST_DEVICE) ?: "未知设备"}," +
+                            "版本:${ctx.get<String>(CONTEXT_REQUEST_VERSION) ?: "未知版本"}," +
+                            "用户:${ctx.get<String>(CONTEXT_LOGIN_ID) ?: "未登录用户"}"
+                )
                 val bean: Any? = getBeanCall(fn.parameters)
                 val files = ctx.fileUploads().map {
                     FileUpload(

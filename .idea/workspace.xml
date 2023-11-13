@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="新增一个健康检查接口">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/handler/RouteFailureHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/handler/RouteFailureHandler.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthServiceHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthServiceHandler.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,6 +85,13 @@
   </component>
   <component name="GitToolBoxStore">
     <option name="projectConfigVersion" value="5" />
+  </component>
+  <component name="GithubProjectSettings">
+    <option name="branchProtectionPatterns">
+      <list>
+        <option value="master" />
+      </list>
+    </option>
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.vertx/vertx-core/4.4.4/7a5c176de3a60991778fb6646850a3c5d809d1aa/vertx-core-4.4.4-sources.jar!/io/vertx/core/streams/WriteStream.java" root0="SKIP_INSPECTION" />
@@ -374,15 +381,9 @@
       <workItem from="1698214915988" duration="156000" />
       <workItem from="1698215103351" duration="66000" />
       <workItem from="1699250365252" duration="1744000" />
-      <workItem from="1699838083713" duration="744000" />
-    </task>
-    <task id="LOCAL-00004" summary="优化代码 解决一些bug">
-      <option name="closed" value="true" />
-      <created>1691072832787</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1691072832787</updated>
+      <workItem from="1699838083713" duration="2760000" />
+      <workItem from="1699843409545" duration="15000" />
+      <workItem from="1699849863127" duration="873000" />
     </task>
     <task id="LOCAL-00005" summary="优化唯一id算法">
       <option name="closed" value="true" />
@@ -768,7 +769,15 @@
       <option name="project" value="LOCAL" />
       <updated>1699256705844</updated>
     </task>
-    <option name="localTasksCounter" value="53" />
+    <task id="LOCAL-00053" summary="新增一个健康检查接口">
+      <option name="closed" value="true" />
+      <created>1699838943636</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1699838943636</updated>
+    </task>
+    <option name="localTasksCounter" value="54" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
