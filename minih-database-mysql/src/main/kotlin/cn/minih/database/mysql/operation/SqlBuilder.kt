@@ -120,7 +120,7 @@ object SqlBuilder {
             QueryConditionType.GT -> " > ? "
             QueryConditionType.LT -> " < ? "
             QueryConditionType.GTE -> " >= ? "
-            QueryConditionType.LTE -> " =< ? "
+            QueryConditionType.LTE -> " <= ? "
             QueryConditionType.LIKE -> " like ? "
 
         }

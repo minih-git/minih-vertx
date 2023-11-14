@@ -64,6 +64,39 @@ abstract class AbstractWrapper<T, R, Children : AbstractWrapper<T, R, Children>>
         return this as Children
     }
 
+    fun gte(key: KProperty1<T, Any>, value: Any): Children {
+        this.condition.add(
+            QueryCondition(
+                CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, key.name),
+                listOf(value),
+                QueryConditionType.GTE
+            )
+        )
+        return this as Children
+    }
+
+    fun lt(key: KProperty1<T, Any>, value: Any): Children {
+        this.condition.add(
+            QueryCondition(
+                CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, key.name),
+                listOf(value),
+                QueryConditionType.LT
+            )
+        )
+        return this as Children
+    }
+
+    fun lte(key: KProperty1<T, Any>, value: Any): Children {
+        this.condition.add(
+            QueryCondition(
+                CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, key.name),
+                listOf(value),
+                QueryConditionType.LTE
+            )
+        )
+        return this as Children
+    }
+
     fun `in`(key: KProperty1<T, Any>, value: List<Any>): Children {
         condition.add(
             QueryCondition(
