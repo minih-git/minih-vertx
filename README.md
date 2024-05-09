@@ -22,7 +22,7 @@
 ### 快速启动
 
 ```kotlin
-@ComponentScan("com.tuoling")
+@ComponentScan("com.minih")
 class SystemMain
 
 suspend fun main(vararg args: String) {
@@ -33,7 +33,7 @@ suspend fun main(vararg args: String) {
 ### 增加配置文件
 
 ```kotlin
-@ComponentScan("com.tuoling")
+@ComponentScan("com.minih")
 class SystemMain
 
 suspend fun main(vararg args: String) {
