@@ -1,15 +1,13 @@
 dependencies {
-
-    api(libs.vertx.discovery)
-    api(libs.vertx.consul)
-    api(libs.vertx.web.client)
-    api(libs.vertx.kotlin.coroutines)
+    api(libs.vertx.mysql)
+    api(libs.vertx.pg)
 
 
-
+    implementation(libs.gson)
     implementation(libs.logging)
     implementation(libs.logback)
-    implementation(libs.gson)
+    implementation(libs.guava)
+
     implementation(libs.minih.core)
     implementation(libs.minih.common)
 

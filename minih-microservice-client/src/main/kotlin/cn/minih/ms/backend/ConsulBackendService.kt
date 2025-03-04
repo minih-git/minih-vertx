@@ -2,7 +2,6 @@ package cn.minih.ms.backend
 
 import cn.minih.common.util.getEnv
 import cn.minih.common.util.toJsonObject
-import cn.minih.ms.client.MsClient
 import io.vertx.core.*
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
@@ -15,7 +14,6 @@ import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
 import io.vertx.servicediscovery.spi.ServiceType
 import java.util.*
 import java.util.stream.Collectors
-import kotlin.concurrent.scheduleAtFixedRate
 
 
 /**
@@ -46,10 +44,10 @@ class ConsulBackendService : ServiceDiscoveryBackend {
     }
 
     private fun startHealthCheck(serviceOptions: ServiceOptions) {
-        Timer().scheduleAtFixedRate(0, 15000) {
-            client.passCheck(serviceOptions.checkOptions.id)
-            MsClient.updateCache()
-        }
+//        Timer().scheduleAtFixedRate(0, 15000) {
+//            client.passCheck(serviceOptions.checkOptions.id)
+//            MsClient.updateCache()
+//        }
         client.passCheck(serviceOptions.checkOptions.id)
     }
 

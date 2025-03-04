@@ -15,9 +15,8 @@ import io.vertx.config.ConfigStoreOptions
 import io.vertx.core.*
 import io.vertx.core.impl.ContextInternal
 import io.vertx.core.json.JsonObject
-import io.vertx.kotlin.coroutines.await
+import io.vertx.kotlin.coroutines.coAwait
 import io.vertx.kotlin.coroutines.dispatcher
-import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
@@ -35,7 +34,6 @@ import kotlin.reflect.full.memberFunctions
  * @desc
  */
 @Suppress("unused")
-
 object MinihBootServiceRun {
 
     private val systemConfigs = mutableListOf<ConfigStoreOptions>()
@@ -184,13 +182,9 @@ object MinihBootServiceRun {
 
     private suspend fun getVertx(vararg args: String): Vertx {
         return when {
-            args.isEmpty() -> Vertx.clusteredVertx(VertxOptions()).await()
+            args.isEmpty() -> Vertx.clusteredVertx(VertxOptions()).coAwait()
             args[0] == "-standalone" -> Vertx.vertx()
-            else -> {
-                val mgr = HazelcastClusterManager()
-                val options = VertxOptions().setClusterManager(mgr)
-                Vertx.clusteredVertx(options).await()
-            }
+            else -> Vertx.clusteredVertx(VertxOptions()).coAwait()
         }
     }
 
@@ -200,11 +194,11 @@ object MinihBootServiceRun {
             log.info("服务开始启动...")
             val currentTime = System.currentTimeMillis()
             initBean(clazz)
-            replenishInitBean(vertx).await()
+            replenishInitBean(vertx).coAwait()
             deployEventBusConsumers(vertx)
-            preStartHandling(vertx).await()
-            deployVerticle(vertx).await()
-            postStartHandling(vertx).await()
+            preStartHandling(vertx).coAwait()
+            deployVerticle(vertx).coAwait()
+            postStartHandling(vertx).coAwait()
             shutdownHook(vertx)
             log(vertx, currentTime)
         } catch (e: Throwable) {
@@ -218,7 +212,7 @@ object MinihBootServiceRun {
     private suspend fun log(vertx: Vertx, startTime: Long) {
         val projectName = getProjectName(vertx.orCreateContext)
         val shareData = vertx.sharedData().getAsyncMap<String, Int>("share-$projectName")
-        val port = shareData.await().get("port").await()
+        val port = shareData.coAwait().get("port").coAwait()
         var msg = "${projectName}服务启动成功,当前环境：${getEnv()},"
         port?.let { msg = msg.plus("端口:${it},") }
         var bd = BigDecimal((System.currentTimeMillis() - startTime) / 1000.00)
@@ -259,7 +253,7 @@ object MinihBootServiceRun {
                 Vertx.currentContext().config().put(it.key, it.value)
             }
         }
-        val config = retriever.config.await()
+        val config = retriever.config.coAwait()
         val configCopy = config.copy()
         configCopy.forEach {
             if (it.key.contains(".")) {

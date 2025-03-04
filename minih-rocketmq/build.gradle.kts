@@ -1,5 +1,5 @@
 dependencies {
-
+    api(libs.vertx.core)
     api(libs.vertx.discovery)
     api(libs.vertx.consul)
     api(libs.vertx.web.client)

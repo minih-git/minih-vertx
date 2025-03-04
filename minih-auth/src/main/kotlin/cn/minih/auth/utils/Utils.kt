@@ -16,7 +16,7 @@ import io.vertx.core.http.HttpServerRequest
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Route
 import io.vertx.ext.web.RoutingContext
-import io.vertx.kotlin.coroutines.await
+import io.vertx.kotlin.coroutines.coAwait
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -36,7 +36,7 @@ import javax.crypto.spec.SecretKeySpec
 
 suspend fun generateAesSecret(): String {
     val cache = RedisCacheManagerImpl().getCache(AES_SECRET_REDIS_KEY_PREFIX)
-    var aesSecret = cache.get("secret", String::class).await()
+    var aesSecret = cache.get("secret", String::class).coAwait()
     if (aesSecret == null) {
         val keyGenerator = KeyGenerator.getInstance("AES")
         keyGenerator.init(128, SecureRandom())

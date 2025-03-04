@@ -5,8 +5,8 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         create("libs") {
-            version("vertx", "4.4.4")
-            version("minih-vertx", "1.0.4")
+            version("vertx", "4.5.13")
+            version("minih-vertx", "2.0.0")
             library("vertx-core", "io.vertx", "vertx-core").versionRef("vertx")
             library("vertx-web", "io.vertx", "vertx-web").versionRef("vertx")
             library("vertx-kotlin", "io.vertx", "vertx-lang-kotlin").versionRef("vertx")
@@ -15,6 +15,7 @@ dependencyResolutionManagement {
             library("vertx-config-yaml", "io.vertx", "vertx-config-yaml").versionRef("vertx")
             library("vertx-service-proxy", "io.vertx", "vertx-service-proxy").versionRef("vertx")
             library("vertx-mysql", "io.vertx", "vertx-mysql-client").versionRef("vertx")
+            library("vertx-pg", "io.vertx", "vertx-pg-client").versionRef("vertx")
             library("vertx-redis", "io.vertx", "vertx-redis-client").versionRef("vertx")
             library("vertx-discovery", "io.vertx", "vertx-service-discovery").versionRef("vertx")
             library("vertx-web-client", "io.vertx", "vertx-web-client").versionRef("vertx")
@@ -51,7 +52,7 @@ dependencyResolutionManagement {
 
 
 include("minih-core")
-include("minih-database-mysql")
+include("minih-database")
 include("minih-web")
 include("minih-auth")
 include("minih-microservice-client")

@@ -16,7 +16,7 @@ import cn.minih.common.util.getConfig
 import cn.minih.common.util.notNullAndExecSuspend
 import io.vertx.core.Vertx
 import io.vertx.kotlin.core.json.jsonObjectOf
-import io.vertx.kotlin.coroutines.await
+import io.vertx.kotlin.coroutines.coAwait
 import java.time.Duration
 import java.util.*
 
@@ -53,7 +53,7 @@ object AuthLogic {
         val tokenSign = TokenSign(tokenValue, loginConfig.device, loginConfig.timeout)
         addTokenSign(session, tokenSign)
         val cache = cacheManager.getCache(TOKEN_VALUE_CACHE_KEY)
-        cache.put(tokenValue, id, Duration.ofSeconds(loginConfig.timeout)).await()
+        cache.put(tokenValue, id, Duration.ofSeconds(loginConfig.timeout)).coAwait()
         return tokenValue
     }
 
@@ -82,7 +82,7 @@ object AuthLogic {
     suspend fun checkLoginState(key: String) {
         val config = getConfig("auth", AuthConfig::class)
         val cache = cacheManager.getCache(LOGIN_ERR_COUNT_CACHE_KEY)
-        val count = cache.incr(key).await()
+        val count = cache.incr(key).coAwait()
         cache.setExpire(key, Duration.ofSeconds(config.loginMaxTryLockTimes))
         if (count > config.loginMaxTryTimes) {
             throw AuthLoginException(errorCode = MinihAuthErrorCode.ERR_CODE_LOGIN_TRY_MAX_TIMES)
@@ -91,7 +91,7 @@ object AuthLogic {
 
     private suspend fun updateSessionTimeout(session: AuthSession, loginConfig: AuthLoginModel) {
         val cache = cacheManager.getCache(LOGIN_SESSION_CACHE_KEY)
-        val curr = trans(cache.getExpire(session.loginId).await().toSeconds())
+        val curr = trans(cache.getExpire(session.loginId).coAwait().toSeconds())
         val timeout = trans(loginConfig.timeout)
         if (curr < timeout) {
             cache.setExpire(session.loginId, Duration.ofSeconds(timeout))
@@ -111,13 +111,13 @@ object AuthLogic {
 
     private suspend fun updateSession(session: AuthSession) {
         val cache = cacheManager.getCache(LOGIN_SESSION_CACHE_KEY)
-        val curr = trans(cache.getExpire(session.loginId).await().toSeconds())
+        val curr = trans(cache.getExpire(session.loginId).coAwait().toSeconds())
         cache.put(session.loginId, session, Duration.ofSeconds(curr))
     }
 
     suspend fun getTokenTimeout(token: String): Long {
         val cache = cacheManager.getCache(TOKEN_VALUE_CACHE_KEY)
-        val curr = trans(cache.getExpire(token).await().toSeconds())
+        val curr = trans(cache.getExpire(token).coAwait().toSeconds())
         return trans(curr)
     }
 
@@ -225,7 +225,7 @@ object AuthLogic {
         loginConfig: AuthLoginModel = AuthLoginModel()
     ): AuthSession? {
         val sessionCache = cacheManager.getCache(LOGIN_SESSION_CACHE_KEY)
-        var session = sessionCache.get(id, AuthSession::class).await()
+        var session = sessionCache.get(id, AuthSession::class).coAwait()
         if (session == null && isCreate) {
             session = AuthSession(id = "session_$id", loginId = id)
             sessionCache.put(id, session, Duration.ofSeconds(loginConfig.timeout))
@@ -235,6 +235,6 @@ object AuthLogic {
 
     suspend fun getLoginIdByToken(token: String): String? {
         val cache = cacheManager.getCache(TOKEN_VALUE_CACHE_KEY)
-        return cache.get(token, String::class).await()
+        return cache.get(token, String::class).coAwait()
     }
 }

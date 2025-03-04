@@ -12,7 +12,7 @@ import io.vertx.core.Context
 import io.vertx.ext.consul.ConsulClient
 import io.vertx.ext.consul.ConsulClientOptions
 import io.vertx.kotlin.core.json.jsonObjectOf
-import io.vertx.kotlin.coroutines.await
+import io.vertx.kotlin.coroutines.coAwait
 
 /**
  * 取消服务注册
@@ -35,9 +35,9 @@ class DeregisterService : PreStopProcess {
             val projectName = getProjectName(context)
             val ip = findFirstNonLoopBackAddress()
             log.info("projectName:$projectName,ip:${ip?.hostAddress}")
-            val shareData = context.owner().sharedData().getAsyncMap<String, Any>("share-$projectName").await()
-            val serverId = shareData.get("serverId-${ip?.hostAddress}").await().toString()
-            client.deregisterService(serverId).await()
+            val shareData = context.owner().sharedData().getAsyncMap<String, Any>("share-$projectName").coAwait()
+            val serverId = shareData.get("serverId-${ip?.hostAddress}").coAwait().toString()
+            client.deregisterService(serverId).coAwait()
             log.info("$serverId deregister done.")
         }
     }

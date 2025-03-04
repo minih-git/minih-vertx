@@ -18,7 +18,7 @@ import io.vertx.ext.web.handler.ResponseContentTypeHandler
 import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.kotlin.coroutines.CoroutineVerticle
-import io.vertx.kotlin.coroutines.await
+import io.vertx.kotlin.coroutines.coAwait
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -75,7 +75,7 @@ abstract class MinihWebVerticle(private val port: Int = 8080) : MinihVerticle, C
         val server = vertx.createHttpServer()
         val projectName = getProjectName(vertx.orCreateContext)
         val shareData = vertx.sharedData().getAsyncMap<String, Int>("share-$projectName")
-        shareData.await().put("port", port).await()
+        shareData.coAwait().put("port", port).coAwait()
         server.requestHandler(routerInstance).listen(port)
     }
 
