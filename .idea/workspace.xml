@@ -1,0 +1,932 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="升级2.0.0">
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthServiceHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthServiceHandler.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/beans/BeanFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/beans/BeanFactory.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-database/src/main/kotlin/cn/minih/database/operation/SqlBuilder.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database/src/main/kotlin/cn/minih/database/operation/SqlBuilder.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-microservice-client/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/DeregisterService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/DeregisterService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/MsClient.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/MsClient.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/MsClientContext.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/MsClientContext.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/RegisterService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/RegisterService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/core/MinihWebVerticle.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/core/MinihWebVerticle.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DefaultGradleProjectSettings">
+    <option name="testRunner" value="GRADLE" />
+    <option name="delegatedBuild" value="true" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$/minih-core">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/minih-web">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/minih-database-mysql">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/minih-auth">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/minih-common">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/minih-microservice-client">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/minih-rocketmq">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/minh-cache">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/minih-cache">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/minih-demo">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="minih-vertx" type="f1a62948:ProjectNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="minih-vertx" type="f1a62948:ProjectNode" />
+                <item name="minih-common" type="2d1252cf:ModuleNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="minih-vertx" type="f1a62948:ProjectNode" />
+                <item name="minih-common" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="minih-vertx" type="f1a62948:ProjectNode" />
+                <item name="minih-common" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="publishing" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="minih-vertx" type="f1a62948:ProjectNode" />
+                <item name="minih-microservice-client" type="2d1252cf:ModuleNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="minih-vertx" type="f1a62948:ProjectNode" />
+                <item name="minih-microservice-client" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="minih-vertx" type="f1a62948:ProjectNode" />
+                <item name="minih-microservice-client" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="publishing" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="minih-vertx" type="f1a62948:ProjectNode" />
+                <item name="minih-microservice-client" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="verification" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="minih-vertx" type="f1a62948:ProjectNode" />
+                <item name="minih-microservice-client" type="2d1252cf:ModuleNode" />
+                <item name="Dependencies" type="6de06a37:ExternalSystemViewDefaultContributor$MyDependenciesNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Kotlin Object" />
+        <option value="Kotlin Interface" />
+        <option value="Class" />
+        <option value="Kotlin Annotation" />
+        <option value="Kotlin Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="components" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;minih-git&quot;
+  }
+}</component>
+  <component name="GitToolBoxStore">
+    <option name="projectConfigVersion" value="5" />
+  </component>
+  <component name="GithubProjectSettings">
+    <option name="branchProtectionPatterns">
+      <list>
+        <option value="master" />
+      </list>
+    </option>
+  </component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/minih-git/minih-vertx.git&quot;,
+    &quot;accountId&quot;: &quot;0910429e-10ea-4610-9247-69a09a6fea65&quot;
+  }
+}</component>
+  <component name="HttpClientSelectedEnvironments">
+    <file url="jar://$APPLICATION_HOME_DIR$/plugins/restClient/lib/restClient.jar!/com/intellij/ws/rest/client/requests/collection/get-requests.http" environment="test" />
+  </component>
+  <component name="MacroExpansionManager">
+    <option name="directoryName" value="edkRhbQu" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="2TI8QGgPvz2iuknIZukEuB7aW2n" />
+  <component name="ProjectViewState">
+    <option name="flattenPackages" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle.Build minih-vertx.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SemanticDiscoveryTest.testSemanticSearch.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.minih-vertx [clean build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.minih-vertx [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.minih-vertx [jar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.minih-vertx [publishToMavenLocal].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.minih-vertx [publish].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.minih-vertx:minih-auth [publishToMavenLocal].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.minih-vertx:minih-auth [publish].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.minih-vertx:minih-cache [publishToMavenLocal].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.minih-vertx:minih-common [publishToMavenLocal].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.minih-vertx:minih-core [publishToMavenLocal].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.minih-vertx:minih-microservice-client [publishToMavenLocal].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.minih-vertx:minih-web [publishToMavenLocal].executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.rest-api_2 | #1.executor&quot;: &quot;Run&quot;,
+    &quot;Kotlin.DemoApplicationKt (1).executor&quot;: &quot;Run&quot;,
+    &quot;Kotlin.DemoApplicationKt.executor&quot;: &quot;Run&quot;,
+    &quot;Kotlin.GatewayApplicationKt.executor&quot;: &quot;Debug&quot;,
+    &quot;Kotlin.SemanticRegistryApplicationKt.executor&quot;: &quot;Debug&quot;,
+    &quot;Kotlin.SystemApplicationKt.executor&quot;: &quot;Debug&quot;,
+    &quot;Kotlin.WeatherApplicationKt.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;jdk.selected.JAVA_MODULE&quot;: &quot;17&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/work/projects/minih/minih-vertx/minih-example/src/main/resources&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.254023&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
+      &quot;yaml&quot;,
+      &quot;JSON&quot;,
+      &quot;TEXT&quot;
+    ]
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\work\projects\minih\minih-vertx\minih-example\src\main\resources" />
+      <recent name="E:\work\projects\minih\minih-vertx\minih-example" />
+      <recent name="E:\projects\minih-vertx\minih-common\src\main\kotlin\cn\minih\database\page" />
+      <recent name="D:\minih-vertx\minih-common\src\main\kotlin\cn\minih\database\mysql\enum" />
+      <recent name="D:\minih-vertx\minih-database-mysql\src\main\kotlin\cn\minih\database\mysql\operation" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\work\projects\minih\minih-vertx\minih-semantic-registry\src\main\resources\main" />
+      <recent name="E:\projects\minih-vertx\minih-common\src\main\kotlin\cn\minih\database\enums" />
+      <recent name="E:\projects\minih-vertx\minih-common\src\main\kotlin\cn\minih\database" />
+      <recent name="D:\minih-vertx\minih-common\src\main\kotlin\cn\minih\common\exception" />
+      <recent name="D:\minih-vertx\minih-common\src\main\kotlin\cn\minih\core\config" />
+    </key>
+    <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
+      <recent name="cn.minih.rocketmq.producer" />
+      <recent name="cn.minih.web.response" />
+      <recent name="cn.minih.web.annotation" />
+      <recent name="cn.minih.auth.annotation" />
+      <recent name="cn.minih.ms.client.config" />
+    </key>
+    <key name="CopyKotlinDeclarationDialog.RECENTS_KEY">
+      <recent name="cn.minih.cache.core.impl" />
+      <recent name="cn.minih.database.mysql.manager" />
+      <recent name="cn.minih.web.response" />
+      <recent name="cn.minih.web.handler" />
+      <recent name="cn.minih.core.boot" />
+    </key>
+  </component>
+  <component name="RunAnythingCache">
+    <option name="myCommands">
+      <command value="gradle clean" />
+      <command value="gradlew clean build --refresh-dependencies" />
+    </option>
+  </component>
+  <component name="RunDashboard">
+    <option name="configurationTypes">
+      <set>
+        <option value="JetRunConfigurationType" />
+      </set>
+    </option>
+  </component>
+  <component name="RunManager" selected="HTTP Request.rest-api_2 | #1">
+    <configuration name="rest-api_2 | #1" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$APPLICATION_CONFIG_DIR$/scratches/rest-api_2.http" executionIdentifier="#1" runType="Run single request">
+      <method v="2" />
+    </configuration>
+    <configuration name="GatewayApplicationKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="cn.minih.gateway.GatewayApplicationKt" />
+      <module name="minih-vertx.minih-gateway-service.main" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="SemanticRegistryApplicationKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="cn.minih.semantic.SemanticRegistryApplicationKt" />
+      <module name="minih-vertx.minih-semantic-registry.main" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="SystemApplicationKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="cn.minih.system.SystemApplicationKt" />
+      <module name="minih-vertx.minih-system-service.main" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="WeatherApplicationKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="cn.minih.weather.WeatherApplicationKt" />
+      <module name="minih-vertx.minih-weather-service.main" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Kotlin.SystemApplicationKt" />
+        <item itemvalue="Kotlin.WeatherApplicationKt" />
+        <item itemvalue="Kotlin.GatewayApplicationKt" />
+        <item itemvalue="Kotlin.SemanticRegistryApplicationKt" />
+        <item itemvalue="HTTP Request.rest-api_2 | #1" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.28293.22" />
+        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-IU-251.28293.22" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="SvnConfiguration">
+    <configuration>C:\Users\h1063\AppData\Roaming\Subversion</configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="" />
+      <created>1690719216793</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1690719216793</updated>
+      <workItem from="1690719218138" duration="338000" />
+      <workItem from="1690719832818" duration="217000" />
+      <workItem from="1690720195642" duration="10845000" />
+      <workItem from="1690803494279" duration="2904000" />
+      <workItem from="1690809086233" duration="5251000" />
+      <workItem from="1690891243655" duration="139000" />
+      <workItem from="1690894135505" duration="11740000" />
+      <workItem from="1691074126136" duration="5290000" />
+      <workItem from="1691252205680" duration="1322000" />
+      <workItem from="1691256753197" duration="7000" />
+      <workItem from="1691256770440" duration="155000" />
+      <workItem from="1691289759295" duration="46097000" />
+      <workItem from="1691401490095" duration="8199000" />
+      <workItem from="1691484019610" duration="3057000" />
+      <workItem from="1691543650964" duration="6675000" />
+      <workItem from="1691573280128" duration="20497000" />
+      <workItem from="1691654741324" duration="5116000" />
+      <workItem from="1691675162886" duration="5985000" />
+      <workItem from="1691757334788" duration="3617000" />
+      <workItem from="1691764155111" duration="2874000" />
+      <workItem from="1691767211045" duration="88000" />
+      <workItem from="1691767354591" duration="676000" />
+      <workItem from="1691768045596" duration="192000" />
+      <workItem from="1691768250619" duration="517000" />
+      <workItem from="1691768811724" duration="11754000" />
+      <workItem from="1691806221833" duration="5599000" />
+      <workItem from="1691842925772" duration="634000" />
+      <workItem from="1691900232205" duration="6441000" />
+      <workItem from="1692066116483" duration="6069000" />
+      <workItem from="1692087641753" duration="4648000" />
+      <workItem from="1692169260811" duration="2708000" />
+      <workItem from="1692235544267" duration="617000" />
+      <workItem from="1692236830660" duration="9380000" />
+      <workItem from="1692356624021" duration="840000" />
+      <workItem from="1692360067870" duration="11000" />
+      <workItem from="1692415761529" duration="9000" />
+      <workItem from="1692415967231" duration="1789000" />
+      <workItem from="1692451328494" duration="7000" />
+      <workItem from="1692499063342" duration="5387000" />
+      <workItem from="1692669681777" duration="1614000" />
+      <workItem from="1692674008314" duration="493000" />
+      <workItem from="1692676083843" duration="14697000" />
+      <workItem from="1692839586398" duration="9553000" />
+      <workItem from="1692868751336" duration="4858000" />
+      <workItem from="1692948235091" duration="6559000" />
+      <workItem from="1693213001137" duration="6189000" />
+      <workItem from="1693295412680" duration="3844000" />
+      <workItem from="1693359273797" duration="857000" />
+      <workItem from="1693455931385" duration="16482000" />
+      <workItem from="1693482973878" duration="4845000" />
+      <workItem from="1693797398480" duration="242000" />
+      <workItem from="1693811791479" duration="7000" />
+      <workItem from="1693988423926" duration="12065000" />
+      <workItem from="1694394477333" duration="9529000" />
+      <workItem from="1694504016433" duration="2765000" />
+      <workItem from="1694684386638" duration="1053000" />
+      <workItem from="1694755228401" duration="1533000" />
+      <workItem from="1695195352146" duration="7072000" />
+      <workItem from="1695603940515" duration="2486000" />
+      <workItem from="1695633554050" duration="3390000" />
+      <workItem from="1695690641556" duration="6696000" />
+      <workItem from="1695722087803" duration="7614000" />
+      <workItem from="1695798356439" duration="1911000" />
+      <workItem from="1697274893980" duration="10714000" />
+      <workItem from="1697418360079" duration="340000" />
+      <workItem from="1697519526328" duration="450000" />
+      <workItem from="1697530062370" duration="1621000" />
+      <workItem from="1697593463065" duration="587000" />
+      <workItem from="1697681610849" duration="11484000" />
+      <workItem from="1697780259460" duration="281000" />
+      <workItem from="1697782494917" duration="4035000" />
+      <workItem from="1697786982871" duration="3237000" />
+      <workItem from="1697792281579" duration="2611000" />
+      <workItem from="1697799400270" duration="438000" />
+      <workItem from="1698212795155" duration="1218000" />
+      <workItem from="1698214915988" duration="156000" />
+      <workItem from="1698215103351" duration="66000" />
+      <workItem from="1699250365252" duration="1744000" />
+      <workItem from="1699838083713" duration="2760000" />
+      <workItem from="1699843409545" duration="15000" />
+      <workItem from="1699849863127" duration="873000" />
+      <workItem from="1699854303179" duration="1088000" />
+      <workItem from="1699865728274" duration="1124000" />
+      <workItem from="1740971856703" duration="1109000" />
+      <workItem from="1740991010520" duration="9512000" />
+      <workItem from="1741015708916" duration="2356000" />
+      <workItem from="1741065928388" duration="649000" />
+      <workItem from="1741066585227" duration="701000" />
+      <workItem from="1741067307834" duration="5502000" />
+      <workItem from="1741078965780" duration="2269000" />
+      <workItem from="1741229586142" duration="617000" />
+      <workItem from="1742264456719" duration="666000" />
+      <workItem from="1742282284570" duration="1172000" />
+      <workItem from="1742560556977" duration="34000" />
+      <workItem from="1764257111160" duration="1590000" />
+      <workItem from="1764393252560" duration="14000" />
+      <workItem from="1764393784880" duration="40000" />
+      <workItem from="1764395831987" duration="1663000" />
+      <workItem from="1764987921197" duration="303000" />
+      <workItem from="1764988274395" duration="3256000" />
+      <workItem from="1764994803121" duration="1195000" />
+      <workItem from="1764999436711" duration="1032000" />
+      <workItem from="1765000505768" duration="60000" />
+      <workItem from="1765000584085" duration="122000" />
+      <workItem from="1765000747828" duration="825000" />
+      <workItem from="1765001604367" duration="2883000" />
+      <workItem from="1765006522252" duration="132000" />
+      <workItem from="1765006683539" duration="433000" />
+      <workItem from="1765007139088" duration="7143000" />
+      <workItem from="1765076804255" duration="26000" />
+      <workItem from="1765458735621" duration="336000" />
+      <workItem from="1766061298273" duration="395000" />
+    </task>
+    <task id="LOCAL-00007" summary="调整服务结构，提取公共模块">
+      <option name="closed" value="true" />
+      <created>1691250443604</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1691250443604</updated>
+    </task>
+    <task id="LOCAL-00008" summary="新增服务间调用">
+      <option name="closed" value="true" />
+      <created>1691335511312</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1691335511312</updated>
+    </task>
+    <task id="LOCAL-00009" summary="修复一些bug">
+      <option name="closed" value="true" />
+      <created>1691400639160</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1691400639160</updated>
+    </task>
+    <task id="LOCAL-00010" summary="优化雪花算法">
+      <option name="closed" value="true" />
+      <created>1691457238199</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1691457238199</updated>
+    </task>
+    <task id="LOCAL-00011" summary="升级版本">
+      <option name="closed" value="true" />
+      <created>1691483469137</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1691483469137</updated>
+    </task>
+    <task id="LOCAL-00012" summary="优化数据库接口">
+      <option name="closed" value="true" />
+      <created>1691491156039</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1691491156039</updated>
+    </task>
+    <task id="LOCAL-00013" summary="优化数据库接口">
+      <option name="closed" value="true" />
+      <created>1691565625965</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1691565625965</updated>
+    </task>
+    <task id="LOCAL-00014" summary="新增rocketmq客户端">
+      <option name="closed" value="true" />
+      <created>1691579536257</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1691579536257</updated>
+    </task>
+    <task id="LOCAL-00015" summary="完善缓存组件，将鉴权组件的缓存切换至缓存组件">
+      <option name="closed" value="true" />
+      <created>1691780583009</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1691780583009</updated>
+    </task>
+    <task id="LOCAL-00016" summary="优化数据库连接">
+      <option name="closed" value="true" />
+      <created>1692008120478</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1692008120478</updated>
+    </task>
+    <task id="LOCAL-00017" summary="优化数据库连接">
+      <option name="closed" value="true" />
+      <created>1692008482594</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1692008482594</updated>
+    </task>
+    <task id="LOCAL-00018" summary="优化">
+      <option name="closed" value="true" />
+      <created>1692082839706</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1692082839706</updated>
+    </task>
+    <task id="LOCAL-00019" summary="优化">
+      <option name="closed" value="true" />
+      <created>1692171507220</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1692171507220</updated>
+    </task>
+    <task id="LOCAL-00020" summary="缓存新增数据类型">
+      <option name="closed" value="true" />
+      <created>1692615402473</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1692615402473</updated>
+    </task>
+    <task id="LOCAL-00021" summary="解决一个mysql链接池用完的bug">
+      <option name="closed" value="true" />
+      <created>1692699305392</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1692699305392</updated>
+    </task>
+    <task id="LOCAL-00022" summary="解决一个mysql链接池用完的bug">
+      <option name="closed" value="true" />
+      <created>1692863024933</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1692863024933</updated>
+    </task>
+    <task id="LOCAL-00023" summary="优化 新增接口传入ctx或request">
+      <option name="closed" value="true" />
+      <created>1692873138816</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1692873138816</updated>
+    </task>
+    <task id="LOCAL-00024" summary="优化 新增接口传入ctx或request">
+      <option name="closed" value="true" />
+      <created>1692957645195</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1692957645195</updated>
+    </task>
+    <task id="LOCAL-00025" summary="优化">
+      <option name="closed" value="true" />
+      <created>1692958405073</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1692958405074</updated>
+    </task>
+    <task id="LOCAL-00026" summary="优化">
+      <option name="closed" value="true" />
+      <created>1692960617583</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1692960617583</updated>
+    </task>
+    <task id="LOCAL-00027" summary="优化分页代码">
+      <option name="closed" value="true" />
+      <created>1693216922183</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1693216922183</updated>
+    </task>
+    <task id="LOCAL-00028" summary="服务间调用 增加header">
+      <option name="closed" value="true" />
+      <created>1693275342955</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1693275342955</updated>
+    </task>
+    <task id="LOCAL-00029" summary="优化权限功能">
+      <option name="closed" value="true" />
+      <created>1693301671454</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1693301671454</updated>
+    </task>
+    <task id="LOCAL-00030" summary="优化，修复一些问题">
+      <option name="closed" value="true" />
+      <created>1693556079221</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1693556079221</updated>
+    </task>
+    <task id="LOCAL-00031" summary="优化，修复一些问题">
+      <option name="closed" value="true" />
+      <created>1693796090911</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1693796090911</updated>
+    </task>
+    <task id="LOCAL-00032" summary="优化readme">
+      <option name="closed" value="true" />
+      <created>1693796251632</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1693796251632</updated>
+    </task>
+    <task id="LOCAL-00033" summary="优化readme">
+      <option name="closed" value="true" />
+      <created>1693797062847</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1693797062847</updated>
+    </task>
+    <task id="LOCAL-00034" summary="优化">
+      <option name="closed" value="true" />
+      <created>1693994283481</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1693994283481</updated>
+    </task>
+    <task id="LOCAL-00035" summary="优化">
+      <option name="closed" value="true" />
+      <created>1694493374313</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1694493374313</updated>
+    </task>
+    <task id="LOCAL-00036" summary="优化">
+      <option name="closed" value="true" />
+      <created>1694675234092</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1694675234092</updated>
+    </task>
+    <task id="LOCAL-00037" summary="优化">
+      <option name="closed" value="true" />
+      <created>1695195939016</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1695195939016</updated>
+    </task>
+    <task id="LOCAL-00038" summary="新增远程接口调用错误回调">
+      <option name="closed" value="true" />
+      <created>1695204074735</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1695204074736</updated>
+    </task>
+    <task id="LOCAL-00039" summary="新增远程接口调用错误回调">
+      <option name="closed" value="true" />
+      <created>1695605339948</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1695605339948</updated>
+    </task>
+    <task id="LOCAL-00040" summary="优化错误信息">
+      <option name="closed" value="true" />
+      <created>1695612249588</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1695612249588</updated>
+    </task>
+    <task id="LOCAL-00041" summary="优化">
+      <option name="closed" value="true" />
+      <created>1695637006144</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1695637006144</updated>
+    </task>
+    <task id="LOCAL-00042" summary="优化">
+      <option name="closed" value="true" />
+      <created>1695708856074</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1695708856074</updated>
+    </task>
+    <task id="LOCAL-00043" summary="优化">
+      <option name="closed" value="true" />
+      <created>1695723205534</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1695723205534</updated>
+    </task>
+    <task id="LOCAL-00044" summary="优化">
+      <option name="closed" value="true" />
+      <created>1697418009765</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1697418009765</updated>
+    </task>
+    <task id="LOCAL-00045" summary="优化">
+      <option name="closed" value="true" />
+      <created>1697519834367</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1697519834367</updated>
+    </task>
+    <task id="LOCAL-00046" summary="优化">
+      <option name="closed" value="true" />
+      <created>1697707300816</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1697707300816</updated>
+    </task>
+    <task id="LOCAL-00047" summary="优化">
+      <option name="closed" value="true" />
+      <created>1697780292387</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1697780292387</updated>
+    </task>
+    <task id="LOCAL-00048" summary="优化">
+      <option name="closed" value="true" />
+      <created>1697784121098</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1697784121098</updated>
+    </task>
+    <task id="LOCAL-00049" summary="优化">
+      <option name="closed" value="true" />
+      <created>1697786895497</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1697786895497</updated>
+    </task>
+    <task id="LOCAL-00050" summary="优化">
+      <option name="closed" value="true" />
+      <created>1697799361838</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1697799361838</updated>
+    </task>
+    <task id="LOCAL-00051" summary="优化">
+      <option name="closed" value="true" />
+      <created>1698214032612</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1698214032612</updated>
+    </task>
+    <task id="LOCAL-00052" summary="新增一个健康检查接口">
+      <option name="closed" value="true" />
+      <created>1699256705844</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1699256705844</updated>
+    </task>
+    <task id="LOCAL-00053" summary="新增一个健康检查接口">
+      <option name="closed" value="true" />
+      <created>1699838943636</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1699838943636</updated>
+    </task>
+    <task id="LOCAL-00054" summary="新增一个健康检查接口">
+      <option name="closed" value="true" />
+      <created>1699854340514</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1699854340514</updated>
+    </task>
+    <task id="LOCAL-00055" summary="升级2.0.0">
+      <option name="closed" value="true" />
+      <created>1741074548994</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1741074548994</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="优化代码 解决一些bug" />
+    <MESSAGE value="优化唯一id算法" />
+    <MESSAGE value="调整服务结构，提取公共模块" />
+    <MESSAGE value="新增服务间调用" />
+    <MESSAGE value="修复一些bug" />
+    <MESSAGE value="优化雪花算法" />
+    <MESSAGE value="升级版本" />
+    <MESSAGE value="优化数据库接口" />
+    <MESSAGE value="新增rocketmq客户端" />
+    <MESSAGE value="新增rocketmq消费客户端" />
+    <MESSAGE value="完善缓存组件，将鉴权组件的缓存切换至缓存组件" />
+    <MESSAGE value="优化数据库连接" />
+    <MESSAGE value="缓存新增数据类型" />
+    <MESSAGE value="解决一个mysql链接池用完的bug" />
+    <MESSAGE value="优化 新增接口传入ctx或request" />
+    <MESSAGE value="优化分页代码" />
+    <MESSAGE value="服务间调用 增加header" />
+    <MESSAGE value="优化权限功能" />
+    <MESSAGE value="优化，修复一些问题" />
+    <MESSAGE value="优化readme" />
+    <MESSAGE value="新增远程接口调用错误回调" />
+    <MESSAGE value="优化错误信息" />
+    <MESSAGE value="优化" />
+    <MESSAGE value="新增一个健康检查接口" />
+    <MESSAGE value="升级2.0.0" />
+    <option name="LAST_COMMIT_MESSAGE" value="升级2.0.0" />
+    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$USER_HOME$/gradle-8.0.2/caches/modules-2/files-2.1/org.apache.rocketmq/rocketmq-client-java/5.0.5/86762955ac78739192ad5a878d557bf6129090ab/rocketmq-client-java-5.0.5-sources.jar!/org/apache/rocketmq/client/java/impl/ClientImpl.java</url>
+          <line>180</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$USER_HOME$/gradle-8.0.2/caches/modules-2/files-2.1/org.apache.rocketmq/rocketmq-client-java/5.0.5/86762955ac78739192ad5a878d557bf6129090ab/rocketmq-client-java-5.0.5-sources.jar!/org/apache/rocketmq/client/java/impl/ClientImpl.java</url>
+          <line>189</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <pin-to-top-manager>
+      <pinned-members>
+        <PinnedItemInfo parentTag="java.util.LinkedHashMap$Entry" memberName="value" />
+        <PinnedItemInfo parentTag="kotlin.reflect.jvm.internal.KClassImpl" memberName="supertypes" />
+        <PinnedItemInfo parentTag="java.util.concurrent.CancellationException" memberName="cause" />
+        <PinnedItemInfo parentTag="java.util.concurrent.CancellationException" memberName="stackTrace" />
+        <PinnedItemInfo parentTag="kotlin.reflect.jvm.internal.KClassImpl" memberName="objectInstance" />
+      </pinned-members>
+    </pin-to-top-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>

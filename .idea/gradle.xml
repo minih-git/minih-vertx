@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/minih-ai-gateway" />
+            <option value="$PROJECT_DIR$/minih-auth" />
+            <option value="$PROJECT_DIR$/minih-cache" />
+            <option value="$PROJECT_DIR$/minih-common" />
+            <option value="$PROJECT_DIR$/minih-core" />
+            <option value="$PROJECT_DIR$/minih-database" />
+            <option value="$PROJECT_DIR$/minih-gateway-service" />
+            <option value="$PROJECT_DIR$/minih-microservice-client" />
+            <option value="$PROJECT_DIR$/minih-rocketmq" />
+            <option value="$PROJECT_DIR$/minih-semantic-registry" />
+            <option value="$PROJECT_DIR$/minih-system-service" />
+            <option value="$PROJECT_DIR$/minih-weather-service" />
+            <option value="$PROJECT_DIR$/minih-web" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>

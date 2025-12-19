@@ -1,0 +1,15 @@
+{
+    "mysql": {
+        "host": "192.169.1.14",
+        "port": 3306,
+        "user": "root",
+        "password": "Minih123",
+        "database": "minih_system"
+    },
+    "semantic": {
+        "registry": {
+            "host": "localhost",
+            "port": 8099
+        }
+    }
+}
