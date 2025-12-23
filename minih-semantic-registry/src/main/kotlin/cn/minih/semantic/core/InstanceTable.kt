@@ -66,6 +66,34 @@ class InstanceTable {
             .filter { now - it.value > TTL_MS }
             .map { it.key }
     }
+    
+    /**
+     * 原子操作：检查并移除已过期的实例。
+     * 使用 computeIfPresent 确保如果在检查过程中收到了新的心跳，移除操作会取消。
+     * @return 移除的实例列表
+     */
+    fun removeAndGetExpired(): List<String> {
+         val now = System.currentTimeMillis()
+         val expired = mutableListOf<String>()
+         
+         // Iterate over a copy or snapshot of keys to avoid concurrent modification issues during iteration,
+         // though ConcurrentHashMap iterator is safe, we only want to act on those that look expired.
+         
+         instances.forEach { (id, lastHeartbeat) ->
+             if (now - lastHeartbeat > TTL_MS) {
+                 // Double check and remove atomically
+                 instances.computeIfPresent(id) { key, timestamp ->
+                     if (now - timestamp > TTL_MS) {
+                         expired.add(key)
+                         null // return null to remove
+                     } else {
+                         timestamp // keep existing
+                     }
+                 }
+             }
+         }
+         return expired
+    }
 
     /**
      * 获取当前注册的实例数量

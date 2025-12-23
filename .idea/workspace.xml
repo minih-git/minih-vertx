@@ -5,18 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4e8a7434-c757-4538-8768-f8bd9cb05aef" name="Changes" comment="升级2.0.0">
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthServiceHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-auth/src/main/kotlin/cn/minih/auth/logic/AuthServiceHandler.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/beans/BeanFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-core/src/main/kotlin/cn/minih/core/beans/BeanFactory.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-database/src/main/kotlin/cn/minih/database/operation/SqlBuilder.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-database/src/main/kotlin/cn/minih/database/operation/SqlBuilder.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-microservice-client/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/DeregisterService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/DeregisterService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/MsClient.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/MsClient.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/MsClientContext.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/MsClientContext.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/RegisterService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/RegisterService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/core/MinihWebVerticle.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-web/src/main/kotlin/cn/minih/web/core/MinihWebVerticle.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-ai-gateway/src/main/kotlin/cn/minih/gateway/sse/SseHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-ai-gateway/src/main/kotlin/cn/minih/gateway/sse/SseHandler.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/proxy/ServiceProxyHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-microservice-client/src/main/kotlin/cn/minih/ms/client/proxy/ServiceProxyHandler.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-semantic-registry/src/main/kotlin/cn/minih/semantic/core/HnswIndexService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-semantic-registry/src/main/kotlin/cn/minih/semantic/core/HnswIndexService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-semantic-registry/src/main/kotlin/cn/minih/semantic/core/InstanceTable.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-semantic-registry/src/main/kotlin/cn/minih/semantic/core/InstanceTable.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-semantic-registry/src/main/kotlin/cn/minih/semantic/core/OnnxEmbeddingService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-semantic-registry/src/main/kotlin/cn/minih/semantic/core/OnnxEmbeddingService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minih-semantic-registry/src/main/kotlin/cn/minih/semantic/registry/SemanticRegistryVerticle.kt" beforeDir="false" afterPath="$PROJECT_DIR$/minih-semantic-registry/src/main/kotlin/cn/minih/semantic/registry/SemanticRegistryVerticle.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -459,6 +454,9 @@
       <workItem from="1765076804255" duration="26000" />
       <workItem from="1765458735621" duration="336000" />
       <workItem from="1766061298273" duration="395000" />
+      <workItem from="1766202314858" duration="2908000" />
+      <workItem from="1766393525354" duration="653000" />
+      <workItem from="1766461490599" duration="6000" />
     </task>
     <task id="LOCAL-00007" summary="调整服务结构，提取公共模块">
       <option name="closed" value="true" />

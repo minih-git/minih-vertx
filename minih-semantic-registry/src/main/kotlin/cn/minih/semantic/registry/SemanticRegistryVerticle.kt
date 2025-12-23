@@ -140,11 +140,11 @@ class SemanticRegistryVerticle(
 
         // 启动超时检查定时器: 每30秒检查一次
         vertx.setPeriodic(30_000) {
-            val expiredInstances = instanceTable.getExpiredInstances()
+            // 使用原子操作进行检查和移除，避免与心跳并发冲突
+            val expiredInstances = instanceTable.removeAndGetExpired()
             expiredInstances.forEach { id ->
                 log.warn("Instance $id expired (TTL exceeded), removing from index")
                 hnswIndexService.remove(id)
-                instanceTable.unregister(id)
             }
             if (expiredInstances.isNotEmpty()) {
                 log.info("Removed ${expiredInstances.size} expired instances")

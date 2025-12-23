@@ -159,22 +159,41 @@ class ServiceProxyHandler : InvocationHandler, Service {
             val requestOptions = buildRequestOption(proxied, host, port, argsRaw.second, config.timeout)
             requestOptions.addHeader("Content-Length", argsBuffer.length().toString())
             log.debug("远程服务调用: ${requestOptions.method.name()}  ${requestOptions.host} ${requestOptions.uri}")
-            client.request(requestOptions.method, requestOptions).sendBuffer(argsBuffer).onSuccess {
-                val result1 = it.body().toJsonObject()
-                val rType = proxied.second.returnType.arguments.first().type!!
-                val rValue = result1.getValue("data")
-                log.debug("远程服务调用返回结果: $result1")
-                promise.complete(rValue?.let { covertTypeData(rValue, rType) })
-            }.onFailure {
-                Assert.isTrue(hasErrorBack && result != null) {
-                    MinihException(it.message, MinihErrorCode.ERR_CODE_REMOTE_CALL_ERROR)
-                }
-                promise.complete(
-                    when (result) {
-                        is Future<*> -> result.result()
-                        else -> result
+
+            // Retry Logic: Max 3 attempts
+            var attempts = 0
+            val maxRetries = 3
+            var success = false
+
+            while (attempts < maxRetries && !success) {
+                attempts++
+                try {
+                    val response = client.request(requestOptions.method, requestOptions).sendBuffer(argsBuffer).await()
+                    
+                    val result1 = response.body().toJsonObject()
+                    val rType = proxied.second.returnType.arguments.first().type!!
+                    val rValue = result1.getValue("data")
+                    log.debug("远程服务调用返回结果: $result1")
+                    promise.complete(rValue?.let { covertTypeData(rValue, rType) })
+                    success = true
+                } catch (e: Exception) {
+                    log.warn("Remote call failed (Attempt $attempts/$maxRetries): ${e.message}")
+                    if (attempts >= maxRetries) {
+                        if (hasErrorBack && result != null) {
+                            promise.complete(
+                                when (result) {
+                                    is Future<*> -> result.result()
+                                    else -> result
+                                }
+                            )
+                        } else {
+                            promise.fail(MinihException(e.message, MinihErrorCode.ERR_CODE_REMOTE_CALL_ERROR))
+                        }
+                    } else {
+                        // Optional: Add small delay before retry
+                        kotlinx.coroutines.delay(100L * attempts) 
                     }
-                )
+                }
             }
         }
         return promise.future()

@@ -6,6 +6,7 @@ import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
 import cn.minih.common.exception.MinihException
 import cn.minih.core.annotation.Component
+import cn.minih.core.config.Config
 import io.vertx.core.impl.logging.LoggerFactory
 import java.io.File
 import java.io.InputStream
@@ -32,23 +33,28 @@ class OnnxEmbeddingService {
             env = OrtEnvironment.getEnvironment()
 
             // 1. 加载模型
-            val modelStream = loadResource(modelPath)
+            // Check if configured in system properties or env vars, else default
+            val configuredModelPath = System.getProperty("minih.semantic.model.path", modelPath)
+            val modelStream = loadResource(configuredModelPath)
+            
             if (modelStream != null) {
                 val modelBytes = modelStream.readBytes()
                 session = env?.createSession(modelBytes, OrtSession.SessionOptions())
-                log.info("ONNX Embedding Model loaded successfully from $modelPath")
+                log.info("ONNX Embedding Model loaded successfully from $configuredModelPath")
             } else {
-                log.warn("ONNX Model not found at $modelPath. Embedding service will be unavailable.")
+                log.warn("ONNX Model not found at $configuredModelPath. Embedding service will be unavailable.")
             }
 
             // 2. 加载 Tokenizer
-            val tokenStream = loadResource(tokenizerPath)
+            val configuredTokenizerPath = System.getProperty("minih.semantic.tokenizer.path", tokenizerPath)
+            val tokenStream = loadResource(configuredTokenizerPath)
+            
             if (tokenStream != null) {
                 // DJL HuggingFaceTokenizer 支持从 InputStream 创建
                 tokenizer = HuggingFaceTokenizer.newInstance(tokenStream, null)
-                log.info("Tokenizer loaded successfully from $tokenizerPath")
+                log.info("Tokenizer loaded successfully from $configuredTokenizerPath")
             } else {
-                log.warn("Tokenizer not found at $tokenizerPath. Please download 'tokenizer.json'.")
+                log.warn("Tokenizer not found at $configuredTokenizerPath. Please download 'tokenizer.json'.")
             }
 
         } catch (e: Exception) {
@@ -82,34 +88,29 @@ class OnnxEmbeddingService {
             // input_ids: [1, seq_len]
             val shape = longArrayOf(1, inputIds.size.toLong())
 
-            // 注意：具体模型的 Input Name 可能不同，标准 BERT 类通常是 input_ids, attention_mask, token_type_ids
-            // 这里假设模型包含这三个输入
-            val tensorIds = OnnxTensor.createTensor(env, LongBuffer.wrap(inputIds), shape)
-            val tensorMask = OnnxTensor.createTensor(env, LongBuffer.wrap(attentionMask), shape)
-            val tensorTypeIds = OnnxTensor.createTensor(env, LongBuffer.wrap(tokenTypeIds), shape)
+            // 使用 Kotlin 的 .use() 自动管理资源闭包，确保护资源在退出作用域时自动释放
+            return OnnxTensor.createTensor(env, LongBuffer.wrap(inputIds), shape).use { tensorIds ->
+                OnnxTensor.createTensor(env, LongBuffer.wrap(attentionMask), shape).use { tensorMask ->
+                    OnnxTensor.createTensor(env, LongBuffer.wrap(tokenTypeIds), shape).use { tensorTypeIds ->
+                        val inputs = mapOf(
+                            "input_ids" to tensorIds,
+                            "attention_mask" to tensorMask,
+                            "token_type_ids" to tensorTypeIds
+                        )
 
-            val inputs = mapOf(
-                "input_ids" to tensorIds,
-                "attention_mask" to tensorMask,
-                "token_type_ids" to tensorTypeIds
-            )
+                        // 3. Run Inference
+                        session!!.run(inputs).use { results ->
+                            // 4. Extract Output
+                            val lastHiddenState = results[0].value as Array<Array<FloatArray>>
 
-            // 3. Run Inference
-            // 必须关闭 results 以释放 native 内存
-            session!!.run(inputs).use { results ->
-                // 4. Extract Output
-                // all-MiniLM-L6-v2 输出通常名为 'last_hidden_state' 或 '0'
-                // dimensions: [batch=1, seq_len, hidden_size=384]
-                // OnnxRuntime Java 返回的是 Object，对于 float tensor 可能是 multidimensional array
-                // float[][][]
-                val lastHiddenState = results[0].value as Array<Array<FloatArray>>
+                            // 提取 Batch 0
+                            val tokenEmbeddings = lastHiddenState[0] // [SeqLen, 384]
 
-                // 提取 Batch 0
-                val tokenEmbeddings = lastHiddenState[0] // [SeqLen, 384]
-
-                // 5. Mean Pooling & Normalize
-                val embedding = meanPooling(tokenEmbeddings, attentionMask)
-                return embedding
+                            // 5. Mean Pooling & Normalize
+                            meanPooling(tokenEmbeddings, attentionMask)
+                        }
+                    }
+                }
             }
 
         } catch (e: Exception) {
