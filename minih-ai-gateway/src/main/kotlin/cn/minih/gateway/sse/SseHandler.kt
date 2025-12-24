@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 
 object SseHandler {
@@ -38,16 +39,31 @@ object SseHandler {
             scope.cancel()
         }
 
+        // 背压控制标志位，防止 drainHandler 重复触发或丢失
+        val isWaitingForDrain = AtomicBoolean(false)
+        
         // 用于背压控制的 drain handler 挂起机制
-        // 当 writeQueue 满时，suspend 等待 drain 事件
+        // 三层背压核心逻辑:
+        // Layer 1: 操作系统级 TCP 拥塞控制 (底层 Netty 自动处理)
+        // Layer 2: Vert.x WriteQueue 水位检查 (writeQueueFull判定缓存溢出)
+        // Layer 3: 协程挂起 (suspend 从而抑制上游数据生产)
         suspend fun waitForDrain() {
             if (response.writeQueueFull()) {
-                suspendCancellableCoroutine<Unit> { cont ->
-                    response.drainHandler {
-                        // 移除 handler 以免重复触发
-                        response.drainHandler(null)
-                        if (cont.isActive) {
-                            cont.resume(Unit)
+                if (isWaitingForDrain.compareAndSet(false, true)) {
+                    suspendCancellableCoroutine<Unit> { cont ->
+                        response.drainHandler {
+                            isWaitingForDrain.set(false)
+                            // 移除 handler 以免重复触发逻辑冲突
+                            response.drainHandler(null)
+                            if (cont.isActive) {
+                                cont.resume(Unit)
+                            }
+                        }
+                        
+                        // 注册取消回调，防止泄露
+                        cont.invokeOnCancellation {
+                             response.drainHandler(null)
+                             isWaitingForDrain.set(false)
                         }
                     }
                 }

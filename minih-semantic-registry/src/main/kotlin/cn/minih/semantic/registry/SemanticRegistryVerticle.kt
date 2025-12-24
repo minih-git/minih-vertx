@@ -138,16 +138,25 @@ class SemanticRegistryVerticle(
                 }
             }
 
-        // 启动超时检查定时器: 每30秒检查一次
+        /**
+         * 启动超时检查定时器: 每30秒检查一次
+         * 
+         * 并发安全设计说明 
+         * 1. 核心挑战：心跳检测线程(Worker/HTTP)与索引清理线程(Periodic Timer)对同一实例状态的竞争。
+         * 2. 解决方案：通过 InstanceTable.removeAndGetExpired() 中的 ConcurrentHashMap.computeIfPresent 实现。
+         * 3. 逻辑闭环：即便清理线程判定实例已超时，但在执行原子删除前若收到了心跳并更新了 timestamp，
+         *    computeIfPresent 内部的二次时间校验将判定为“有效”并保留实例。
+         * 4. 索引一致性：只有在从 InstanceTable 原子移除成功后，才执行 HnswIndexService.remove，
+         *    确保了语义索引与存活状态的最终一致性。
+         */
         vertx.setPeriodic(30_000) {
-            // 使用原子操作进行检查和移除，避免与心跳并发冲突
             val expiredInstances = instanceTable.removeAndGetExpired()
             expiredInstances.forEach { id ->
                 log.warn("Instance $id expired (TTL exceeded), removing from index")
                 hnswIndexService.remove(id)
             }
             if (expiredInstances.isNotEmpty()) {
-                log.info("Removed ${expiredInstances.size} expired instances")
+                log.info("Removed ${expiredInstances.size} expired instances atomically.")
             }
         }
 

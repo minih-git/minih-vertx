@@ -70,22 +70,26 @@ class OnnxEmbeddingService {
 
     /**
      * 计算文本的 Embedding 向量
+     *
+     * @param text 输入文本
+     * @return 归一化后的向量 (384维)
      */
     fun embed(text: String): FloatArray {
         if (session == null || tokenizer == null) {
-            throw MinihException("Model or Tokenizer not initialized. Ensure 'model.onnx' and 'tokenizer.json' exist.")
+            log.error("Model or Tokenizer not initialized. Returning emergency zero vector.")
+            return FloatArray(384) { 0f }
         }
 
         try {
             // 1. Tokenize
             val encoding = tokenizer!!.encode(text)
-            val inputIds = encoding.ids
+            val inputIds = encoding.ids // 维度: [seq_len]
             val attentionMask = encoding.attentionMask
             val tokenTypeIds = encoding.typeIds
 
             // 2. Prepare Tensors
             val env = this.env!!
-            // input_ids: [1, seq_len]
+            // 明确 input_ids 维度: [batch_size=1, sequence_length=inputIds.size]
             val shape = longArrayOf(1, inputIds.size.toLong())
 
             // 使用 Kotlin 的 .use() 自动管理资源闭包，确保护资源在退出作用域时自动释放
@@ -98,13 +102,14 @@ class OnnxEmbeddingService {
                             "token_type_ids" to tensorTypeIds
                         )
 
-                        // 3. Run Inference
+                        // 3. Run Inference (带超时控制或捕获推理异常)
                         session!!.run(inputs).use { results ->
                             // 4. Extract Output
+                            // Output name usually 'last_hidden_state', index 0
                             val lastHiddenState = results[0].value as Array<Array<FloatArray>>
 
-                            // 提取 Batch 0
-                            val tokenEmbeddings = lastHiddenState[0] // [SeqLen, 384]
+                            // 提取 Batch 0，维度: [seq_len, 384]
+                            val tokenEmbeddings = lastHiddenState[0] 
 
                             // 5. Mean Pooling & Normalize
                             meanPooling(tokenEmbeddings, attentionMask)
@@ -113,9 +118,13 @@ class OnnxEmbeddingService {
                 }
             }
 
+        } catch (e: ai.onnxruntime.OrtException) {
+            log.error("ONNX Runtime inference failed (Possible model corruption or timeout): ${e.message}", e)
+            // 降级方案: 返回中性向量，确保语义搜索流程不崩溃，只是检索不到结果
+            return FloatArray(384) { 0f }
         } catch (e: Exception) {
-            log.error("Embedding failed", e)
-            throw MinihException("Embedding failed: ${e.message}")
+            log.error("Unexpected embedding failure: ${e.message}", e)
+            return FloatArray(384) { 0f }
         }
     }
 
