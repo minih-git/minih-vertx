@@ -33,6 +33,9 @@ class OnnxEmbeddingService {
     private var modelTempFile: File? = null
 
     init {
+        // 1. 启动时尝试清理旧的临时文件，解决 JVM 异常退出导致的残留问题
+        cleanupOldTempFiles()
+
         // 注册 Shutdown Hook，确保临时文件在 JVM 退出时被清理
         Runtime.getRuntime().addShutdownHook(Thread {
             cleanup()
@@ -98,6 +101,39 @@ class OnnxEmbeddingService {
             } catch (e: Exception) {
                 log.warn("Failed to delete temporary model file: ${file.absolutePath}", e)
             }
+        }
+    }
+
+    /**
+     * 启动时清理残留的临时文件
+     * 仅尝试删除，忽略被锁定的文件（说明有其他实例正在使用）
+     */
+    private fun cleanupOldTempFiles() {
+        try {
+            val tempDir = File(System.getProperty("java.io.tmpdir"), "minih-semantic")
+            if (tempDir.exists() && tempDir.isDirectory) {
+                log.info("Checking for old temporary files in: ${tempDir.absolutePath}")
+                
+                 // 列出所有符合模式且不是当前正在使用的文件
+                 // 注意：当前实例的文件尚未创建，所以理论上这里列出的都是"旧"的
+                 // 但是如果有其他并行实例在运行，它们的文件也会被列出
+                tempDir.listFiles { f -> 
+                    f.isFile && f.name.startsWith("onnx-model-") && f.name.endsWith(".onnx") 
+                }?.forEach { file ->
+                    try {
+                        // 尝试删除。在 Windows 上，如果文件被其他进程打开，delete() 会返回 false 或抛出异常。
+                        // 这恰好提供了我们需要的保护机制：只删除没人用的死文件。
+                        if (file.delete()) {
+                            log.info("Cleaned up old temporary model file: ${file.absolutePath}")
+                        }
+                    } catch (e: Exception) {
+                        // 忽略删除错误，可能是文件被锁定
+                        log.debug("Could not delete temp file (might be in use): ${file.absolutePath}")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            log.warn("Failed to cleanup old temp files", e)
         }
     }
 
