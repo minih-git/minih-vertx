@@ -60,26 +60,44 @@ class SemanticDeregisterService : PreStopProcess {
                         }
                         processedMethods.add(serviceId)
 
-                        // Registry Config
-                        val registryHost = context.config().getString("minih.semantic.registry.host", "localhost")
-                        val registryPort = context.config().getInteger("minih.semantic.registry.port", 8099)
+                        val envHost = System.getenv("SEMANTIC_REGISTRY_HOST")
+                        val envPortStr = System.getenv("SEMANTIC_REGISTRY_PORT")
+
+                        // 注册中心配置
+                        val registryHost = if (!envHost.isNullOrBlank()) envHost else context.config().getString("minih.semantic.registry.host", "localhost")
+                        val registryPort = if (!envPortStr.isNullOrBlank()) envPortStr.toInt() else context.config().getInteger("minih.semantic.registry.port", 8099)
 
                         val msg = JsonObject().put("id", serviceId)
 
-                        try {
-                            val response = WebClient.create(context.owner())
-                                .post(registryPort, registryHost, "/semantic/api/unregister")
-                                .timeout(5000L)  // 5秒超时，防止注册中心宕机时无限阻塞
-                                .sendJsonObject(msg)
-                                .coAwait()
+                        // 重试逻辑
+                        var retries = 3
+                        var success = false
+                        while (retries > 0 && !success) {
+                            try {
+                                val response = WebClient.create(context.owner())
+                                    .post(registryPort, registryHost, "/semantic/api/unregister")
+                                    .timeout(5000L)  // 5秒超时
+                                    .sendJsonObject(msg)
+                                    .coAwait()
 
-                            if (response.statusCode() == 200) {
-                                log.info("Deregistered AI Tool via HTTP: $serviceId")
-                            } else {
-                                log.warn("Failed to deregister AI Tool: $serviceId, status: ${response.statusCode()}")
+                                if (response.statusCode() == 200) {
+                                    log.info("Deregistered AI Tool via HTTP: $serviceId")
+                                    success = true
+                                } else {
+                                    log.warn("Failed to deregister AI Tool: $serviceId, status: ${response.statusCode()}. Retries left: ${retries - 1}")
+                                }
+                            } catch (e: Exception) {
+                                log.warn("Failed to deregister AI Tool: $serviceId, error: ${e.message}. Retries left: ${retries - 1}")
                             }
-                        } catch (e: Exception) {
-                            log.warn("Failed to deregister AI Tool: $serviceId, error: ${e.message}")
+
+                            if (!success) {
+                                retries--
+                                if (retries > 0) {
+                                    try {
+                                        kotlinx.coroutines.delay(1000L) // 失败重试前等待 1秒
+                                    } catch (e: Exception) {  }
+                                }
+                            }
                         }
                     }
                 }

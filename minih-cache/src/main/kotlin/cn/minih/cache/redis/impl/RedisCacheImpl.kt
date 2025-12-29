@@ -11,6 +11,17 @@ import kotlin.reflect.full.createType
 
 /**
  *  redis缓存
+ *  redis缓存
+ *
+ *  缓存更新策略 (Cache Update Strategy):
+ *  1. **写入模式**: 直接覆盖 (Overwrite).
+ *     每次 put/sAdd/lPush 等写操作都会直接更新 Redis 中的数据，遵循 Last-Write-Wins 原则。
+ *  2. **过期策略**: 被动 TTL (Time-To-Live).
+ *     写入时支持指定过期时间。如果未指定，将使用全局配置的 TTL。
+ *     数据过期后由 Redis 自动删除，以此保证数据的最终一致性。
+ *  3. **一致性**: 最终一致性.
+ *     依赖 TTL 机制处理陈旧数据。对于强一致性要求的很多场景，建议结合数据库事务或主动失效机制(evict)使用。
+ *
  * @author hubin
  * @since 2023-08-11 14:50:06
  */
