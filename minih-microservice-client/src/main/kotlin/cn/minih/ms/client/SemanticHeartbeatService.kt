@@ -25,7 +25,6 @@ class SemanticHeartbeatService : PostStartingProcess {
         /**
          * 心跳定时器 ID，用于在服务关闭时取消
          */
-        @Volatile
         var timerId: Long? = null
             private set
 
@@ -93,6 +92,7 @@ class SemanticHeartbeatService : PostStartingProcess {
             val msg = JsonObject().put("id", serviceId)
 
             client.post(registryPort, registryHost, "/semantic/api/heartbeat")
+                .timeout(5000L)  // 5秒超时
                 .sendJsonObject(msg) { ar ->
                     if (ar.succeeded() && ar.result().statusCode() == 200) {
                         log.debug("Heartbeat sent: $serviceId")

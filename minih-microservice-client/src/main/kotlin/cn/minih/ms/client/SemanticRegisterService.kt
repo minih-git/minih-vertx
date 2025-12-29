@@ -122,6 +122,7 @@ class SemanticRegisterService : PostStartingProcess {
 
                         WebClient.create(context.owner())
                             .post(registryPort, registryHost, "/semantic/api/register")
+                            .timeout(10000L)  // 10秒超时，首次注册允许更长时间
                             .sendJsonObject(msg) { ar ->
                                 if (ar.succeeded() && ar.result().statusCode() == 200) {
                                     log.info("Registered AI Tool via HTTP: $serviceId")

@@ -69,6 +69,7 @@ class SemanticDeregisterService : PreStopProcess {
                         try {
                             val response = WebClient.create(context.owner())
                                 .post(registryPort, registryHost, "/semantic/api/unregister")
+                                .timeout(5000L)  // 5秒超时，防止注册中心宕机时无限阻塞
                                 .sendJsonObject(msg)
                                 .coAwait()
 

@@ -6,9 +6,10 @@ import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
 import cn.minih.common.exception.MinihException
 import cn.minih.core.annotation.Component
-import cn.minih.core.config.Config
 import io.vertx.core.impl.logging.LoggerFactory
 import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.InputStream
 import java.nio.LongBuffer
 
@@ -28,103 +29,168 @@ class OnnxEmbeddingService {
     private var modelPath: String = "main/model.onnx"
     private var tokenizerPath: String = "main/tokenizer.json"
 
+    /** 临时模型文件引用，用于 Shutdown Hook 清理 */
+    private var modelTempFile: File? = null
+
     init {
+        // 注册 Shutdown Hook，确保临时文件在 JVM 退出时被清理
+        Runtime.getRuntime().addShutdownHook(Thread {
+            cleanup()
+        })
+
+        env = OrtEnvironment.getEnvironment()
+
+        //  加载模型
+        val configuredModelPath = System.getProperty("minih.semantic.model.path", modelPath)
+
+        // 优化：不再读取为 ByteArray，而是确保有物理文件路径供 OnnxRuntime 读取
+        val modelFile = getOrCopyResource(configuredModelPath)
+            ?: throw MinihException("FATAL: ONNX Model not found at $configuredModelPath. Initialization aborted.")
+
+        // 使用 loadModel(String path) 而不是 loadModel(byte[])，避免堆内存占用
+        session = env?.createSession(modelFile.absolutePath, OrtSession.SessionOptions())
+        log.info("ONNX Embedding Model loaded successfully from ${modelFile.absolutePath}")
+
+        //  加载 Tokenizer
+        val configuredTokenizerPath = System.getProperty("minih.semantic.tokenizer.path", tokenizerPath)
+        val tokenStream = loadResourceStream(configuredTokenizerPath)
+            ?: throw MinihException("FATAL: Tokenizer not found at $configuredTokenizerPath. Initialization aborted.")
+        tokenizer = HuggingFaceTokenizer.newInstance(tokenStream, null)
+        log.info("Tokenizer loaded successfully from $configuredTokenizerPath")
+
+        log.info("ONNX Embedding Service initialized successfully.")
+    }
+
+    /**
+     * 清理临时文件及 Native 资源
+     */
+    private fun cleanup() {
+        //  关闭 Session
         try {
-            env = OrtEnvironment.getEnvironment()
-
-            // 1. 加载模型
-            // Check if configured in system properties or env vars, else default
-            val configuredModelPath = System.getProperty("minih.semantic.model.path", modelPath)
-            val modelStream = loadResource(configuredModelPath)
-            
-            if (modelStream != null) {
-                val modelBytes = modelStream.readBytes()
-                session = env?.createSession(modelBytes, OrtSession.SessionOptions())
-                log.info("ONNX Embedding Model loaded successfully from $configuredModelPath")
-            } else {
-                log.warn("ONNX Model not found at $configuredModelPath. Embedding service will be unavailable.")
-            }
-
-            // 2. 加载 Tokenizer
-            val configuredTokenizerPath = System.getProperty("minih.semantic.tokenizer.path", tokenizerPath)
-            val tokenStream = loadResource(configuredTokenizerPath)
-            
-            if (tokenStream != null) {
-                // DJL HuggingFaceTokenizer 支持从 InputStream 创建
-                tokenizer = HuggingFaceTokenizer.newInstance(tokenStream, null)
-                log.info("Tokenizer loaded successfully from $configuredTokenizerPath")
-            } else {
-                log.warn("Tokenizer not found at $configuredTokenizerPath. Please download 'tokenizer.json'.")
-            }
-
+            session?.close()
+            log.info("OnnxSession closed.")
         } catch (e: Exception) {
-            log.error("Failed to initialize ONNX Runtime or Tokenizer", e)
+            log.warn("Failed to close OnnxSession", e)
+        }
+
+        //  关闭 Environment
+        try {
+            env?.close()
+            log.info("OnnxEnvironment closed.")
+        } catch (e: Exception) {
+            log.warn("Failed to close OnnxEnvironment", e)
+        }
+
+        //  关闭 Tokenizer
+        try {
+            tokenizer?.close()
+            log.info("Tokenizer closed.")
+        } catch (e: Exception) {
+            log.warn("Failed to close Tokenizer", e)
+        }
+
+        //  清理临时文件
+        modelTempFile?.let { file ->
+            try {
+                if (file.exists() && file.delete()) {
+                    log.info("Cleaned up temporary model file: ${file.absolutePath}")
+                }
+            } catch (e: Exception) {
+                log.warn("Failed to delete temporary model file: ${file.absolutePath}", e)
+            }
         }
     }
 
-    private fun loadResource(path: String): InputStream? {
+    /**
+     * 获取资源文件。
+     * 如果是本地文件，直接返回。
+     * 如果是 Classpath 资源，复制到临时文件并返回。
+     */
+    private fun getOrCopyResource(path: String): File? {
+        //  尝试作为绝对路径或相对路径直接读取
+        val f = File(path)
+        if (f.exists()) return f
+
+        //  尝试从 Classpath 读取
+        val stream = javaClass.classLoader.getResourceAsStream(path) ?: return null
+
+        return try {
+            // 创建临时文件（使用固定目录便于管理）
+            val tempDir = File(System.getProperty("java.io.tmpdir"), "minih-semantic")
+            if (!tempDir.exists()) tempDir.mkdirs()
+
+            val tempFile = File(tempDir, "onnx-model-${System.currentTimeMillis()}.onnx")
+            // 注意：不再使用 deleteOnExit()，改用 Shutdown Hook 主动清理
+
+            // 复制流到文件
+            tempFile.outputStream().use { output ->
+                stream.copyTo(output)
+            }
+
+            // 保存引用供 Shutdown Hook 使用
+            this.modelTempFile = tempFile
+
+            log.info("Copied classpath resource '$path' to temporary file: ${tempFile.absolutePath}")
+            tempFile
+        } catch (e: Exception) {
+            log.error("Failed to copy resource to temp file: $path", e)
+            throw MinihException("Failed to copy resource to temp file: $path")
+        } finally {
+            stream.close()
+        }
+    }
+
+    private fun loadResourceStream(path: String): InputStream? {
         val f = File(path)
         if (f.exists()) return f.inputStream()
         return javaClass.classLoader.getResourceAsStream(path)
     }
 
     /**
-     * 计算文本的 Embedding 向量
+     * 计算文本的 Embedding 向量 (异步非阻塞)
      *
      * @param text 输入文本
      * @return 归一化后的向量 (384维)
      */
-    fun embed(text: String): FloatArray {
+    suspend fun embed(text: String): FloatArray = withContext(Dispatchers.IO) {
         if (session == null || tokenizer == null) {
-            log.error("Model or Tokenizer not initialized. Returning emergency zero vector.")
-            return FloatArray(384) { 0f }
+            throw MinihException("Embedding service not properly initialized")
         }
 
         try {
-            // 1. Tokenize
             val encoding = tokenizer!!.encode(text)
             val inputIds = encoding.ids // 维度: [seq_len]
             val attentionMask = encoding.attentionMask
-            val tokenTypeIds = encoding.typeIds
 
-            // 2. Prepare Tensors
-            val env = this.env!!
-            // 明确 input_ids 维度: [batch_size=1, sequence_length=inputIds.size]
+            val env = env!!
             val shape = longArrayOf(1, inputIds.size.toLong())
 
-            // 使用 Kotlin 的 .use() 自动管理资源闭包，确保护资源在退出作用域时自动释放
-            return OnnxTensor.createTensor(env, LongBuffer.wrap(inputIds), shape).use { tensorIds ->
+            OnnxTensor.createTensor(env, LongBuffer.wrap(inputIds), shape).use { tensorIds ->
                 OnnxTensor.createTensor(env, LongBuffer.wrap(attentionMask), shape).use { tensorMask ->
-                    OnnxTensor.createTensor(env, LongBuffer.wrap(tokenTypeIds), shape).use { tensorTypeIds ->
-                        val inputs = mapOf(
-                            "input_ids" to tensorIds,
-                            "attention_mask" to tensorMask,
-                            "token_type_ids" to tensorTypeIds
-                        )
+                    // 仅传递 input_ids 和 attention_mask，避免 quantization 模型由于 token_type_ids 报错
+                    val inputs = mapOf(
+                        "input_ids" to tensorIds,
+                        "attention_mask" to tensorMask
+                    )
 
-                        // 3. Run Inference (带超时控制或捕获推理异常)
-                        session!!.run(inputs).use { results ->
-                            // 4. Extract Output
-                            // Output name usually 'last_hidden_state', index 0
-                            val lastHiddenState = results[0].value as Array<Array<FloatArray>>
+                    session!!.run(inputs).use { results ->
+                        val lastHiddenState = results[0].value as Array<Array<FloatArray>>
 
-                            // 提取 Batch 0，维度: [seq_len, 384]
-                            val tokenEmbeddings = lastHiddenState[0] 
+                        // 提取 Batch 0，维度: [seq_len, 384]
+                        val tokenEmbeddings = lastHiddenState[0]
 
-                            // 5. Mean Pooling & Normalize
-                            meanPooling(tokenEmbeddings, attentionMask)
-                        }
+                        meanPooling(tokenEmbeddings, attentionMask)
                     }
                 }
             }
 
         } catch (e: ai.onnxruntime.OrtException) {
             log.error("ONNX Runtime inference failed (Possible model corruption or timeout): ${e.message}", e)
-            // 降级方案: 返回中性向量，确保语义搜索流程不崩溃，只是检索不到结果
-            return FloatArray(384) { 0f }
+            // 降级方案: 返回中性向量
+            FloatArray(384) { 0f }
         } catch (e: Exception) {
             log.error("Unexpected embedding failure: ${e.message}", e)
-            return FloatArray(384) { 0f }
+            FloatArray(384) { 0f }
         }
     }
 
