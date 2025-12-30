@@ -76,19 +76,15 @@ class InstanceTable {
          val now = System.currentTimeMillis()
          val expired = mutableListOf<String>()
          
-         // Iterate over a copy or snapshot of keys to avoid concurrent modification issues during iteration,
-         // though ConcurrentHashMap iterator is safe, we only want to act on those that look expired.
-         
+         // 遍历所有实例，检查是否超时（只读检查）
          instances.forEach { (id, lastHeartbeat) ->
              if (now - lastHeartbeat > TTL_MS) {
-                 // Double check and remove atomically
-                 instances.computeIfPresent(id) { key, timestamp ->
-                     if (now - timestamp > TTL_MS) {
-                         expired.add(key)
-                         null // return null to remove
-                     } else {
-                         timestamp // keep existing
-                     }
+                 // 原子操作：仅当值仍为 lastHeartbeat 时移除
+                 // 这可以避免移除在检查期间刚刚更新了心跳的实例
+                 if (instances.remove(id, lastHeartbeat)) {
+                     // 只有移除成功才认为该实例确已过期并被当前线程清理
+                     expired.add(id)
+                     log.debug("Instance expired and removed: $id")
                  }
              }
          }

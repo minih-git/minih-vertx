@@ -17,6 +17,8 @@ import io.vertx.core.impl.ContextInternal
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.coAwait
 import io.vertx.kotlin.coroutines.dispatcher
+import io.vertx.micrometer.MicrometerMetricsOptions
+import io.vertx.micrometer.VertxPrometheusOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
@@ -181,10 +183,16 @@ object MinihBootServiceRun {
     }
 
     private suspend fun getVertx(vararg args: String): Vertx {
+        val options = VertxOptions().setMetricsOptions(
+            MicrometerMetricsOptions()
+                .setPrometheusOptions(VertxPrometheusOptions().setEnabled(true))
+                .setJvmMetricsEnabled(true)
+                .setEnabled(true)
+        )
         return when {
-            args.isEmpty() -> Vertx.clusteredVertx(VertxOptions()).coAwait()
-            args[0] == "-standalone" -> Vertx.vertx()
-            else -> Vertx.clusteredVertx(VertxOptions()).coAwait()
+            args.isEmpty() -> Vertx.clusteredVertx(options).coAwait()
+            args[0] == "-standalone" -> Vertx.vertx(options)
+            else -> Vertx.clusteredVertx(options).coAwait()
         }
     }
 

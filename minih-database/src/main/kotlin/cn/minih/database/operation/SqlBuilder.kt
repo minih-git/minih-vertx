@@ -103,12 +103,12 @@ object SqlBuilder {
 
     fun getConditionSqlByType(type: QueryConditionType, value: List<Any>, startIdx: Int): String {
         return when (type) {
-            QueryConditionType.EQ -> " = $${startIdx}"
-            QueryConditionType.NOT_EQ -> " <> $${startIdx}"
+            QueryConditionType.EQ -> " = ?"
+            QueryConditionType.NOT_EQ -> " <> ?"
             QueryConditionType.IN -> {
                 var idx = startIdx - 1
                 val perch = when {
-                    value.isEmpty() -> "$${startIdx}"
+                    value.isEmpty() -> "?"
                     else -> value.joinToString(",") { _ -> idx += 1;"$${idx}" }
                 }
                 " in (${perch})"

@@ -13,6 +13,7 @@ dependencies {
     implementation(libs.logging)
     implementation(libs.logback)
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation(libs.jackson)
 }
 
 application {

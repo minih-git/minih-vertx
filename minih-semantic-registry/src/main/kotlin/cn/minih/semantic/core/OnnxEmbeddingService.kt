@@ -106,7 +106,7 @@ class OnnxEmbeddingService {
 
     /**
      * 启动时清理残留的临时文件
-     * 仅尝试删除，忽略被锁定的文件（说明有其他实例正在使用）
+     * 仅尝试删除，忽略被锁定的文件
      */
     private fun cleanupOldTempFiles() {
         try {
@@ -115,14 +115,10 @@ class OnnxEmbeddingService {
                 log.info("Checking for old temporary files in: ${tempDir.absolutePath}")
                 
                  // 列出所有符合模式且不是当前正在使用的文件
-                 // 注意：当前实例的文件尚未创建，所以理论上这里列出的都是"旧"的
-                 // 但是如果有其他并行实例在运行，它们的文件也会被列出
                 tempDir.listFiles { f -> 
                     f.isFile && f.name.startsWith("onnx-model-") && f.name.endsWith(".onnx") 
                 }?.forEach { file ->
                     try {
-                        // 尝试删除。在 Windows 上，如果文件被其他进程打开，delete() 会返回 false 或抛出异常。
-                        // 这恰好提供了我们需要的保护机制：只删除没人用的死文件。
                         if (file.delete()) {
                             log.info("Cleaned up old temporary model file: ${file.absolutePath}")
                         }
@@ -197,25 +193,28 @@ class OnnxEmbeddingService {
             val encoding = tokenizer!!.encode(text)
             val inputIds = encoding.ids // 维度: [seq_len]
             val attentionMask = encoding.attentionMask
+            val tokenTypeIds = encoding.typeIds // 维度: [seq_len]
 
             val env = env!!
             val shape = longArrayOf(1, inputIds.size.toLong())
 
             OnnxTensor.createTensor(env, LongBuffer.wrap(inputIds), shape).use { tensorIds ->
                 OnnxTensor.createTensor(env, LongBuffer.wrap(attentionMask), shape).use { tensorMask ->
-                    // 仅传递 input_ids 和 attention_mask，避免 quantization 模型由于 token_type_ids 报错
-                    val inputs = mapOf(
-                        "input_ids" to tensorIds,
-                        "attention_mask" to tensorMask
-                    )
+                    OnnxTensor.createTensor(env, LongBuffer.wrap(tokenTypeIds), shape).use { tensorTypeIds ->
+                        val inputs = mapOf(
+                            "input_ids" to tensorIds,
+                            "attention_mask" to tensorMask,
+                            "token_type_ids" to tensorTypeIds
+                        )
 
-                    session!!.run(inputs).use { results ->
-                        val lastHiddenState = results[0].value as Array<Array<FloatArray>>
+                        session!!.run(inputs).use { results ->
+                            val lastHiddenState = results[0].value as Array<Array<FloatArray>>
 
-                        // 提取 Batch 0，维度: [seq_len, 384]
-                        val tokenEmbeddings = lastHiddenState[0]
+                            // 提取 Batch 0，维度: [seq_len, 384]
+                            val tokenEmbeddings = lastHiddenState[0]
 
-                        meanPooling(tokenEmbeddings, attentionMask)
+                            meanPooling(tokenEmbeddings, attentionMask)
+                        }
                     }
                 }
             }

@@ -7,6 +7,8 @@ dependencies {
     api(libs.vertx.kotlin)
     api(libs.vertx.hazelcast)
     api(libs.buddy)
+    api(libs.vertx.micrometer.metrics)
+    api(libs.micrometer.registry.prometheus)
 
     implementation(libs.minih.common)
 

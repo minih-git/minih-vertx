@@ -5,6 +5,7 @@ import cn.minih.database.manager.RepositoryManager
 import cn.minih.database.operation.QueryWrapper
 import cn.minih.system.data.model.User
 import io.vertx.kotlin.coroutines.await
+import io.vertx.kotlin.coroutines.coAwait
 
 @Service("userService")
 class UserService {

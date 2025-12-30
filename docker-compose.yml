@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  minih-gateway-service:
+    build:
+      context: ./minih-gateway-service
+      dockerfile: Dockerfile
+    image: minih/minih-gateway-service:latest
+    ports:
+      - "8000:8080"
+    environment:
+      - SEMANTIC_REGISTRY_HOST=minih-semantic-registry
+      - SEMANTIC_REGISTRY_PORT=8099
+    networks:
+      - minih-network
+    depends_on:
+      - minih-semantic-registry
+
+  minih-system-service:
+    build:
+      context: ./minih-system-service
+      dockerfile: Dockerfile
+    image: minih/minih-system-service:latest
+    ports:
+      - "8001:8081"
+    environment:
+      - SEMANTIC_REGISTRY_HOST=minih-semantic-registry
+      - SEMANTIC_REGISTRY_PORT=8099
+    networks:
+      - minih-network
+    depends_on:
+      - minih-semantic-registry
+    volumes:
+      - ./minih-system-service/config-docker.json:/app/config-docker.json
+    command: [ "./bin/minih-system-service", "-conf", "/app/config-docker.json" ]
+
+  minih-weather-service:
+    build:
+      context: ./minih-weather-service
+      dockerfile: Dockerfile
+    image: minih/minih-weather-service:latest
+    ports:
+      - "8002:8082"
+    environment:
+      - SEMANTIC_REGISTRY_HOST=minih-semantic-registry
+      - SEMANTIC_REGISTRY_PORT=8099
+    networks:
+      - minih-network
+    depends_on:
+      - minih-semantic-registry
+
+  minih-semantic-registry:
+    build:
+      context: ./minih-semantic-registry
+      dockerfile: Dockerfile
+    image: minih/minih-semantic-registry:latest
+    ports:
+      - "8099:8099"
+    networks:
+      - minih-network
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - minih-network
+    depends_on:
+      - minih-semantic-registry
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - minih-network
+    depends_on:
+      - minih-semantic-registry
+      - prometheus
+
+networks:
+  minih-network:
+    driver: bridge

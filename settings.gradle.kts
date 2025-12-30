@@ -23,6 +23,8 @@ dependencyResolutionManagement {
             library("vertx-consul", "io.vertx", "vertx-consul-client").versionRef("vertx")
             library("vertx-discovery-bridge", "io.vertx", "vertx-service-discovery-bridge-consul").versionRef("vertx")
             library("vertx-discovery-backend", "io.vertx", "vertx-service-discovery-backend-consul").versionRef("vertx")
+            library("vertx-micrometer-metrics", "io.vertx", "vertx-micrometer-metrics").versionRef("vertx")
+            library("micrometer-registry-prometheus", "io.micrometer:micrometer-registry-prometheus:1.10.6")
 
             library("logging", "io.github.oshai:kotlin-logging-jvm:4.0.0")
             library("logback", "ch.qos.logback:logback-classic:1.4.8")
@@ -32,7 +34,7 @@ dependencyResolutionManagement {
             library("hutool", "cn.hutool:hutool-core:5.8.20")
             library("jackson", "com.fasterxml.jackson.core:jackson-databind:2.15.2")
             library("bcrypt", "org.mindrot:jbcrypt:0.4")
-            library("kotlin-reflect", "org.jetbrains.kotlin:kotlin-reflect:1.9.0")
+            library("kotlin-reflect", "org.jetbrains.kotlin:kotlin-reflect:1.9.22")
 //            library("cglib", "cglib:cglib:3.3.0")
             library("buddy", "net.bytebuddy:byte-buddy-dep:1.14.7")
 

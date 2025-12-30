@@ -1,5 +1,6 @@
 package cn.minih.semantic.registry
 
+import cn.minih.common.util.getConfig
 import cn.minih.core.annotation.Component
 import cn.minih.semantic.core.HnswIndexService
 import cn.minih.semantic.core.InstanceTable
@@ -11,75 +12,82 @@ import io.vertx.core.impl.logging.LoggerFactory
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 
+import io.vertx.kotlin.coroutines.CoroutineVerticle
+import io.vertx.kotlin.coroutines.coAwait
+import kotlinx.coroutines.launch
+
 @Component
 class SemanticRegistryVerticle(
     private val embeddingService: OnnxEmbeddingService,
     private val hnswIndexService: HnswIndexService,
     private val instanceTable: InstanceTable
-) : AbstractVerticle() {
+) : CoroutineVerticle() {
 
     private val log = LoggerFactory.getLogger(SemanticRegistryVerticle::class.java)
 
-    override fun start() {
+    override suspend fun start() {
         // Event Bus Logic (Optional, kept for internal usage)
         val eb = vertx.eventBus()
 
         // ... (EventBus handlers can stay or be removed. I will keep them for now but add HTTP)
-        
-        // HTTP Server Logic
+
         val router = Router.router(vertx)
         router.route().handler(BodyHandler.create())
-        
+
         // POST /semantic/api/register
         router.post("/semantic/api/register").handler { ctx ->
-            try {
-                val body = ctx.bodyAsJson
-                val id = body.getString("id")
-                val desc = body.getString("desc")
-                val payload = body.getString("payload", "{}")
+            launch {
+                try {
+                    val body = ctx.bodyAsJson
+                    val id = body.getString("id")
+                    val desc = body.getString("desc")
+                    val payload = body.getString("payload", "{}")
 
-                if (id == null || desc == null) {
-                    ctx.response().setStatusCode(400).end("Missing id or desc")
-                    return@handler
+                    if (id == null || desc == null) {
+                        ctx.response().setStatusCode(400).end("Missing id or desc")
+                        return@launch
+                    }
+
+                    log.info("HTTP Registering semantic service: $id - $desc")
+                    val vector = embeddingService.embed(desc)
+                    hnswIndexService.add(id, vector, payload)
+                    instanceTable.register(id)
+                    ctx.json(JsonObject().put("status", "ok"))
+                } catch (e: Exception) {
+                    log.error("HTTP Registration failed", e)
+                    ctx.response().setStatusCode(500).end(e.message)
                 }
-
-                log.info("HTTP Registering semantic service: $id - $desc")
-                val vector = embeddingService.embed(desc)
-                hnswIndexService.add(id, vector, payload)
-                instanceTable.register(id)
-                ctx.json(JsonObject().put("status", "ok"))
-            } catch (e: Exception) {
-                log.error("HTTP Registration failed", e)
-                ctx.response().setStatusCode(500).end(e.message)
             }
         }
-        
+
         // POST /semantic/api/search
         router.post("/semantic/api/search").handler { ctx ->
-             try {
-                val body = ctx.bodyAsJson
-                val query = body.getString("query")
-                val k = body.getInteger("k", 5)
+            launch {
+                try {
+                    val body = ctx.bodyAsJson
+                    val query = body.getString("query")
+                    val k = body.getInteger("k", 5)
 
-                if (query == null) {
-                    ctx.response().setStatusCode(400).end("Missing query")
-                    return@handler
-                }
+                    if (query == null) {
+                        ctx.response().setStatusCode(400).end("Missing query")
+                        return@launch
+                    }
 
-                val vector = embeddingService.embed(query)
-                val results = hnswIndexService.search(vector, k)
-                
-                val jsonResults = results.map { 
-                    JsonObject()
-                        .put("id", it.id)
-                        .put("distance", it.distance)
-                        .put("payload", JsonObject(it.payload))
+                    val vector = embeddingService.embed(query)
+                    val results = hnswIndexService.search(vector, k)
+
+                    val jsonResults = results.map {
+                        JsonObject()
+                            .put("id", it.id)
+                            .put("distance", it.distance)
+                            .put("payload", JsonObject(it.payload))
+                    }
+
+                    ctx.json(JsonArray(jsonResults))
+                } catch (e: Exception) {
+                    log.error("HTTP Search failed", e)
+                    ctx.response().setStatusCode(500).end(e.message)
                 }
-                
-                ctx.json(JsonArray(jsonResults))
-            } catch (e: Exception) {
-                log.error("HTTP Search failed", e)
-                ctx.response().setStatusCode(500).end(e.message)
             }
         }
 
@@ -125,23 +133,21 @@ class SemanticRegistryVerticle(
                 ctx.response().setStatusCode(500).end(e.message)
             }
         }
-        
-        // Default Port 8099
-        val port = config().getInteger("semantic.registry.port", 8099)
-        vertx.createHttpServer()
-            .requestHandler(router)
-            .listen(port) { ar ->
-                if (ar.succeeded()) {
-                    log.info("Semantic Registry HTTP Server started on port $port")
-                } else {
-                    log.error("Failed to start Semantic Registry HTTP Server", ar.cause())
-                }
-            }
+
+        try {
+            vertx.createHttpServer()
+                .requestHandler(router)
+                .listen(8099, "0.0.0.0")
+                .coAwait()
+            log.info("Semantic Registry HTTP Server started on port 8099")
+        } catch (e: Throwable) {
+            log.error("Failed to start Semantic Registry HTTP Server", e)
+        }
 
         /**
          * 启动超时检查定时器: 每30秒检查一次
-         * 
-         * 并发安全设计说明 
+         *
+         * 并发安全设计说明
          * 1. 核心挑战：心跳检测线程(Worker/HTTP)与索引清理线程(Periodic Timer)对同一实例状态的竞争。
          * 2. 解决方案：通过 InstanceTable.removeAndGetExpired() 中的 ConcurrentHashMap.computeIfPresent 实现。
          * 3. 逻辑闭环：即便清理线程判定实例已超时，但在执行原子删除前若收到了心跳并更新了 timestamp，
@@ -161,55 +167,61 @@ class SemanticRegistryVerticle(
         }
 
         // 注册服务: { "id": "serviceId", "desc": "description text", "payload": "json metadata" }
+        // 注册服务: { "id": "serviceId", "desc": "description text", "payload": "json metadata" }
         eb.consumer<JsonObject>("minih.semantic.register") { message ->
-            try {
-                val body = message.body()
-                val id = body.getString("id")
-                val desc = body.getString("desc")
-                val payload = body.getString("payload", "{}")
+            launch {
+                try {
+                    val body = message.body()
+                    val id = body.getString("id")
+                    val desc = body.getString("desc")
+                    val payload = body.getString("payload", "{}")
 
-                if (id == null || desc == null) {
-                    message.fail(400, "Missing id or desc")
-                    return@consumer
+                    if (id == null || desc == null) {
+                        message.fail(400, "Missing id or desc")
+                        return@launch
+                    }
+
+                    log.info("Registering semantic service: $id - $desc")
+                    val vector = embeddingService.embed(desc)
+                    hnswIndexService.add(id, vector, payload)
+                    instanceTable.register(id)
+                    message.reply(JsonObject().put("status", "ok"))
+                } catch (e: Exception) {
+                    log.error("Registration failed", e)
+                    message.fail(500, e.message)
                 }
-
-                log.info("Registering semantic service: $id - $desc")
-                val vector = embeddingService.embed(desc)
-                hnswIndexService.add(id, vector, payload)
-                instanceTable.register(id)
-                message.reply(JsonObject().put("status", "ok"))
-            } catch (e: Exception) {
-                log.error("Registration failed", e)
-                message.fail(500, e.message)
             }
         }
 
         // 语义搜素: { "query": "text", "k": 5 }
+        // 语义搜素: { "query": "text", "k": 5 }
         eb.consumer<JsonObject>("minih.semantic.search") { message ->
-            try {
-                val body = message.body()
-                val query = body.getString("query")
-                val k = body.getInteger("k", 5)
+            launch {
+                try {
+                    val body = message.body()
+                    val query = body.getString("query")
+                    val k = body.getInteger("k", 5)
 
-                if (query == null) {
-                    message.fail(400, "Missing query")
-                    return@consumer
-                }
+                    if (query == null) {
+                        message.fail(400, "Missing query")
+                        return@launch
+                    }
 
-                val vector = embeddingService.embed(query)
-                val results = hnswIndexService.search(vector, k)
-                
-                val jsonResults = results.map { 
-                    JsonObject()
-                        .put("id", it.id)
-                        .put("distance", it.distance)
-                        .put("payload", JsonObject(it.payload))
+                    val vector = embeddingService.embed(query)
+                    val results = hnswIndexService.search(vector, k)
+
+                    val jsonResults = results.map {
+                        JsonObject()
+                            .put("id", it.id)
+                            .put("distance", it.distance)
+                            .put("payload", JsonObject(it.payload))
+                    }
+
+                    message.reply(io.vertx.core.json.JsonArray(jsonResults))
+                } catch (e: Exception) {
+                    log.error("Search failed", e)
+                    message.fail(500, e.message)
                 }
-                
-                message.reply(io.vertx.core.json.JsonArray(jsonResults))
-            } catch (e: Exception) {
-                log.error("Search failed", e)
-                message.fail(500, e.message)
             }
         }
 
@@ -233,7 +245,7 @@ class SemanticRegistryVerticle(
                 message.fail(500, e.message)
             }
         }
-        
+
         log.info("SemanticRegistryVerticle deployed. Listening on minih.semantic.*")
     }
 }

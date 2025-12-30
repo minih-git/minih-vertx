@@ -20,6 +20,7 @@ class RouteFailureHandler private constructor() : Handler<RoutingContext>, Error
     }
 
     override fun handle(ctx: RoutingContext) {
+        if (ctx.response().ended()) return
         var r: R<String>
         val ex = ctx.failure()
         if (ctx.statusCode() == 200 || ex != null) {

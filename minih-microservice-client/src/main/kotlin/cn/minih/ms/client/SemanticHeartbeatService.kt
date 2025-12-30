@@ -84,8 +84,11 @@ class SemanticHeartbeatService : PostStartingProcess {
      * 发送心跳到语义注册中心
      */
     private fun sendHeartbeats(context: Context) {
-        val registryHost = context.config().getString("minih.semantic.registry.host", "localhost")
-        val registryPort = context.config().getInteger("minih.semantic.registry.port", 8099)
+        val envHost = System.getenv("SEMANTIC_REGISTRY_HOST")
+        val envPortStr = System.getenv("SEMANTIC_REGISTRY_PORT")
+
+        val registryHost = if (!envHost.isNullOrBlank()) envHost else context.config().getString("minih.semantic.registry.host", "localhost")
+        val registryPort = if (!envPortStr.isNullOrBlank()) envPortStr.toInt() else context.config().getInteger("minih.semantic.registry.port", 8099)
         val client = WebClient.create(context.owner())
 
         registeredServiceIds.forEach { serviceId ->

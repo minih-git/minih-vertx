@@ -6,7 +6,10 @@ dependencies {
     implementation(libs.logback)
     implementation(libs.logging)
     implementation(libs.gson)
+    implementation(libs.jackson)
     api(libs.vertx.web)
+    implementation(libs.vertx.micrometer.metrics)
+
 
 
 }

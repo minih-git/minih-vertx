@@ -4,12 +4,14 @@ package cn.minih.web.core
 
 import cn.minih.common.util.getConfig
 import cn.minih.common.util.getProjectName
+import cn.minih.common.util.log
 import cn.minih.common.util.notNullAndExec
 import cn.minih.core.boot.MinihVerticle
 import cn.minih.web.config.WebConfig
 import cn.minih.web.handler.RouteFailureHandler
 import cn.minih.web.service.Service
 import io.vertx.core.Vertx
+import io.vertx.core.json.JsonObject
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Route
 import io.vertx.ext.web.Router
@@ -17,16 +19,22 @@ import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.ResponseContentTypeHandler
 import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
+import io.vertx.micrometer.PrometheusScrapingHandler
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.coAwait
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlin.coroutines.Continuation
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.KType
+import kotlin.reflect.full.starProjectedType
+import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.valueParameters
 import kotlin.reflect.jvm.javaMethod
+import kotlin.reflect.jvm.jvmErasure
 
 /**
  * web服务启动器
@@ -61,6 +69,7 @@ abstract class MinihWebVerticle(private val port: Int = 8080) : MinihVerticle, C
             .failureHandler(RouteFailureHandler.instance)
         routerInstance.route("/healthCheck").handler { it.end("ok") }
         routerInstance.route("/ws/minihEventbus/*").subRouter(sockJSHandler.bridge(options))
+        routerInstance.route("/metrics").handler(PrometheusScrapingHandler.create())
     }
 
 
@@ -109,43 +118,34 @@ fun Route.coroutineHandler(fn: KFunction<Any?>) {
                     if (ctx.body() != null && ctx.body().length() > 0) {
                         val checkJson = ctx.body().asString().trim()
                         if (checkJson.startsWith("{") && checkJson.endsWith("}")) {
-                             paramsJson.mergeIn(ctx.bodyAsJson)
+                            paramsJson.mergeIn(ctx.bodyAsJson)
                         }
                     }
                 } catch (e: Exception) { /* ignore body parse error */ }
 
                 // 排除 instance 参数 (第一个通常是 bean 实例)
-                val argsNeed = fn.parameters.filter { it.kind == kotlin.reflect.KParameter.Kind.VALUE }
+                val argsNeed = fn.valueParameters.filter { it.kind == kotlin.reflect.KParameter.Kind.VALUE }
                 val argsList = cn.minih.common.util.generateArgs(argsNeed, paramsJson)
                 val argsMap = argsList.toMap().toMutableMap()
-                
+
                 // 将 bean 实例放入参数 map
-                val instanceParam = fn.parameters.find { it.kind == kotlin.reflect.KParameter.Kind.INSTANCE }
+                val instanceParam = fn.valueParameters.find { it.kind == kotlin.reflect.KParameter.Kind.INSTANCE }
                 if (instanceParam != null) {
                     argsMap[instanceParam] = bean
                 }
 
-                // 3. 调用方法
-                // 构造有序参数列表
+                // 3. 调用方法 - 构造有序参数列表
                 val orderedArgs = ArrayList<Any?>()
                 fn.valueParameters.forEach { param ->
-                     orderedArgs.add(argsMap[param])
+                    orderedArgs.add(argsMap[param])
                 }
-                
-                // 处理可变参数等复杂情况比较麻烦，暂且假设没有 varargs
-                val argsArray = orderedArgs.toArray()
-                
-                // 3. 调用方法
-                // 构造有序参数列表
-                val orderedArgs = ArrayList<Any?>()
-                fn.valueParameters.forEach { param ->
-                     orderedArgs.add(argsMap[param])
-                }
-                val argsArray = orderedArgs.toArray()
+
+                val argsArray = orderedArgs.toTypedArray()
 
                 // 修复: 使用 Java Reflection + Continuation 直接调用，解决 Proxy 和 Kotlin Reflection 的兼容问题
                 val javaMethod = fn.javaMethod
-                val result = if (fn.isSuspend && javaMethod != null) {
+                val isSuspend = fn.isSuspend
+                val result = if (isSuspend && javaMethod != null) {
                     kotlin.coroutines.intrinsics.suspendCoroutineUninterceptedOrReturn<Any?> { cont ->
                         val fullArgs = arrayOfNulls<Any?>(argsArray.size + 1)
                         System.arraycopy(argsArray, 0, fullArgs, 0, argsArray.size)
@@ -153,11 +153,16 @@ fun Route.coroutineHandler(fn: KFunction<Any?>) {
                         try {
                             javaMethod.invoke(bean, *fullArgs)
                         } catch (e: java.lang.reflect.InvocationTargetException) {
+                            log.error("${e.message}")
                             throw e.targetException
                         }
                     }
                 } else {
-                    fn.call(bean, *argsArray)
+                    if (isSuspend) {
+                        fn.callSuspend(bean, *argsArray)
+                    } else {
+                        fn.call(bean, *argsArray)
+                    }
                 }
 
                 // 4. 处理返回值
@@ -177,32 +182,32 @@ fun Route.coroutineHandler(fn: KFunction<Any?>) {
                         // 通常 SSE 保持连接，直到客户端断开或服务端不再发送。
                         // 如果 Flow 结束了，可以 end request
                         if (!ctx.response().ended()) {
-                            ctx.response().end() 
+                            ctx.response().end()
                         }
                     } catch (e: Exception) {
                         // CancellationException 会在这里捕获
                         if (!ctx.response().ended()) {
-                           ctx.response().end()
+                            ctx.response().end()
                         }
                         throw e
                     }
                 } else {
                     if (!ctx.response().ended()) {
-                         if (result == null) {
-                             ctx.end()
-                         } else {
-                             ctx.json(result)
-                         }
+                        if (result == null) {
+                            ctx.end()
+                        } else {
+                            ctx.json(result)
+                        }
                     }
                 }
 
             } catch (e: Exception) {
                 if (e !is kotlinx.coroutines.CancellationException) {
-                   ctx.fail(e)
+                    ctx.fail(e)
                 }
             }
         }
-        
+
         // 5. 处理连接断开
         ctx.response().closeHandler {
             job.cancel(kotlinx.coroutines.CancellationException("Client disconnected"))
@@ -219,19 +224,24 @@ private fun getBeanCall(params: List<kotlin.reflect.KParameter>): Any? {
         val type = p1.type
         val clazz = type.classifier as? KClass<*>
         if (clazz != null) {
-             // 检查是否是 Service
-             // 简单处理：尝试从 BeanFactory 获取
-             try {
-                 return cn.minih.core.beans.BeanFactory.instance.getBeanFromType(type)
-             } catch (e: Exception) {
-                 // ignore
-             }
-             // 尝试通过 Interface 获取
-              try {
-                 return cn.minih.core.beans.BeanFactory.instance.getBeanFromType(clazz.supertypes.first { it.classifier != Any::class })
-             } catch (e: Exception) {
-                 // ignore
-             }
+            // 检查是否是 Service
+            // 简单处理：尝试从 BeanFactory 获取
+            try {
+                return cn.minih.core.beans.BeanFactory.instance.getBeanFromType(type)
+            } catch (e: Exception) {
+                // ignore
+            }
+            try {
+                val superClass = clazz.java.superclass
+                if (superClass != null && superClass != Any::class.java && superClass != Object::class.java) {
+                    val superKClass = superClass.kotlin
+                    // 修复：将 KClass 转换为 KType
+                    val superKType = superKClass.starProjectedType
+                    return cn.minih.core.beans.BeanFactory.instance.getBeanFromType(superKType)
+                }
+            } catch (e: Exception) {
+                // ignore
+            }
         }
     }
     return null
