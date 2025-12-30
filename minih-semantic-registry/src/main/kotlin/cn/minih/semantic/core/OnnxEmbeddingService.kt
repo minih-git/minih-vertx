@@ -12,6 +12,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.InputStream
 import java.nio.LongBuffer
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 /**
  * 基于 ONNX Runtime 的 Embedding 服务
@@ -19,6 +21,11 @@ import java.nio.LongBuffer
  */
 @Component
 class OnnxEmbeddingService {
+
+    companion object {
+        /** MiniLM-L6-v2 模型最大序列长度 */
+        private const val MAX_SEQUENCE_LENGTH = 512
+    }
 
     private val log = LoggerFactory.getLogger(OnnxEmbeddingService::class.java)
 
@@ -113,16 +120,16 @@ class OnnxEmbeddingService {
             val tempDir = File(System.getProperty("java.io.tmpdir"), "minih-semantic")
             if (tempDir.exists() && tempDir.isDirectory) {
                 log.info("Checking for old temporary files in: ${tempDir.absolutePath}")
-                
+
                  // 列出所有符合模式且不是当前正在使用的文件
-                tempDir.listFiles { f -> 
-                    f.isFile && f.name.startsWith("onnx-model-") && f.name.endsWith(".onnx") 
+                tempDir.listFiles { f ->
+                    f.isFile && f.name.startsWith("onnx-model-") && f.name.endsWith(".onnx")
                 }?.forEach { file ->
                     try {
                         if (file.delete()) {
                             log.info("Cleaned up old temporary model file: ${file.absolutePath}")
                         }
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         // 忽略删除错误，可能是文件被锁定
                         log.debug("Could not delete temp file (might be in use): ${file.absolutePath}")
                     }
@@ -149,7 +156,9 @@ class OnnxEmbeddingService {
         return try {
             // 创建临时文件（使用固定目录便于管理）
             val tempDir = File(System.getProperty("java.io.tmpdir"), "minih-semantic")
-            if (!tempDir.exists()) tempDir.mkdirs()
+            if (!tempDir.exists() && !tempDir.mkdirs()) {
+                throw MinihException("Failed to create temp directory: ${tempDir.absolutePath}")
+            }
 
             val tempFile = File(tempDir, "onnx-model-${System.currentTimeMillis()}.onnx")
             // 注意：不再使用 deleteOnExit()，改用 Shutdown Hook 主动清理
@@ -184,48 +193,52 @@ class OnnxEmbeddingService {
      * @param text 输入文本
      * @return 归一化后的向量 (384维)
      */
+    /**
+     * 计算文本的 Embedding 向量
+     * 移除了 inferenceLock，利用 OrtSession 的线程安全特性实现高并发
+     */
     suspend fun embed(text: String): FloatArray = withContext(Dispatchers.IO) {
-        if (session == null || tokenizer == null) {
-            throw MinihException("Embedding service not properly initialized")
-        }
+        val currentSession = session ?: throw MinihException("Session not initialized")
+        val currentTokenizer = tokenizer ?: throw MinihException("Tokenizer not initialized")
+        val currentEnv = env ?: throw MinihException("Environment not initialized")
 
         try {
-            val encoding = tokenizer!!.encode(text)
-            val inputIds = encoding.ids // 维度: [seq_len]
-            val attentionMask = encoding.attentionMask
-            val tokenTypeIds = encoding.typeIds // 维度: [seq_len]
+            // 1. Tokenization
+            val encoding = currentTokenizer.encode(text)
 
-            val env = env!!
+            // 2. 准备输入数据 (限制最大长度)
+            val inputIds = encoding.ids.let { if (it.size > MAX_SEQUENCE_LENGTH) it.copyOfRange(0, MAX_SEQUENCE_LENGTH) else it }
+            val attentionMask = encoding.attentionMask.let { if (it.size > MAX_SEQUENCE_LENGTH) it.copyOfRange(0, MAX_SEQUENCE_LENGTH) else it }
+            val tokenTypeIds = encoding.typeIds.let { if (it.size > MAX_SEQUENCE_LENGTH) it.copyOfRange(0, MAX_SEQUENCE_LENGTH) else it }
+
             val shape = longArrayOf(1, inputIds.size.toLong())
 
-            OnnxTensor.createTensor(env, LongBuffer.wrap(inputIds), shape).use { tensorIds ->
-                OnnxTensor.createTensor(env, LongBuffer.wrap(attentionMask), shape).use { tensorMask ->
-                    OnnxTensor.createTensor(env, LongBuffer.wrap(tokenTypeIds), shape).use { tensorTypeIds ->
-                        val inputs = mapOf(
-                            "input_ids" to tensorIds,
-                            "attention_mask" to tensorMask,
-                            "token_type_ids" to tensorTypeIds
-                        )
+            // 3. 使用 Map 管理输入资源，确保即使出错也能释放
+            val inputTensors = mutableMapOf<String, OnnxTensor>()
+            try {
+                inputTensors["input_ids"] = OnnxTensor.createTensor(currentEnv, LongBuffer.wrap(inputIds), shape)
+                inputTensors["attention_mask"] = OnnxTensor.createTensor(currentEnv, LongBuffer.wrap(attentionMask), shape)
+                inputTensors["token_type_ids"] = OnnxTensor.createTensor(currentEnv, LongBuffer.wrap(tokenTypeIds), shape)
 
-                        session!!.run(inputs).use { results ->
-                            val lastHiddenState = results[0].value as Array<Array<FloatArray>>
+                // 4. 执行推理
+                currentSession.run(inputTensors).use { results ->
+                    val outputTensor = results[0] as OnnxTensor
 
-                            // 提取 Batch 0，维度: [seq_len, 384]
-                            val tokenEmbeddings = lastHiddenState[0]
+                    // 获取三维数组: [batch][seq_len][hidden_size]
+                    // 对于 MiniLM，这里通常是 FloatArray 的多维表示
+                    val rawOutput = outputTensor.value as Array<Array<FloatArray>>
+                    val tokenEmbeddings = rawOutput[0] // 取 Batch 中的第一个
 
-                            meanPooling(tokenEmbeddings, attentionMask)
-                        }
-                    }
+                    // 5. 池化与归一化
+                    return@withContext meanPooling(tokenEmbeddings, attentionMask)
                 }
+            } finally {
+                // 显式释放所有输入 Tensor 占用的 Native 内存
+                inputTensors.values.forEach { it.close() }
             }
-
-        } catch (e: ai.onnxruntime.OrtException) {
-            log.error("ONNX Runtime inference failed (Possible model corruption or timeout): ${e.message}", e)
-            // 降级方案: 返回中性向量
-            FloatArray(384) { 0f }
         } catch (e: Exception) {
-            log.error("Unexpected embedding failure: ${e.message}", e)
-            FloatArray(384) { 0f }
+            log.error("Embedding inference failed for text: ${text.take(20)}...", e)
+            throw MinihException("Embedding failed: ${e.message}")
         }
     }
 
